@@ -131,6 +131,11 @@ ohos_source_set("tools_test_bm_source_set") {
     defines += [ "ACCOUNT_ENABLE" ]
   }
 
+  if (distributed_bundle_framework_bm) {
+    external_deps += [ "distributed_bundle_framework:dbms_fwk" ]
+    defines += [ "DISTRIBUTED_BUNDLE_FRAMEWORK" ]
+  }
+
   part_name = "bundle_tool"
 }
 

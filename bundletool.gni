@@ -25,13 +25,20 @@ declare_args() {
   account_enable_bm = true
   overlay_install_bm = true
   quick_fix_bm = true
+  distributed_bundle_framework_bm = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.account_os_account)) {
     account_enable_bm = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.bundlemanager_distributed_bundle_framework)) {
+    distributed_bundle_framework_bm = false
   }
 }
 
 print("account_enable_bm = " + "$account_enable_bm")
 print("overlay_install_bm = " + "$overlay_install_bm")
 print("quick_fix_bm = " + "$quick_fix_bm")
+print("distributed_bundle_framework_bm = " + "$distributed_bundle_framework_bm")

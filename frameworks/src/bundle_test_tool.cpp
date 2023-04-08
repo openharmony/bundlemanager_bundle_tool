@@ -149,6 +149,7 @@ static const std::string HELP_MSG = "usage: bundle_test_tool <command> <options>
                              "  setDebugMode        enable signature debug mode\n"
                              "  getBundleStats        get bundle stats\n"
                              "  getAppProvisionInfo   get appProvisionInfo\n"
+                             "  getDistributedBundleName   get distributedBundleName\n"
                              "  eventCB        register then unregister bundle event callback\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -236,7 +237,7 @@ const std::string HELP_MSG_ADD_INSTALL_RULE =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -a, --app-id <app-id>                  specify app id of the application\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -t, --control-rule-type                specify control type of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
@@ -245,7 +246,7 @@ const std::string HELP_MSG_GET_INSTALL_RULE =
     "eg:bundle_test_tool getAppInstallRule -t <control-rule-type> -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -t, --control-rule-type                specify control type of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
@@ -254,7 +255,7 @@ const std::string HELP_MSG_DELETE_INSTALL_RULE =
     "eg:bundle_test_tool deleteAppInstallRule -a <app-id> -t <control-rule-type> -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -a, --app-id <app-id>                  specify app id of the application\n"
     "  -t, --control-rule-type                specify control type of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
@@ -264,7 +265,7 @@ const std::string HELP_MSG_CLEAN_INSTALL_RULE =
     "eg:bundle_test_tool cleanAppInstallRule -t <control-rule-type> -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -t, --control-rule-type                specify control type of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
@@ -273,7 +274,7 @@ const std::string HELP_MSG_ADD_APP_RUNNING_RULE =
     "eg:bundle_test_tool addAppRunningRule -c <control-rule> -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -c, --control-rule                     specify control rule of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
@@ -282,7 +283,7 @@ const std::string HELP_MSG_DELETE_APP_RUNNING_RULE =
     "eg:bundle_test_tool deleteAppRunningRule -c <control-rule> -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -c, --control-rule                     specify control rule of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
@@ -291,7 +292,7 @@ const std::string HELP_MSG_CLEAN_APP_RUNNING_RULE =
     "eg:bundle_test_tool cleanAppRunningRule -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
 const std::string HELP_MSG_GET_APP_RUNNING_RULE =
@@ -299,7 +300,7 @@ const std::string HELP_MSG_GET_APP_RUNNING_RULE =
     "eg:bundle_test_tool getAppRunningControlRule -u <user-id> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
 const std::string HELP_MSG_GET_APP_RUNNING_RESULT_RULE =
@@ -307,7 +308,7 @@ const std::string HELP_MSG_GET_APP_RUNNING_RESULT_RULE =
     "eg:bundle_test_tool getAppRunningControlRuleResult -n <bundle-name> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -e, --euid <eu-id>                     default euid value is 537\n"
+    "  -e, --euid <eu-id>                     default euid value is 3057\n"
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
@@ -391,6 +392,14 @@ const std::string HELP_MSG_GET_APP_PROVISION_INFO =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME =
+    "usage: bundle_test_tool getDistributedBundleName <options>\n"
+    "eg:bundle_test_tool getDistributedBundleName -n <network-id> -a <access-token-id>\n"
+    "options list:\n"
+    "  -h, --help                                   list available commands\n"
+    "  -n, --network-id  <network-id>               specify networkId of the application\n"
+    "  -a, --access-token-id <access-token-id>      specify a accessTokenId of the application \n";
+
 const std::string HELP_MSG_BUNDLE_EVENT_CALLBACK =
     "usage: bundle_test_tool eventCB <options>\n"
     "options list:\n"
@@ -400,6 +409,12 @@ const std::string HELP_MSG_BUNDLE_EVENT_CALLBACK =
 
 const std::string HELP_MSG_NO_BUNDLE_NAME_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
+
+const std::string HELP_MSG_NO_NETWORK_ID_OPTION =
+    "error: you must specify a network id with '-n' or '--network-id' \n";
+
+const std::string HELP_MSG_NO_ACCESS_TOKEN_ID_OPTION =
+    "error: you must specify a access token id with '-n' or '--access-token-id' \n";
 
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
@@ -441,6 +456,15 @@ const std::string STRING_GET_BUNDLE_STATS_NG = "get bundle stats failed\n";
 
 const std::string STRING_GET_APP_PROVISION_INFO_OK = "get appProvisionInfo successfully\n";
 const std::string STRING_GET_APP_PROVISION_INFO_NG = "get appProvisionInfo failed\n";
+
+const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
+    "error: you must specify a control type with '-n' or '--network-id' \n"
+    "and a accessTokenId with '-a' or '--access-token-id' \n";
+
+const std::string GET_DISTRIBUTED_BUNDLE_NAME_COMMAND_NAME = "getDistributedBundleName";
+
+const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_OK = "get distributedBundleName successfully\n";
+const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_NG = "get distributedBundleName failed\n";
 
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
@@ -525,6 +549,13 @@ const struct option LONG_OPTIONS_GET_BUNDLE_STATS[] = {
     {"user-id", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
+const std::string SHORT_OPTIONS_GET_DISTRIBUTED_BUNDLE_NAME = "hn:a:";
+const struct option LONG_OPTIONS_GET_DISTRIBUTED_BUNDLE_NAME[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"network-id", required_argument, nullptr, 'n'},
+    {"access-token-id", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
 
 const std::string SHORT_OPTIONS_BUNDLE_EVENT_CALLBACK = "hou:";
 const struct option LONG_OPTIONS_BUNDLE_EVENT_CALLBACK[] = {
@@ -587,6 +618,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"setDebugMode", std::bind(&BundleTestTool::RunAsSetDebugMode, this)},
         {"getBundleStats", std::bind(&BundleTestTool::RunAsGetBundleStats, this)},
         {"getAppProvisionInfo", std::bind(&BundleTestTool::RunAsGetAppProvisionInfo, this)},
+        {"getDistributedBundleName", std::bind(&BundleTestTool::RunAsGetDistributedBundleName, this)},
         {"eventCB", std::bind(&BundleTestTool::HandleBundleEventCallback, this)},
     };
 
@@ -617,6 +649,12 @@ ErrCode BundleTestTool::Init()
         (bundleInstallerProxy_->AsObject() == nullptr)) {
         result = OHOS::ERR_INVALID_VALUE;
     }
+
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+    if (distributedBmsProxy_ == nullptr) {
+        distributedBmsProxy_ = BundleCommandCommon::GetDistributedBundleMgrService();
+    }
+#endif
 
     return result;
 }
@@ -1511,14 +1549,14 @@ ErrCode BundleTestTool::CheckAddInstallRuleCorrectOption(int option, const std::
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool addAppInstallRule -a test1,test2 -t 1 -u 101 -e 537
+// bundle_test_tool addAppInstallRule -a test1,test2 -t 1 -u 101 -e 3057
 ErrCode BundleTestTool::RunAsAddInstallRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "addAppInstallRule";
     std::vector<std::string> appIds;
-    int euid = 537;
+    int euid = 3057;
     int userId = 100;
     int ruleType = 0;
     APP_LOGD("RunAsAddInstallRuleCommand is start");
@@ -1596,13 +1634,13 @@ ErrCode BundleTestTool::CheckGetInstallRuleCorrectOption(int option, const std::
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool getAppInstallRule -t 1 -u 101 -e 537
+// bundle_test_tool getAppInstallRule -t 1 -u 101 -e 3057
 ErrCode BundleTestTool::RunAsGetInstallRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "getAppInstallRule";
-    int euid = 537;
+    int euid = 3057;
     int userId = 100;
     int ruleType = 0;
     APP_LOGD("RunAsGetInstallRuleCommand is start");
@@ -1690,12 +1728,12 @@ ErrCode BundleTestTool::CheckDeleteInstallRuleCorrectOption(int option, const st
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool deleteAppInstallRule -a test1 -t 1 -u 101 -e 537
+// bundle_test_tool deleteAppInstallRule -a test1 -t 1 -u 101 -e 3057
 ErrCode BundleTestTool::RunAsDeleteInstallRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "deleteAppInstallRule";
     std::vector<std::string> appIds;
     int ruleType = 0;
@@ -1775,12 +1813,12 @@ ErrCode BundleTestTool::CheckCleanInstallRuleCorrectOption(
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool cleanAppInstallRule -t 1 -u 101 -e 537
+// bundle_test_tool cleanAppInstallRule -t 1 -u 101 -e 3057
 ErrCode BundleTestTool::RunAsCleanInstallRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "cleanAppInstallRule";
     int userId = 100;
     int ruleType = 0;
@@ -1873,12 +1911,12 @@ ErrCode BundleTestTool::CheckAppRunningRuleCorrectOption(int option, const std::
 }
 
 // bundle_test_tool addAppRunningRule -c appId:id1,controlMessage:msg1;appId:id2,controlMessage:msg2
-// -u 101 -e 537
+// -u 101 -e 3057
 ErrCode BundleTestTool::RunAsAddAppRunningRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "addAppRunningRule";
     int userId = 100;
     std::vector<AppRunningControlRule> controlRule;
@@ -1924,12 +1962,12 @@ ErrCode BundleTestTool::RunAsAddAppRunningRuleCommand()
     return result;
 }
 
-// bundle_test_tool deleteAppRunningRule -c appId:101,controlMessage:msg1 -u 101 -e 537
+// bundle_test_tool deleteAppRunningRule -c appId:101,controlMessage:msg1 -u 101 -e 3057
 ErrCode BundleTestTool::RunAsDeleteAppRunningRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "addAppRunningRule";
     int userId = 100;
     std::vector<AppRunningControlRule> controlRule;
@@ -2003,12 +2041,12 @@ ErrCode BundleTestTool::CheckCleanAppRunningRuleCorrectOption(
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool cleanAppRunningRule -u 101 -e 537
+// bundle_test_tool cleanAppRunningRule -u 101 -e 3057
 ErrCode BundleTestTool::RunAsCleanAppRunningRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "addAppRunningRule";
     int userId = 100;
     APP_LOGD("RunAsCleanAppRunningRuleCommand is start");
@@ -2077,12 +2115,12 @@ ErrCode BundleTestTool::CheckGetAppRunningRuleCorrectOption(int option, const st
     return OHOS::ERR_OK ;
 }
 
-// bundle_test_tool getAppRunningControlRule -u 101 -e 537
+// bundle_test_tool getAppRunningControlRule -u 101 -e 3057
 ErrCode BundleTestTool::RunAsGetAppRunningControlRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "addAppRunningRule";
     int userId = 100;
     APP_LOGD("RunAsGetAppRunningControlRuleCommand is start");
@@ -2161,12 +2199,12 @@ ErrCode BundleTestTool::CheckGetAppRunningRuleResultCorrectOption(int option, co
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool getAppRunningControlRuleResult -n com.ohos.example -e 537
+// bundle_test_tool getAppRunningControlRuleResult -n com.ohos.example -e 3057
 ErrCode BundleTestTool::RunAsGetAppRunningControlRuleResultCommand()
 {
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
-    int euid = 537;
+    int euid = 3057;
     std::string commandName = "addAppRunningRule";
     int userId = 100;
     std::string bundleName;
@@ -2760,6 +2798,106 @@ ErrCode BundleTestTool::GetAppProvisionInfo(const std::string &bundleName,
     return ret;
 }
 
+ErrCode BundleTestTool::RunAsGetDistributedBundleName()
+{
+    ErrCode result = OHOS::ERR_OK;
+    std::string networkId;
+    int32_t counter = 0;
+    int32_t accessTokenId = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_DISTRIBUTED_BUNDLE_NAME.c_str(),
+            LONG_OPTIONS_GET_DISTRIBUTED_BUNDLE_NAME, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckGetDistributedBundleNameCorrectOption(option, GET_DISTRIBUTED_BUNDLE_NAME_COMMAND_NAME,
+            networkId, accessTokenId);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    if (accessTokenId == 0 || networkId.size() == 0) {
+        resultReceiver_.append(HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::string msg;
+    result = GetDistributedBundleName(networkId, accessTokenId, msg);
+    if (result == OHOS::ERR_OK) {
+        resultReceiver_ = STRING_GET_DISTRIBUTED_BUNDLE_NAME_OK + msg;
+    } else {
+        resultReceiver_ = STRING_GET_DISTRIBUTED_BUNDLE_NAME_NG + "\n";
+        APP_LOGE("RunAsGetDistributedBundleName fail result %{public}d.", result);
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::CheckGetDistributedBundleNameCorrectOption(int32_t option, const std::string &commandName,
+    std::string &networkId, int32_t &accessTokenId)
+{
+    ErrCode result = OHOS::ERR_OK;
+    switch (option) {
+        case 'h': {
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+        case 'n': {
+            networkId = optarg;
+            if (networkId.size() == 0) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        case 'a': {
+            if (!OHOS::StrToInt(optarg, accessTokenId) || accessTokenId < 0) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        default: {
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::GetDistributedBundleName(const std::string &networkId,
+    int32_t accessTokenId, std::string& msg)
+{
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+    if (distributedBmsProxy_ == nullptr) {
+        APP_LOGE("distributedBmsProxy_ is nullptr");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::string bundleName;
+    auto ret = distributedBmsProxy_->GetDistributedBundleName(networkId, accessTokenId, bundleName);
+    if (ret == OHOS::NO_ERROR) {
+        msg = "\n";
+        if (bundleName.size() == 0) {
+            msg += "no match found \n";
+        } else {
+            msg += bundleName + "\n";
+        }
+        msg += "\n";
+    } else {
+        APP_LOGE("distributedBmsProxy_ GetDistributedBundleName fail errcode %{public}d.", ret);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    return OHOS::ERR_OK;
+#endif
+    return OHOS::ERR_INVALID_VALUE;
+}
+
 bool BundleTestTool::ParseEventCallbackOptions(bool &onlyUnregister, int32_t &uid)
 {
     int32_t opt;
@@ -2853,7 +2991,7 @@ ErrCode BundleTestTool::HandleBundleEventCallback()
         return OHOS::ERR_INVALID_VALUE;
     }
     seteuid(uid);
-    ErrCode ret;
+    ErrCode ret = OHOS::ERR_OK;
     sptr<BundleEventCallbackImpl> bundleEventCallback = new (std::nothrow) BundleEventCallbackImpl();
     if (onlyUnregister) {
         // only call UnRegisterBundleEventCallback

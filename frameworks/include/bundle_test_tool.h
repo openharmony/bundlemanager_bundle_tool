@@ -20,6 +20,9 @@
 #include "bundle_event_callback_host.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_installer_interface.h"
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+#include "distributed_bms_interface.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -72,6 +75,7 @@ private:
     ErrCode RunAsSetDebugMode();
     ErrCode RunAsGetBundleStats();
     ErrCode RunAsGetAppProvisionInfo();
+    ErrCode RunAsGetDistributedBundleName();
     ErrCode HandleBundleEventCallback();
 
     std::condition_variable cv_;
@@ -80,6 +84,9 @@ private:
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+    sptr<IDistributedBms> distributedBmsProxy_;
+#endif
 
     bool CheckRemovableErrorOption(int option, int counter, const std::string &commandName);
     bool CheckRemovableCorrectOption(int option, const std::string &commandName, int &isRemovable, std::string &name);
@@ -117,11 +124,14 @@ private:
     ErrCode SwitchQuickFix(const std::string &bundleName, int32_t enable,
         std::shared_ptr<QuickFixResult> &quickFixRes);
     ErrCode DeleteQuickFix(const std::string &bundleName, std::shared_ptr<QuickFixResult> &quickFixRes);
-    ErrCode GetQuickFixPath(int32_t index, std::vector<std::string>& quickFixPaths) const;
+    ErrCode GetQuickFixPath(int32_t index, std::vector<std::string> &quickFixPaths) const;
     ErrCode SetDebugMode(int32_t debugMode);
-    bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string& msg);
-    ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string& msg);
+    bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string &msg);
+    ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string &msg);
+    ErrCode GetDistributedBundleName(const std::string &networkId, int32_t accessTokenId, std::string &msg);
     ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId);
+    ErrCode CheckGetDistributedBundleNameCorrectOption(int32_t option, const std::string &commandName,
+        std::string &networkId, int32_t &accessTokenId);
     bool ParseEventCallbackOptions(bool &onlyUnregister, int32_t &uid);
     void Sleep(int32_t seconds);
     ErrCode CallRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
