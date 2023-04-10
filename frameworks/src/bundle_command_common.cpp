@@ -17,6 +17,9 @@
 #include "app_log_wrapper.h"
 #include "appexecfwk_errors.h"
 #include "bundle_mgr_proxy.h"
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+#include "distributed_bms_proxy.h"
+#endif
 #ifdef ACCOUNT_ENABLE
 #include "os_account_info.h"
 #include "os_account_manager.h"
@@ -46,6 +49,24 @@ sptr<IBundleMgr> BundleCommandCommon::GetBundleMgrProxy()
     APP_LOGD("get bundle manager proxy success.");
     return iface_cast<IBundleMgr>(remoteObject);
 }
+
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+sptr<IDistributedBms> BundleCommandCommon::GetDistributedBundleMgrService()
+{
+    auto saMgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saMgr == nullptr) {
+        APP_LOGE("saMgr is nullptr");
+        return nullptr;
+    }
+    OHOS::sptr<OHOS::IRemoteObject> remoteObject =
+        saMgr->CheckSystemAbility(OHOS::DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        APP_LOGE("failed to get distributed bms proxy.");
+        return nullptr;
+    }
+    return OHOS::iface_cast<IDistributedBms>(remoteObject);
+}
+#endif
 
 int32_t BundleCommandCommon::GetCurrentUserId(int32_t userId)
 {
@@ -394,6 +415,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: installd clean dir failed.",
     },
     {
+        IStatusReceiver::ERR_INSTALLD_SET_SELINUX_LABEL_FAILED,
+        "error: installd set selinux label failed."
+    },
+    {
         IStatusReceiver::ERR_UNINSTALL_SYSTEM_APP_ERROR,
         "error: uninstall system app error.",
     },
@@ -588,6 +613,14 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_APPEXECFWK_UNINSTALL_SHARE_APP_LIBRARY_IS_RELIED,
         "error, shared bundle is relied",
+    },
+    {
+        IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_URI_FAILED,
+        "error, bundle name in proxy data uri is different",
+    },
+    {
+        IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_PERMISSION_FAILED,
+        "error, apl of required permission in proxy data is too low",
     },
     {
         IStatusReceiver::ERR_UNKNOWN,

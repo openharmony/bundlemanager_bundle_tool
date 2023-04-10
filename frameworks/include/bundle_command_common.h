@@ -18,6 +18,9 @@
 
 #include "bundle_mgr_interface.h"
 #include "bundle_installer_interface.h"
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+#include "distributed_bms_interface.h"
+#endif
 
 #include <map>
 #include <string>
@@ -27,6 +30,10 @@ namespace AppExecFwk {
 class BundleCommandCommon {
 public:
     static sptr<IBundleMgr> GetBundleMgrProxy();
+
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+    static sptr<IDistributedBms> GetDistributedBundleMgrService();
+#endif
 
     static int32_t GetCurrentUserId(int32_t userId);
 
