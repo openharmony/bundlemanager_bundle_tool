@@ -2800,7 +2800,7 @@ ErrCode BundleTestTool::GetAppProvisionInfo(const std::string &bundleName,
 
 ErrCode BundleTestTool::RunAsGetDistributedBundleName()
 {
-    ErrCode result = OHOS::ERR_OK;
+    ErrCode result;
     std::string networkId;
     int32_t counter = 0;
     int32_t accessTokenId = 0;
@@ -2894,8 +2894,9 @@ ErrCode BundleTestTool::GetDistributedBundleName(const std::string &networkId,
         return OHOS::ERR_INVALID_VALUE;
     }
     return OHOS::ERR_OK;
-#endif
+#else
     return OHOS::ERR_INVALID_VALUE;
+#endif
 }
 
 bool BundleTestTool::ParseEventCallbackOptions(bool &onlyUnregister, int32_t &uid)
