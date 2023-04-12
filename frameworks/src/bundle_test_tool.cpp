@@ -2800,6 +2800,7 @@ ErrCode BundleTestTool::GetAppProvisionInfo(const std::string &bundleName,
 
 ErrCode BundleTestTool::RunAsGetDistributedBundleName()
 {
+    ErrCode result;
     std::string networkId;
     int32_t counter = 0;
     int32_t accessTokenId = 0;
@@ -2830,7 +2831,7 @@ ErrCode BundleTestTool::RunAsGetDistributedBundleName()
         return OHOS::ERR_INVALID_VALUE;
     }
     std::string msg;
-    ErrCode result = GetDistributedBundleName(networkId, accessTokenId, msg);
+    result = GetDistributedBundleName(networkId, accessTokenId, msg);
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_GET_DISTRIBUTED_BUNDLE_NAME_OK + msg;
     } else {
