@@ -39,7 +39,7 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
                              "  dump-overlay dump overlay info of the specific overlay bundle\n"
                              "  dump-target-overlay dump overlay info of the specific target bundle\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"
-                             "  dump-shared dump shared library information by shared library bundle name\n";
+                             "  dump-shared dump inter-application shared library information by bundle name\n";
 
 const std::string HELP_MSG_INSTALL =
     "usage: bm install <options>\n"
@@ -51,7 +51,7 @@ const std::string HELP_MSG_INSTALL =
     "                                                                     under which are some hap or hsp files\n"
     "  -r -p <bundle-file-path>                                   replace an existing bundle\n"
     "  -r --bundle-path <bundle-file-path>                        replace an existing bundle\n"
-    "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>      install cross-app hsp files\n"
+    "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>      install inter-application hsp files\n"
     "  -u, --user-id <user-id>                                    specify a user id\n"
     "  -w, --waitting-time <waitting-time>                        specify waitting time for installation, the minimum\n"
     "                                                                     waitting time is 180s, the maximum waitting\n"
@@ -65,8 +65,8 @@ const std::string HELP_MSG_UNINSTALL =
     "  -m, --module-name <module-name>      uninstall a module by module name\n"
     "  -u, --user-id <user-id>              specify a user id\n"
     "  -k, --keep-data                      keep the user data after uninstall\n"
-    "  -s, --shared                         uninstall shared library\n"
-    "  -v, --version                        uninstall a shared library by versionCode\n";
+    "  -s, --shared                         uninstall inter-application shared library\n"
+    "  -v, --version                        uninstall a inter-application shared library by versionCode\n";
 
 const std::string HELP_MSG_UNINSTALL_SHARE =
     "usage: bm uninstall-shared <options>\n"
@@ -148,8 +148,8 @@ const std::string HELP_MSG_DUMP_SHARED =
     "eg:bm dump-shared -n <bundle-name> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -a, --all                              list all shared library name in system\n"
-    "  -n, --bundle-name  <bundle-name>       dump shared library information by shared library bundleName\n";
+    "  -a, --all                              list all inter-application shared library name in system\n"
+    "  -n, --bundle-name  <bundle-name>       dump inter-application shared library information by bundleName\n";
 
 const std::string HELP_MSG_DUMP_SHARED_DEPENDENCIES =
     "usage: bm dump-dependencies <options>\n"
