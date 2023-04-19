@@ -623,6 +623,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error, apl of required permission in proxy data is too low",
     },
     {
+        IStatusReceiver::ERR_INSTALL_FAILED_DEBUG_NOT_SAME,
+        "error, install debug type not same",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
