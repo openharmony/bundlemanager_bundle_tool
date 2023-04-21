@@ -2992,7 +2992,7 @@ ErrCode BundleTestTool::HandleBundleEventCallback()
         return OHOS::ERR_INVALID_VALUE;
     }
     seteuid(uid);
-    ErrCode ret = OHOS::ERR_OK;
+    ErrCode ret;
     sptr<BundleEventCallbackImpl> bundleEventCallback = new (std::nothrow) BundleEventCallbackImpl();
     if (onlyUnregister) {
         // only call UnRegisterBundleEventCallback
