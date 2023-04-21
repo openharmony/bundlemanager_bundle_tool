@@ -42,9 +42,6 @@ bm help
 | bm install -h | 显示install支持的命令信息 |
 | bm install -p <file-path>    | 安装应用，支持指定路径和多个hap、hsp同时安装 |
 | bm install -p <file-path> -u <user-id>   |给指定用户安装一个应用 |
-| bm install -r -p <file-path> | 覆盖安装一个应用 |
-| bm install -r -p <file-path> -u <user-id> | 给指定用户覆盖安装一个应用 |
-| bm install -r -p <file-path> -u <user-id> -w <waitting-time> | 安装时指定bm工具等待时间，最小的等待时长为180s，最大的等待时长为600s, 默认缺省为5s |
 | bm install -s <hsp-dir-path> | 安装应用间共享库 |
 | bm install -p <file-path> -s <hsp-dir-path> | 同时安装使用方应用和其依赖的应用间共享库 |
 
@@ -52,8 +49,6 @@ bm help
 ```Bash
 # 安装一个hap
 bm install -p /data/app/ohosapp.hap
-# 覆盖安装一个hap
-bm install -p /data/app/ohosapp.hap -r
 # 安装一个应用间共享库
 bm install -s xxx.hsp
 # 同时安装多个应用间共享库

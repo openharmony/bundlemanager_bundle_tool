@@ -123,7 +123,6 @@ HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0200, Functio
         const_cast<char *>(cmd_.c_str()),
         const_cast<char *>("-p"),
         const_cast<char *>(STRING_BUNDLE_PATH.c_str()),
-        const_cast<char *>("-r"),
         const_cast<char *>(""),
     };
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
