@@ -49,8 +49,6 @@ const std::string HELP_MSG_INSTALL =
     "  -p, --bundle-path <file-path> <file-path> ...              install one bundle by some hap or hsp paths\n"
     "  -p, --bundle-path <bundle-direction>                       install one bundle by a direction,\n"
     "                                                                     under which are some hap or hsp files\n"
-    "  -r -p <bundle-file-path>                                   replace an existing bundle\n"
-    "  -r --bundle-path <bundle-file-path>                        replace an existing bundle\n"
     "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>      install inter-application hsp files\n"
     "  -u, --user-id <user-id>                                    specify a user id\n"
     "  -w, --waitting-time <waitting-time>                        specify waitting time for installation, the minimum\n"

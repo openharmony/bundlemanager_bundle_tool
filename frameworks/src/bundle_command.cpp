@@ -53,11 +53,10 @@ const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
 
-const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:";
+const std::string SHORT_OPTIONS = "hp:n:m:a:cdu:w:s:";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-path", required_argument, nullptr, 'p'},
-    {"replace", no_argument, nullptr, 'r'},
     {"bundle-name", required_argument, nullptr, 'n'},
     {"module-name", required_argument, nullptr, 'm'},
     {"ability-name", required_argument, nullptr, 'a'},
@@ -235,8 +234,7 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
     if (index >= argc_ || index < INDEX_OFFSET) {
         return false;
     }
-    if (argList_[index - INDEX_OFFSET] == "-r" || argList_[index - INDEX_OFFSET] == "--replace" ||
-        argList_[index - INDEX_OFFSET] == "-p" || argList_[index - INDEX_OFFSET] == "--bundle-path" ||
+    if (argList_[index - INDEX_OFFSET] == "-p" || argList_[index - INDEX_OFFSET] == "--bundle-path" ||
         argList_[index - INDEX_OFFSET] == "-u" || argList_[index - INDEX_OFFSET] == "--user-id" ||
         argList_[index - INDEX_OFFSET] == "-w" || argList_[index - INDEX_OFFSET] == "--waitting-time" ||
         argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path") {
@@ -336,12 +334,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 index = optind;
-                break;
-            }
-            case 'r': {
-                // 'bm install -r'
-                // 'bm install --replace'
-                installFlag = InstallFlag::REPLACE_EXISTING;
                 break;
             }
             case 'u': {
@@ -452,8 +444,7 @@ ErrCode BundleManagerShellCommand::GetBundlePath(const std::string& param,
     if (param.empty()) {
         return OHOS::ERR_INVALID_VALUE;
     }
-    if (param == "-r" || param == "--replace" || param == "-p" ||
-        param == "--bundle-path" || param == "-u" || param == "--user-id" ||
+    if (param == "-p" || param == "--bundle-path" || param == "-u" || param == "--user-id" ||
         param == "-w" || param == "--waitting-time") {
         return OHOS::ERR_INVALID_VALUE;
     }

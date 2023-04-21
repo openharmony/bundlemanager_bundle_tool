@@ -83,26 +83,3 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Functio
 
     EXPECT_EQ(commandResult, STRING_INSTALL_BUNDLE_NG + "\n" + INSTALL_FALSE + "\n");
 }
-
-/**
- * @tc.number: Bm_Command_Install_SystemTest_0300
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "bm install -p <bundle-path> -r" command.
- */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0300, Function | MediumTest | Level1)
-{
-    // uninstall the bundle
-    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
-
-    // install a valid bundle
-    ToolSystemTest::InstallBundle(STRING_BUNDLE_PATH, true);
-
-    // install the same bundle
-    std::string command = "bm install -p " + STRING_BUNDLE_PATH + " -r";
-    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
-
-    EXPECT_EQ(commandResult, STRING_INSTALL_BUNDLE_OK + "\n");
-
-    // uninstall the bundle
-    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
-}

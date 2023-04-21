@@ -513,7 +513,7 @@ const struct option LONG_OPTIONS_GET[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_RULE = "ha:c:n:e:r:t:u:";
+const std::string SHORT_OPTIONS_RULE = "ha:c:n:e:t:u:";
 const struct option LONG_OPTIONS_RULE[] = {
     {"help", no_argument, nullptr, 'h'},
     {"app-id", required_argument, nullptr, 'a'},

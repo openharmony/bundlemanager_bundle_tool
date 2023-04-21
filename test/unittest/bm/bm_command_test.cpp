@@ -1297,14 +1297,6 @@ HWTEST_F(BmCommandTest, GetBundlePath_0001, Function | MediumTest | Level1)
     auto res = cmd.GetBundlePath(param, bundlePaths);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 
-    param = "-r";
-    res = cmd.GetBundlePath(param, bundlePaths);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
-
-    param = "--replace";
-    res = cmd.GetBundlePath(param, bundlePaths);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
-
     param = "-p";
     res = cmd.GetBundlePath(param, bundlePaths);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
