@@ -2768,6 +2768,43 @@ ErrCode BundleTestTool::RunAsGetAppProvisionInfo()
     return result;
 }
 
+ErrCode BundleTestTool::RunAsGetBundleInfo()
+{
+    std::string bundleName;
+    int32_t flag;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, flag);
+    if (result != OHOS::ERR_OK){
+        resultReceiver_.append("wrong");
+    } else {
+        std::string msg;
+        bool ret = GetBundleInfo(bundleName, flag, msg);
+        if (!ret) {
+            resultReceiver_ = "wrong2";
+        } else {
+            resultReceiver_ = msg;
+        }
+    }
+}
+
+bool BundleTestTool::GetBundleInfo(const std::string &bundleName, int32_t flag, std::string &msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    BundleInfo bundleInfo;
+    bool ret = bundleMgrProxy_->GetBundleInfo(bundleName, flag, bundleInfo, 100);
+    if (!ret) {
+        msg = "wrong3";
+    } else {
+        nlohmann::json jsonObject = bundleInfo;
+        jsonObject["applicationInfo"] = bundleInfo.applicationInfo;
+        dumpResults= jsonObject.dump(Constants::DUMP_INDENT);
+    }
+    return ret;
+}
+
+
 ErrCode BundleTestTool::GetAppProvisionInfo(const std::string &bundleName,
     int32_t userId, std::string& msg)
 {

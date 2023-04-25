@@ -77,6 +77,7 @@ private:
     ErrCode RunAsGetAppProvisionInfo();
     ErrCode RunAsGetDistributedBundleName();
     ErrCode HandleBundleEventCallback();
+    ErrCode RunAsGetBundleInfo();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -136,6 +137,7 @@ private:
     void Sleep(int32_t seconds);
     ErrCode CallRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CallUnRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
+    bool GetBundleInfo(const std::string &bundleName, int32_t flag, std::string &msg);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
