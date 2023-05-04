@@ -627,6 +627,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error, install debug type not same",
     },
     {
+        IStatusReceiver::ERR_INSTALL_ISOLATION_MODE_FAILED,
+        "error: isolationMode does not match the system.",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
