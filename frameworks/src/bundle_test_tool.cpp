@@ -312,6 +312,15 @@ const std::string HELP_MSG_GET_APP_RUNNING_RESULT_RULE =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_PROXY_DATA_STRING =
+    "usage: bundle_test_tool getStr <options>\n"
+    "eg:bundle_test_tool getProxyDataInfos -m <module-name> -n <bundle-name> -u <user-id> \n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -m, --module-name <module-name>        specify module name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
 const std::string HELP_MSG_NO_ADD_INSTALL_RULE_OPTION =
     "error: you must specify a app id with '-a' or '--app-id' \n"
     "and a control type with '-t' or '--control-rule-type' \n"
@@ -466,6 +475,8 @@ const std::string GET_DISTRIBUTED_BUNDLE_NAME_COMMAND_NAME = "getDistributedBund
 const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_OK = "get distributedBundleName successfully\n";
 const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_NG = "get distributedBundleName failed\n";
 
+const std::string STRING_GET_PROXY_DATA_NG = "get proxyData failed";
+
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
     "user data size: ",
@@ -564,6 +575,15 @@ const struct option LONG_OPTIONS_BUNDLE_EVENT_CALLBACK[] = {
     {"uid", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_PROXY_DATA = "hn:m:u:";
+const struct option LONG_OPTIONS_PROXY_DATA[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -620,6 +640,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getAppProvisionInfo", std::bind(&BundleTestTool::RunAsGetAppProvisionInfo, this)},
         {"getDistributedBundleName", std::bind(&BundleTestTool::RunAsGetDistributedBundleName, this)},
         {"eventCB", std::bind(&BundleTestTool::HandleBundleEventCallback, this)},
+        {"getProxyData", std::bind(&BundleTestTool::RunAsGetProxyDataCommand, this)},
     };
 
     return OHOS::ERR_OK;
@@ -1354,6 +1375,93 @@ bool BundleTestTool::CheckGetStringCorrectOption(
         }
     }
     return ret;
+}
+
+bool BundleTestTool::CheckGetProxyDataCorrectOption(
+    int option, const std::string &commandName, int &temp, std::string &name)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'n': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -n %{public}s", commandName.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'm': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -m module-name:%{public}s, %{public}s",
+                     commandName.c_str(), name.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'u': {
+            StringToInt(optarg, commandName, temp, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetProxyDataCommand()
+{
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getProxyData";
+    std::string name = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+    int userId = 100;
+    APP_LOGD("RunAsGetProxyDataCommand is start");
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(
+                argc_, argv_, SHORT_OPTIONS_PROXY_DATA.c_str(), LONG_OPTIONS_PROXY_DATA, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getStr with no option.");
+                resultReceiver_.append(HELP_MSG_NO_GETSTRING_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetProxyDataCorrectOption(option, commandName, temp, name)
+                 ? OHOS::ERR_INVALID_VALUE : result;
+        moduleName = option == 'm' ? name : moduleName;
+        bundleName = option == 'n' ? name : bundleName;
+        userId = option == 'u' ? temp : userId;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_STRING);
+    } else {
+        std::vector<ProxyData> proxyDatas;
+        result = bundleMgrProxy_->GetProxyDataInfos(bundleName, moduleName, userId, proxyDatas);
+        if (result == ERR_OK) {
+            nlohmann::json jsonObject = proxyDatas;
+            results= jsonObject.dump(Constants::DUMP_INDENT);
+            resultReceiver_.append(results);
+        } else {
+            resultReceiver_.append(STRING_GET_PROXY_DATA_NG + " errCode is "+ std::to_string(ret) + "\n");
+        }
+    }
+    return result;
 }
 
 ErrCode BundleTestTool::RunAsGetStringCommand()
