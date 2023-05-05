@@ -78,6 +78,7 @@ private:
     ErrCode RunAsGetDistributedBundleName();
     ErrCode HandleBundleEventCallback();
     ErrCode RunAsGetProxyDataCommand();
+    ErrCode RunAsGetAllProxyDataCommand();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -114,6 +115,7 @@ private:
         std::string &bundleName, int32_t &userId, int &euid);
     bool CheckSandboxCorrectOption(int option, const std::string &commandName, int &data, std::string &bundleName);
     bool CheckGetProxyDataCorrectOption(int option, const std::string &commandName, int &temp, std::string &name);
+    bool CheckGetAllProxyDataCorrectOption(int option, const std::string &commandName, int &temp, std::string &name);
     ErrCode InstallSandboxOperation(
         const std::string &bundleName, const int32_t userId, const int32_t dlpType, int32_t &appIndex) const;
     ErrCode UninstallSandboxOperation(
@@ -138,7 +140,6 @@ private:
     void Sleep(int32_t seconds);
     ErrCode CallRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CallUnRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
-    bool GetBundleInfo(const std::string &bundleName, int32_t flag, std::string &msg);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
