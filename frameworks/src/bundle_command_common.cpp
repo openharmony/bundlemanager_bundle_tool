@@ -616,7 +616,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_URI_FAILED,
-        "error, bundle name in proxy data uri is different",
+        "error, uri in proxy data is wrong",
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_PERMISSION_FAILED,
