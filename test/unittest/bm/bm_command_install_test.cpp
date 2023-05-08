@@ -944,7 +944,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3800, Function | MediumTest | 
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), STRING_INSTALL_BUNDLE_OK + "\n");
+    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
 }
 
 /**
