@@ -1,7 +1,7 @@
 {
     "name": "@ohos/bundle_tool",
     "description": "包管理命令行工具：提供命令行中执行hap包的安装、更新、卸载及信息查询的能力",
-    "version": "3.1",
+    "version": "4.0",
     "license": "Apache 2.0",
     "segment": {
         "destPath": "foundation/bundlemanager/bundle_tool"
@@ -16,8 +16,8 @@
         "adapted_system_type": [
             "standard"
         ],
-        "rom": "100KB",
-        "ram": "100KB",
+        "rom": "~300KB",
+        "ram": "~100KB",
         "deps": {
             "components": [
                 "ability_base",
@@ -27,10 +27,16 @@
                 "init",
                 "ipc",
                 "os_account",
+                "samgr",
+                "ability_runtime",
+                "common_event_service",
                 "resource_management",
-                "samgr"
+                "distributed_bundle_framework"
             ],
-            "third_party": []
+            "third_party": [
+                "json",
+                "jsoncpp"
+            ]
         },
         "build": {
             "sub_component": [
