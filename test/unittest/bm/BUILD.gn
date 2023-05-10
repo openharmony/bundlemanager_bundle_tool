@@ -84,7 +84,6 @@ ohos_unittest("bm_command_dump_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 }
@@ -137,7 +136,6 @@ ohos_unittest("bm_command_dump_dependencies_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 }
@@ -190,7 +188,6 @@ ohos_unittest("bm_command_install_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 }
@@ -243,7 +240,6 @@ ohos_unittest("bm_command_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 }
@@ -296,7 +292,6 @@ ohos_unittest("bm_command_uninstall_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 }
@@ -349,7 +344,6 @@ ohos_unittest("bm_command_quickfix_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 }
@@ -402,7 +396,6 @@ ohos_unittest("bm_command_overlay_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 
