@@ -30,7 +30,6 @@
                 "samgr",
                 "ability_runtime",
                 "common_event_service",
-                "resource_management",
                 "distributed_bundle_framework"
             ],
             "third_party": [
