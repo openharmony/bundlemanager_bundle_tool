@@ -114,6 +114,7 @@ std::string ShellCommand::GetMessageFromCode(const int32_t code) const
         std::string message = messageMap_.at(code);
 
         if (message.size() != 0) {
+            result.append(STRING_CODE + std::to_string(code) + "\n");
             result.append(message + "\n");
         }
     }
