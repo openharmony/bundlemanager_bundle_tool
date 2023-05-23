@@ -1511,8 +1511,6 @@ ErrCode BundleTestTool::RunAsGetAllProxyDataCommand()
     int counter = 0;
     std::string commandName = "getProxyData";
     std::string name = "";
-    std::string bundleName = "";
-    std::string moduleName = "";
     int userId = Constants::ALL_USERID;
     APP_LOGD("RunAsGetAllProxyDataCommand is start");
     while (true) {
