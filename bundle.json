@@ -9,9 +9,7 @@
     "component": {
         "name": "bundle_tool",
         "subsystem": "bundlemanager",
-        "syscap": [
-            "SystemCapability.BundleManager.BundleTool"
-        ],
+        "syscap": [],
         "features": [],
         "adapted_system_type": [
             "standard"
