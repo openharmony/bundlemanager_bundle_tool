@@ -63,7 +63,6 @@ ohos_unittest("bm_command_dump_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -76,6 +75,7 @@ ohos_unittest("bm_command_dump_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -115,7 +115,6 @@ ohos_unittest("bm_command_dump_dependencies_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -128,6 +127,7 @@ ohos_unittest("bm_command_dump_dependencies_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -167,7 +167,6 @@ ohos_unittest("bm_command_install_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -180,6 +179,7 @@ ohos_unittest("bm_command_install_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -219,7 +219,6 @@ ohos_unittest("bm_command_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -232,6 +231,7 @@ ohos_unittest("bm_command_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -271,7 +271,6 @@ ohos_unittest("bm_command_uninstall_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -284,6 +283,7 @@ ohos_unittest("bm_command_uninstall_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -323,7 +323,6 @@ ohos_unittest("bm_command_quickfix_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -336,6 +335,7 @@ ohos_unittest("bm_command_quickfix_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -375,7 +375,6 @@ ohos_unittest("bm_command_overlay_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/common:libappexecfwk_common",
     "${bundle_framework_path}/services/bundlemgr:libbms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -388,6 +387,7 @@ ohos_unittest("bm_command_overlay_test") {
     "appverify:libhapverify",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
