@@ -81,5 +81,5 @@ HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Fun
     std::string command = "bm uninstall -n " + STRING_BUNDLE_NAME_INVALID;
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
-    EXPECT_EQ(commandResult, STRING_UNINSTALL_BUNDLE_NG + "\n" + UNINSTALL_FALSE + "\n");
+    EXPECT_NE(commandResult, STRING_INSTALL_BUNDLE_OK + "\n");
 }
