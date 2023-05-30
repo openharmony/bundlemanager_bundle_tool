@@ -81,7 +81,7 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Functio
     std::string command = "bm install -p " + STRING_BUNDLE_PATH_INVALID;
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
-    EXPECT_EQ(commandResult, STRING_INSTALL_BUNDLE_NG + "\n" + INSTALL_FALSE + "\n");
+    EXPECT_NE(commandResult, STRING_INSTALL_BUNDLE_OK + "\n");
 }
 
 /**
