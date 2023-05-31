@@ -28,6 +28,7 @@ const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundle
 const std::string STRING_BUNDLE_PATH_INVALID = STRING_BUNDLE_PATH + ".invalid";
 const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForInstall";
 const std::string INSTALL_FALSE = "error: install file path invalid.";
+const std::string ERR_CODE = "code:9568269\n";
 }  // namespace
 
 class BmCommandInstallSystemTest : public ::testing::Test {
@@ -81,7 +82,7 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Functio
     std::string command = "bm install -p " + STRING_BUNDLE_PATH_INVALID;
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
-    EXPECT_NE(commandResult, STRING_INSTALL_BUNDLE_OK + "\n");
+    EXPECT_EQ(commandResult, STRING_INSTALL_BUNDLE_NG + "\n" + ERR_CODE + INSTALL_FALSE + "\n");
 }
 
 /**
