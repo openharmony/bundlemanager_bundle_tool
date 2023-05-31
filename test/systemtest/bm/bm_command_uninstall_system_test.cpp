@@ -28,6 +28,7 @@ const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundle
 const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForUninstall";
 const std::string STRING_BUNDLE_NAME_INVALID = STRING_BUNDLE_NAME + ".invalid";
 const std::string UNINSTALL_FALSE = "error: uninstall missing installed bundle.";
+const std::string ERR_CODE = "code:9568386\n";
 }  // namespace
 
 class BmCommandUninstallSystemTest : public ::testing::Test {
@@ -81,5 +82,5 @@ HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Fun
     std::string command = "bm uninstall -n " + STRING_BUNDLE_NAME_INVALID;
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
-    EXPECT_EQ(commandResult, STRING_UNINSTALL_BUNDLE_NG + "\n" + UNINSTALL_FALSE + "\n");
+    EXPECT_EQ(commandResult, STRING_UNINSTALL_BUNDLE_NG + "\n" + ERR_CODE + UNINSTALL_FALSE + "\n");
 }
