@@ -2066,7 +2066,7 @@ ErrCode BundleTestTool::CheckAppRunningRuleCorrectOption(int option, const std::
             std::string arrayJsonRule = optarg;
             std::stringstream array(arrayJsonRule);
             std::string object;
-            while (getline(array, object, '/')) {
+            while (getline(array, object, ';')) {
                 size_t pos1 = object.find("appId");
                 size_t pos2 = object.find("controlMessage");
                 size_t pos3 = object.find(":", pos2);
