@@ -27,7 +27,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const std::string HELP_MSG_NO_OPTION = "error: you must specify an option at least.";
-
+const std::string STRING_CODE = "code:";
 const int OFFSET_REQUIRED_ARGUMENT = 2;
 }  // namespace
 
