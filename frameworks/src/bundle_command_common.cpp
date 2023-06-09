@@ -600,35 +600,43 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_ASAN_ENABLED_NOT_SUPPORT,
-        "error, install asan enabled is not support",
+        "error: install asan enabled is not support",
     },
     {
         IStatusReceiver::ERR_INSTALL_BUNDLE_TYPE_NOT_SAME,
-        "error, install bundleType not same",
+        "error: install bundleType not same",
     },
     {
         IStatusReceiver::ERR_APPEXECFWK_UNINSTALL_SHARE_APP_LIBRARY_IS_NOT_EXIST,
-        "error, shared bundle is not exist",
+        "error: shared bundle is not exist",
     },
     {
         IStatusReceiver::ERR_APPEXECFWK_UNINSTALL_SHARE_APP_LIBRARY_IS_RELIED,
-        "error, shared bundle is relied",
+        "error: shared bundle is relied",
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_URI_FAILED,
-        "error, uri in proxy data is wrong",
+        "error: uri in proxy data is wrong",
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_PERMISSION_FAILED,
-        "error, apl of required permission in proxy data is too low",
+        "error: apl of required permission in proxy data is too low",
     },
     {
         IStatusReceiver::ERR_INSTALL_FAILED_DEBUG_NOT_SAME,
-        "error, install debug type not same",
+        "error: install debug type not same",
     },
     {
         IStatusReceiver::ERR_INSTALL_ISOLATION_MODE_FAILED,
         "error: isolationMode does not match the system.",
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_FAILED,
+        "error: verify code signature failed.",
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_FILE_IS_INVALID,
+        "error: code signature file is invalid",
     },
     {
         IStatusReceiver::ERR_UNKNOWN,
