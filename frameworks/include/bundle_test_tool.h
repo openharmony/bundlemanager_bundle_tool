@@ -79,6 +79,8 @@ private:
     ErrCode HandleBundleEventCallback();
     ErrCode RunAsGetProxyDataCommand();
     ErrCode RunAsGetAllProxyDataCommand();
+    ErrCode RunAsSetExtNameOrMIMEToAppCommand();
+    ErrCode RunAsDelExtNameOrMIMEToAppCommand();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -116,6 +118,7 @@ private:
     bool CheckSandboxCorrectOption(int option, const std::string &commandName, int &data, std::string &bundleName);
     bool CheckGetProxyDataCorrectOption(int option, const std::string &commandName, int &temp, std::string &name);
     bool CheckGetAllProxyDataCorrectOption(int option, const std::string &commandName, int &temp, std::string &name);
+    bool CheckExtOrMimeCorrectOption(int option, const std::string &commandName, int &temp, std::string &name);
     ErrCode InstallSandboxOperation(
         const std::string &bundleName, const int32_t userId, const int32_t dlpType, int32_t &appIndex) const;
     ErrCode UninstallSandboxOperation(

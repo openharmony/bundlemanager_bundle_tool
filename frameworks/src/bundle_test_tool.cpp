@@ -432,6 +432,28 @@ const std::string HELP_MSG_NO_NETWORK_ID_OPTION =
 const std::string HELP_MSG_NO_ACCESS_TOKEN_ID_OPTION =
     "error: you must specify a access token id with '-n' or '--access-token-id' \n";
 
+const std::string HELP_MSG_SET_EXT_NAME_OR_MIME_TYPE =
+    "usage: bundle_test_tool setExtNameOrMimeTypeToApp <options>\n"
+    "eg:bundle_test_tool getProxyDataInfos -m <module-name> -n <bundle-name> -a <ability-name>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -m, --module-name <module-name>        specify module name of the application\n"
+    "  -a, --ability-name <ability-name>      specify ability name of the application\n"
+    "  -e, --ext-name <ext-name>              specify the ext-name\n"
+    "  -t, --mime-type <mime-type>            specify the mime-type\n";
+
+const std::string HELP_MSG_DEL_EXT_NAME_OR_MIME_TYPE =
+    "usage: bundle_test_tool setExtNameOrMimeTypeToApp <options>\n"
+    "eg:bundle_test_tool getProxyDataInfos -m <module-name> -n <bundle-name> -a <ability-name>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -m, --module-name <module-name>        specify module name of the application\n"
+    "  -a, --ability-name <ability-name>      specify ability name of the application\n"
+    "  -e, --ext-name <ext-name>              specify the ext-name\n"
+    "  -t, --mime-type <mime-type>            specify the mime-type\n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -598,6 +620,17 @@ const struct option LONG_OPTIONS_ALL_PROXY_DATA[] = {
     {"user-id", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_MIME = "ha:e:m:n:t:";
+const struct option LONG_OPTIONS_MIME[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"ability-name", required_argument, nullptr, 'a'},
+    {"ext-name", required_argument, nullptr, 'e'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"mime-type", required_argument, nullptr, 't'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -656,6 +689,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"eventCB", std::bind(&BundleTestTool::HandleBundleEventCallback, this)},
         {"getProxyDataInfos", std::bind(&BundleTestTool::RunAsGetProxyDataCommand, this)},
         {"getAllProxyDataInfos", std::bind(&BundleTestTool::RunAsGetAllProxyDataCommand, this)},
+        {"setExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsSetExtNameOrMIMEToAppCommand, this)},
+        {"delExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsDelExtNameOrMIMEToAppCommand, this)},
     };
 
     return OHOS::ERR_OK;
@@ -1595,6 +1630,159 @@ ErrCode BundleTestTool::RunAsGetStringCommand()
             return result;
         }
         resultReceiver_.append(results);
+    }
+    return result;
+}
+
+bool BundleTestTool::CheckExtOrMimeCorrectOption(
+    int option, const std::string &commandName, int &temp, std::string &name)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'n': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -n %{public}s", commandName.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'm': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -m module-name:%{public}s, %{public}s",
+                     commandName.c_str(), name.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'a': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -m ability-name:%{public}s, %{public}s",
+                     commandName.c_str(), name.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'e': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -m ext-name:%{public}s, %{public}s",
+                     commandName.c_str(), name.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 't': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -m mime-type:%{public}s, %{public}s",
+                     commandName.c_str(), name.c_str(), argv_[optind - 1]);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsSetExtNameOrMIMEToAppCommand()
+{
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "setExtNameOrMimeToApp";
+    std::string name = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+    std::string abilityName = "";
+    std::string extName = "";
+    std::string mimeType = "";
+    APP_LOGD("RunAsSetExtNameOrMIMEToAppCommand is start");
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(
+            argc_, argv_, SHORT_OPTIONS_MIME.c_str(), LONG_OPTIONS_MIME, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool RunAsSetExtNameOrMIMEToAppCommand with no option.");
+                resultReceiver_.append(HELP_MSG_SET_EXT_NAME_OR_MIME_TYPE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckExtOrMimeCorrectOption(option, commandName, temp, name)
+                 ? OHOS::ERR_INVALID_VALUE : result;
+        moduleName = option == 'm' ? name : moduleName;
+        bundleName = option == 'n' ? name : bundleName;
+        abilityName = option == 'a' ? name : abilityName;
+        extName = option == 'e' ? name : extName;
+        mimeType = option == 't' ? name : mimeType;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_PROXY_DATA);
+    } else {
+        result = bundleMgrProxy_->SetExtNameOrMIMEToApp(bundleName, moduleName, abilityName, extName, mimeType);
+        if (result == ERR_OK) {
+            resultReceiver_.append("SetExtNameOrMIMEToApp succeeded,");
+        } else {
+            resultReceiver_.append("SetExtNameOrMIMEToApp failed, errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsDelExtNameOrMIMEToAppCommand()
+{
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "delExtNameOrMimeToApp";
+    std::string name = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+    std::string abilityName = "";
+    std::string extName = "";
+    std::string mimeType = "";
+    APP_LOGD("RunAsDelExtNameOrMIMEToAppCommand is start");
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(
+            argc_, argv_, SHORT_OPTIONS_MIME.c_str(), LONG_OPTIONS_MIME, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool RunAsDelExtNameOrMIMEToAppCommand with no option.");
+                resultReceiver_.append(HELP_MSG_SET_EXT_NAME_OR_MIME_TYPE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckExtOrMimeCorrectOption(option, commandName, temp, name)
+                 ? OHOS::ERR_INVALID_VALUE : result;
+        moduleName = option == 'm' ? name : moduleName;
+        bundleName = option == 'n' ? name : bundleName;
+        abilityName = option == 'a' ? name : abilityName;
+        extName = option == 'e' ? name : extName;
+        mimeType = option == 't' ? name : mimeType;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_PROXY_DATA);
+    } else {
+        result = bundleMgrProxy_->DelExtNameOrMIMEToApp(bundleName, moduleName, abilityName, extName, mimeType);
+        if (result == ERR_OK) {
+            resultReceiver_.append("DelExtNameOrMIMEToApp succeeded");
+        } else {
+            resultReceiver_.append("DelExtNameOrMIMEToApp failed, errCode is "+ std::to_string(result) + "\n");
+        }
     }
     return result;
 }
