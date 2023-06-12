@@ -44,18 +44,19 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
 const std::string HELP_MSG_INSTALL =
     "usage: bm install <options>\n"
     "options list:\n"
-    "  -h, --help                                                 list available commands\n"
-    "  -p, --bundle-path <file-path>                              install a hap or hsp by a specified path\n"
-    "  -p, --bundle-path <file-path> <file-path> ...              install one bundle by some hap or hsp paths\n"
-    "  -p, --bundle-path <bundle-direction>                       install one bundle by a direction,\n"
-    "                                                                     under which are some hap or hsp files\n"
-    "  -r -p <bundle-file-path>                                   replace an existing bundle\n"
-    "  -r --bundle-path <bundle-file-path>                        replace an existing bundle\n"
-    "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>      install inter-application hsp files\n"
-    "  -u, --user-id <user-id>                                    specify a user id\n"
-    "  -w, --waitting-time <waitting-time>                        specify waitting time for installation, the minimum\n"
-    "                                                                     waitting time is 180s, the maximum waitting\n"
-    "                                                                     time is 600s\n";
+    "  -h, --help                                                     list available commands\n"
+    "  -p, --bundle-path <file-path>                                  install a hap or hsp by a specified path\n"
+    "  -p, --bundle-path <file-path> <file-path> ...                  install one bundle by some hap or hsp paths\n"
+    "  -p, --bundle-path <bundle-direction>                           install one bundle by a direction,\n"
+    "                                                                    under which are some hap or hsp files\n"
+    "  -r -p <bundle-file-path>                                       replace an existing bundle\n"
+    "  -r --bundle-path <bundle-file-path>                            replace an existing bundle\n"
+    "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>          install inter-application hsp files\n"
+    "  -u, --user-id <user-id>                                        specify a user id\n"
+    "  -v, --verify-code-signature-path <code-signature-file-path>    specify a code-signature file\n"
+    "  -w, --waitting-time <waitting-time>                            specify waitting time for installation,\n"
+    "                                                                    the minimum waitting time is 180s,\n"
+    "                                                                    the maximum waitting time is 600s\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: bm uninstall <options>\n"
@@ -166,6 +167,9 @@ const std::string HELP_MSG_NO_BUNDLE_PATH_OPTION =
 const std::string HELP_MSG_NO_BUNDLE_NAME_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name'.";
 
+const std::string HELP_MSG_NOT_SUPPORT_MULTI_HAP_OR_HSP_INSTALLATION =
+    "error: you cannot install multi hap or hsp by specified code-signature file. \n";
+
 const std::string STRING_INSTALL_BUNDLE_OK = "install bundle successfully.";
 const std::string STRING_INSTALL_BUNDLE_NG = "error: failed to install bundle.";
 
@@ -258,6 +262,9 @@ private:
     std::string DumpTargetOverlayInfo(const std::string &bundleName, const std::string &moduleName, int32_t userId);
     ErrCode ParseSharedDependenciesCommand(int32_t option, std::string &bundleName, std::string &moduleName);
     ErrCode ParseSharedCommand(int32_t option, std::string &bundleName, bool &dumpSharedAll);
+    bool ObtainModuleNameFromBundlePaths(const std::vector<std::string> &bundlePaths,
+        std::string &moduleName);
+
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
 };

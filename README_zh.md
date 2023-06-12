@@ -45,8 +45,9 @@ bm help
 | bm install -r -p <file-path> | 覆盖安装一个应用 |
 | bm install -r -p <file-path> -u <user-id> | 给指定用户覆盖安装一个应用 |
 | bm install -r -p <file-path> -u <user-id> -w <waitting-time> | 安装时指定bm工具等待时间，最小的等待时长为180s，最大的等待时长为600s, 默认缺省为5s |
-| bm install -s <hsp-dir-path> | 安装应用间共享库 |
+| bm install -s <hsp-dir-path> | 安装应用间共享库， 每个路径目录下只能存在一个hsp或者一个与hsp相匹配的代码签名文件 |
 | bm install -p <file-path> -s <hsp-dir-path> | 同时安装使用方应用和其依赖的应用间共享库 |
+| bm install -p <file-path> -v <code-signature-file-path>| 安装应用，同时指定应用的代码签名文件路径，安装时，会校验应用的代码。此时，不支持多个hap、hsp批量安装 |
 
 * 示例
 ```Bash
@@ -60,6 +61,11 @@ bm install -s xxx.hsp
 bm install -s xxx.hsp yyy.hsp
 # 同时安装使用方应用和其依赖的应用间共享库
 bm install -p aaa.hap -s xxx.hsp yyy.hsp
+# 安装应用时进行代码签名校验
+bm install -p aaa.hap -v xxx.sig
+bm install -p aaa.hsp -v xxx.sig
+# 安装应用间的共享库，同时进行代码签名校验, /data/test/目录下只存在aaa.hsp和匹配的xxx.sig
+bm install -s /data/test/
 ```
 #### 卸载命令
 命令可以组合，下面列出部分命令。-u未指定情况下，默认为所有用户。
