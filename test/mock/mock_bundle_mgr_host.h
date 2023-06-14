@@ -34,6 +34,7 @@ public:
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
     ErrCode SetAbilityEnabled(const AbilityInfo &abilityInfo, bool isEnable,
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
+    bool GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag, BundleInfo &bundleInfo);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

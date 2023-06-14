@@ -41,6 +41,10 @@ const std::string DEFAULT_WAIT_TIME = "200";
 const std::string MINIMUMT_WAIT_TIME = "1";
 const std::string MAXIMUM_WAIT_TIME = "700";
 const std::string DEFAULT_DEVICE_TIME = "0";
+const std::string STRING_SIGNATURE_FILE_PATH = "/data/test/bundle_test/test.sig";
+const std::string STRING_TEST_BUNDLE_PATH = "/data/test/";
+const std::string STRING_DATA_TEST = "/data/test/demoTest/";
+const std::string STRING_EMPTY = "";
 }  // namespace
 
 class MockBundleInstallerHost : public IRemoteStub<IBundleInstaller> {
