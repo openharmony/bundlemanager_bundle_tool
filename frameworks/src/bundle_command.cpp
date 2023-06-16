@@ -346,7 +346,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 if (GetBundlePath(optarg, bundlePath) != OHOS::ERR_OK) {
                     APP_LOGD("'bm install' with no argument.");
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 index = optind;
@@ -386,7 +385,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 if (GetBundlePath(optarg, sharedBundleDirPaths) != OHOS::ERR_OK) {
                     APP_LOGD("'bm install -s' with no argument.");
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 hspIndex = optind;
@@ -462,7 +460,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     if ((!codeSignatureFilePath.empty()) && (!bundlePath.empty())) {
         if (!ObtainModuleNameFromBundlePaths(bundlePath, moduleName)) {
             APP_LOGW("ObtainModuleNameFromBundlePaths failed");
-            resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE + "\n");
+            resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
             result = OHOS::ERR_INVALID_VALUE;
         }
     }

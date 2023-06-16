@@ -18,6 +18,10 @@
 using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+const std::string MODULE_NAME = "moduleName";
+} // namespace
+
 bool MockBundleMgrHost::DumpInfos(
     const DumpFlag flag, const std::string &bundleName, int32_t userId, std::string &result)
 {
@@ -62,6 +66,13 @@ ErrCode MockBundleMgrHost::SetAbilityEnabled(const AbilityInfo &abilityInfo, boo
     APP_LOGD("abilityName: %{public}s", abilityInfo.name.c_str());
     APP_LOGD("isEnable: %{public}d", isEnable);
     return ERR_OK;
+}
+
+bool MockBundleMgrHost::GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag,
+    BundleInfo &bundleInfo)
+{
+    bundleInfo.moduleNames.emplace_back(MODULE_NAME);
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
