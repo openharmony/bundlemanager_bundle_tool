@@ -74,7 +74,7 @@ const struct option LONG_OPTIONS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string UNINSTALL_OPTIONS = "hn:m:u:v:s";
+const std::string UNINSTALL_OPTIONS = "hn:km:u:v:s";
 const struct option UNINSTALL_LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
@@ -457,6 +457,12 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         result = OHOS::ERR_INVALID_VALUE;
     }
 
+    if (!sharedBundleDirPaths.empty() && !codeSignatureFilePath.empty()) {
+        APP_LOGW("the command 'bm install -s <sharedLibraryDir> -v signatureFilePath' is not supported.");
+        resultReceiver_.append(HELP_MSG_COMMAND_IS_NOT_SUPPORTED);
+        result = OHOS::ERR_INVALID_VALUE;
+    }
+
     if ((!codeSignatureFilePath.empty()) && (!bundlePath.empty())) {
         if (!ObtainModuleNameFromBundlePaths(bundlePath, moduleName)) {
             APP_LOGW("ObtainModuleNameFromBundlePaths failed");
@@ -472,7 +478,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         installParam.installFlag = installFlag;
         installParam.userId = userId;
         installParam.sharedBundleDirPaths = sharedBundleDirPaths;
-        if (!codeSignatureFilePath.empty()) {
+        if (!codeSignatureFilePath.empty() && !moduleName.empty()) {
             installParam.verifyCodeParams.emplace(moduleName, codeSignatureFilePath);
         }
         int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime);
