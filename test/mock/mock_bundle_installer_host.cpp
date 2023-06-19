@@ -126,6 +126,7 @@ bool MockBundleInstallerHost::DestoryBundleStreamInstaller(uint32_t streamInstal
 bool MockBundleInstallerHost::Uninstall(const UninstallParam &uninstallParam,
     const sptr<IStatusReceiver> &statusReceiver)
 {
+    statusReceiver->OnFinished(OHOS::ERR_OK, MSG_SUCCESS);
     return true;
 }
 } // namespace AppExecFwk
