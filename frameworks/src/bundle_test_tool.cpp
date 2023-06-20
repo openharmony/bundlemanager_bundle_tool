@@ -2795,7 +2795,7 @@ ErrCode BundleTestTool::RunAsDeleteQuickFix()
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SWITCH_QUICK_FIX);
+        resultReceiver_.append(HELP_MSG_DELETE_QUICK_FIX);
         return result;
     }
     std::shared_ptr<QuickFixResult> deleteRes = nullptr;
