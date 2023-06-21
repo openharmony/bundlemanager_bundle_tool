@@ -170,7 +170,7 @@ const std::string HELP_MSG_NO_BUNDLE_NAME_OPTION =
 const std::string HELP_MSG_NOT_SUPPORT_MULTI_HAP_OR_HSP_INSTALLATION =
     "error: you cannot install multi hap or hsp by specified code-signature file. \n";
 
-const std::string HELP_MSG_COMMAND_IS_NOT_SUPPORTED = 
+const std::string HELP_MSG_COMMAND_IS_NOT_SUPPORTED =
     "error: the command 'bm install -s <sharedLibraryDir> -v signatureFilePath' is not supported. \n";
 
 const std::string STRING_INSTALL_BUNDLE_OK = "install bundle successfully.";
