@@ -81,6 +81,8 @@ private:
     ErrCode RunAsGetAllProxyDataCommand();
     ErrCode RunAsSetExtNameOrMIMEToAppCommand();
     ErrCode RunAsDelExtNameOrMIMEToAppCommand();
+    ErrCode RunAsQueryDataGroupInfos();
+    ErrCode RunAsGetGroupDir();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -139,10 +141,13 @@ private:
     ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId);
     ErrCode CheckGetDistributedBundleNameCorrectOption(int32_t option, const std::string &commandName,
         std::string &networkId, int32_t &accessTokenId);
+    bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::string& msg);
     bool ParseEventCallbackOptions(bool &onlyUnregister, int32_t &uid);
     void Sleep(int32_t seconds);
     ErrCode CallRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CallUnRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
+    ErrCode CheckGetGroupIdCorrectOption(int32_t option, std::string &dataGroupId);
+    bool GetGroupDir(const std::string &dataGroupId, std::string& msg);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
