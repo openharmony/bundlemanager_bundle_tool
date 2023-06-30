@@ -33,6 +33,7 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_proxy.h"
 #include "bundle_tool_callback_stub.h"
+#include "data_group_info.h"
 #include "directory_ex.h"
 #include "parameter.h"
 #ifdef BUNDLE_FRAMEWORK_QUICK_FIX
@@ -454,6 +455,21 @@ const std::string HELP_MSG_DEL_EXT_NAME_OR_MIME_TYPE =
     "  -e, --ext-name <ext-name>              specify the ext-name\n"
     "  -t, --mime-type <mime-type>            specify the mime-type\n";
 
+const std::string HELP_MSG_QUERY_DATA_GROUP_INFOS =
+    "usage: bundle_test_tool queryDataGroupInfos <options>\n"
+    "eg:bundle_test_tool queryDataGroupInfos -n <bundle-name> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_GET_GROUP_DIR =
+    "usage: bundle_test_tool getGroupDir <options>\n"
+    "eg:bundle_test_tool getGroupDir -d <data-group-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -d, --data-group-id  <data-group-id>       specify bundle name of the application\n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -494,6 +510,12 @@ const std::string STRING_GET_BUNDLE_STATS_NG = "get bundle stats failed\n";
 
 const std::string STRING_GET_APP_PROVISION_INFO_OK = "get appProvisionInfo successfully\n";
 const std::string STRING_GET_APP_PROVISION_INFO_NG = "get appProvisionInfo failed\n";
+
+const std::string STRING_QUERY_DATA_GROUP_INFOS_OK = "queryDataGroupInfos successfully\n";
+const std::string STRING_QUERY_DATA_GROUP_INFOS_NG = "queryDataGroupInfos failed\n";
+
+const std::string STRING_GET_GROUP_DIR_OK = "getGroupDir successfully\n";
+const std::string STRING_GET_GROUP_DIR_NG = "getGroupDir failed\n";
 
 const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
     "error: you must specify a control type with '-n' or '--network-id' \n"
@@ -631,6 +653,13 @@ const struct option LONG_OPTIONS_MIME[] = {
     {"mime-type", required_argument, nullptr, 't'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_GET_GROUP_DIR = "hd:";
+const struct option LONG_OPTIONS_GET_GROUP_DIR[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"data-group-id", required_argument, nullptr, 'd'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -691,6 +720,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getAllProxyDataInfos", std::bind(&BundleTestTool::RunAsGetAllProxyDataCommand, this)},
         {"setExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsSetExtNameOrMIMEToAppCommand, this)},
         {"delExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsDelExtNameOrMIMEToAppCommand, this)},
+        {"queryDataGroupInfos", std::bind(&BundleTestTool::RunAsQueryDataGroupInfos, this)},
+        {"getGroupDir", std::bind(&BundleTestTool::RunAsGetGroupDir, this)},
     };
 
     return OHOS::ERR_OK;
@@ -3389,6 +3420,132 @@ ErrCode BundleTestTool::HandleBundleEventCallback()
     }
     Sleep(SLEEP_SECONDS);
     return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsQueryDataGroupInfos()
+{
+    APP_LOGI("RunAsQueryDataGroupInfos start");
+    std::string bundleName;
+    int32_t userId;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_QUERY_DATA_GROUP_INFOS);
+    } else {
+        std::string msg;
+        result = QueryDataGroupInfos(bundleName, userId, msg);
+        if (result) {
+            resultReceiver_ = STRING_QUERY_DATA_GROUP_INFOS_OK + msg;
+            return ERR_OK;
+        } else {
+            resultReceiver_ = STRING_QUERY_DATA_GROUP_INFOS_NG + "\n";
+        }
+    }
+    return OHOS::ERR_INVALID_VALUE;
+}
+
+bool BundleTestTool::QueryDataGroupInfos(const std::string &bundleName,
+    int32_t userId, std::string& msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::vector<DataGroupInfo> infos;
+    bool ret = bundleMgrProxy_->QueryDataGroupInfos(bundleName, userId, infos);
+    if (ret) {
+        msg = "dataGroupInfos:\n{\n";
+        for (const auto &dataGroupInfo : infos) {
+            msg +="     ";
+            msg += dataGroupInfo.ToString();
+            msg += "\n";
+        }
+        msg += "}\n";
+        return true;
+    }
+
+    return false;
+}
+
+ErrCode BundleTestTool::RunAsGetGroupDir()
+{
+    APP_LOGI("RunAsGetGroupDir start");
+    ErrCode result;
+    std::string dataGroupId;
+
+    std::string networkId;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_GROUP_DIR.c_str(),
+            LONG_OPTIONS_GET_GROUP_DIR, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_GET_GROUP_DIR);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckGetGroupIdCorrectOption(option, dataGroupId);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(HELP_MSG_GET_GROUP_DIR);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    std::string msg;
+    bool ret = GetGroupDir(dataGroupId, msg);
+    if (ret) {
+        resultReceiver_ = STRING_GET_GROUP_DIR_OK + msg;
+    } else {
+        resultReceiver_ = STRING_GET_GROUP_DIR_NG + "\n";
+        APP_LOGE("RunAsGetGroupDir fail");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::CheckGetGroupIdCorrectOption(int32_t option, std::string &dataGroupId)
+{
+    ErrCode result = OHOS::ERR_OK;
+    switch (option) {
+        case 'h': {
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+        case 'd': {
+            dataGroupId = optarg;
+            if (dataGroupId.size() == 0) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        default: {
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+    }
+    return result;
+}
+
+bool BundleTestTool::GetGroupDir(const std::string &dataGroupId, std::string& msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::string dir;
+    bool ret = bundleMgrProxy_->GetGroupDir(dataGroupId, dir);
+    if (ret) {
+        msg = "group dir:\n";
+        msg += dir;
+        msg += "\n";
+        return true;
+    }
+
+    return false;
 }
 } // AppExecFwk
 } // OHOS
