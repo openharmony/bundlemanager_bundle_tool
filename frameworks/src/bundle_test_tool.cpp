@@ -3471,8 +3471,6 @@ ErrCode BundleTestTool::RunAsGetGroupDir()
     APP_LOGI("RunAsGetGroupDir start");
     ErrCode result;
     std::string dataGroupId;
-
-    std::string networkId;
     int32_t counter = 0;
     while (true) {
         counter++;
