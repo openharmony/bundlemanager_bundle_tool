@@ -23,6 +23,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::AppExecFwk;
 
+namespace OHOS {
 namespace {
 const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForInstall.hap";
 const std::string STRING_BUNDLE_PATH_INVALID = STRING_BUNDLE_PATH + ".invalid";
@@ -107,3 +108,4 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0300, Functio
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
 }
+} // OHOS

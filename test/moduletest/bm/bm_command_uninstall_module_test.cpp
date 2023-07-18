@@ -30,6 +30,7 @@ using namespace OHOS;
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
+namespace OHOS {
 class BmCommandUninstallModuleTest : public ::testing::Test {
 public:
     static void SetUpTestCase();
@@ -134,3 +135,4 @@ HWTEST_F(BmCommandUninstallModuleTest, Bm_Command_Uninstall_ModuleTest_0200, Fun
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_UNINSTALL_BUNDLE_OK + "\n");
 }
+} // OHOS
