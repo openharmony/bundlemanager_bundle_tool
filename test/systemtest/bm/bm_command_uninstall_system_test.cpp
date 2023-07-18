@@ -23,6 +23,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::AppExecFwk;
 
+namespace OHOS {
 namespace {
 const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForUninstall.hap";
 const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForUninstall";
@@ -84,3 +85,4 @@ HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Fun
 
     EXPECT_EQ(commandResult, STRING_UNINSTALL_BUNDLE_NG + "\n" + ERR_CODE + UNINSTALL_FALSE + "\n");
 }
+} // OHOS

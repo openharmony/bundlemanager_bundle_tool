@@ -23,6 +23,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::AppExecFwk;
 
+namespace OHOS {
 namespace {
 const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForInstall.hap";
 const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForInstall";
@@ -111,4 +112,5 @@ HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0300, Function | Me
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
     EXPECT_EQ(commandResult, GET_FALSE + "\n");
-} 
+}
+} // OHOS

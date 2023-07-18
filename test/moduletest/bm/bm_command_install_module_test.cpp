@@ -30,6 +30,7 @@ using namespace OHOS;
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
+namespace OHOS {
 class BmCommandInstallModuleTest : public ::testing::Test {
 public:
     static void SetUpTestCase();
@@ -135,3 +136,4 @@ HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0200, Functio
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_INSTALL_BUNDLE_OK + "\n");
 }
+} // OHOS
