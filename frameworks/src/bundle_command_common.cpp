@@ -639,6 +639,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: code signature file is invalid",
     },
     {
+        IStatusReceiver::ERR_UNINSTALL_FROM_BMS_EXTENSION_FAILED,
+        "error: uninstall bundle from extension failed",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
