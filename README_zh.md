@@ -25,10 +25,10 @@ foundation/bundlemanager/bundle_tool
 | disable | 禁用命令，用来禁用应用 |
 | get | 获取udid命令，用来获取设备的udid |
 | quickfix | 快速修复相关命令，用来执行补丁相关操作，如补丁安装、补丁查询 |
-| dependencies | 查询应用依赖的模块信息 |
-| shared | 查询应用间HSP应用信息 |
-| overlay | 打印overlay应用的的overlayMNoduleInfo |
-| target-overlay | 打印目标应用的所有关联overlay应用的 overlayModuleInfo |
+| dump-dependencies | 查询应用依赖的模块信息 |
+| dump-shared | 查询应用间HSP应用信息 |
+| dump-overlay | 打印overlay应用的的overlayMNoduleInfo |
+| dump-target-overlay | 打印目标应用的所有关联overlay应用的 overlayModuleInfo |
 #### 帮助命令
 | 命令    | 描述       |
 | ------- | ---------- |
