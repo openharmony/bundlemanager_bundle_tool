@@ -643,6 +643,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: uninstall bundle from extension failed",
     },
     {
+        IStatusReceiver::ERR_INSTALL_ENTERPRISE_BUNDLE_NOT_ALLOWED,
+        "error: enterprise normal/mdm bundle cannot be installed on non-enterprise device",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
