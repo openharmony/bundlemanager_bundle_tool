@@ -485,7 +485,7 @@ HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Query_0900, TestSize.Level1)
 HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Query_1000, TestSize.Level1)
 {
     QuickFixCommand command;
-    std::string bundleName = "com.ohos.launcher";
+    std::string bundleName = "com.ohos.mms";
     std::string resultInfo;
     auto ret = command.GetApplyedQuickFixInfo(bundleName, resultInfo);
     EXPECT_EQ(ret, QUICK_FIX_OK);
