@@ -34,6 +34,8 @@ public:
 private:
     mutable std::promise<int32_t> resultMsgSignal_;
     int32_t waittingTime_;
+    bool isSetValue = false;
+    std::mutex setValueMutex_;
     DISALLOW_COPY_AND_MOVE(StatusReceiverImpl);
 };
 }  // namespace AppExecFwk
