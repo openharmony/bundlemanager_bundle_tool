@@ -41,7 +41,13 @@ StatusReceiverImpl::~StatusReceiverImpl()
 void StatusReceiverImpl::OnFinished(const int32_t resultCode, const std::string &resultMsg)
 {
     APP_LOGI("on finished result is %{public}d, %{public}s", resultCode, resultMsg.c_str());
-    resultMsgSignal_.set_value(resultCode);
+    std::lock_guard<std::mutex> lock(setValueMutex_);
+    if (!isSetValue) {
+        isSetValue = true;
+        resultMsgSignal_.set_value(resultCode);
+    } else {
+        APP_LOGW("resultMsgSignal_ is set");
+    }
 }
 
 void StatusReceiverImpl::OnStatusNotify(const int progress)
