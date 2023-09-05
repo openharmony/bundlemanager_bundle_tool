@@ -647,6 +647,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: enterprise normal/mdm bundle cannot be installed on non-enterprise device",
     },
     {
+        IStatusReceiver::ERR_INSTALLD_COPY_FILE_FAILED,
+        "error: copy file failed",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
