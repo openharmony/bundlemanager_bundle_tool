@@ -68,12 +68,12 @@ void BmCommandDumpTest::TearDown()
 void BmCommandDumpTest::MakeMockObjects()
 {
     // mock a mgr host
-    auto mgrHostPtr = sptr<IRemoteObject>(new MockBundleMgrHost());
+    auto mgrHostPtr = sptr<IRemoteObject>(new (std::nothrow) MockBundleMgrHost());
     // mock a mgr proxy
     mgrProxyPtr_ = iface_cast<IBundleMgr>(mgrHostPtr);
 
     // mock a installer host
-    auto installerHostPtr = sptr<IRemoteObject>(new MockBundleInstallerHost());
+    auto installerHostPtr = sptr<IRemoteObject>(new (std::nothrow) MockBundleInstallerHost());
     // mock a installer proxy
     installerProxyPtr_ = iface_cast<IBundleInstaller>(installerHostPtr);
 }
