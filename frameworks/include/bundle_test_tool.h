@@ -77,6 +77,8 @@ private:
     ErrCode RunAsGetAppProvisionInfo();
     ErrCode RunAsGetDistributedBundleName();
     ErrCode HandleBundleEventCallback();
+    ErrCode ResetAOTCompileStatus();
+    ErrCode SendCommonEvent();
     ErrCode RunAsGetProxyDataCommand();
     ErrCode RunAsGetAllProxyDataCommand();
     ErrCode RunAsSetExtNameOrMIMEToAppCommand();
@@ -143,6 +145,8 @@ private:
         std::string &networkId, int32_t &accessTokenId);
     bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::string& msg);
     bool ParseEventCallbackOptions(bool &onlyUnregister, int32_t &uid);
+    bool ParseResetAOTCompileStatusOptions(std::string &bundleName, std::string &moduleName,
+        int32_t &triggerMode, int32_t &uid);
     void Sleep(int32_t seconds);
     ErrCode CallRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CallUnRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
