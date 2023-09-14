@@ -49,6 +49,8 @@ ohos_systemtest("bm_command_install_system_test") {
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_systemtest("bm_command_uninstall_system_test") {
@@ -84,6 +86,8 @@ ohos_systemtest("bm_command_uninstall_system_test") {
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_systemtest("bm_command_dump_system_test") {
@@ -119,6 +123,8 @@ ohos_systemtest("bm_command_dump_system_test") {
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 group("systemtest") {
