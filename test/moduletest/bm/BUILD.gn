@@ -81,6 +81,8 @@ ohos_moduletest("bm_command_dump_module_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_moduletest("bm_command_install_module_test") {
@@ -131,6 +133,8 @@ ohos_moduletest("bm_command_install_module_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_moduletest("bm_command_uninstall_module_test") {
@@ -181,6 +185,8 @@ ohos_moduletest("bm_command_uninstall_module_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 group("moduletest") {

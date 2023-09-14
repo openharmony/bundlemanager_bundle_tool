@@ -38,6 +38,8 @@ declare_args() {
   }
 }
 
+bm_install_external_deps = [ "ffrt:libffrt" ]
+
 print("account_enable_bm = " + "$account_enable_bm")
 print("overlay_install_bm = " + "$overlay_install_bm")
 print("quick_fix_bm = " + "$quick_fix_bm")

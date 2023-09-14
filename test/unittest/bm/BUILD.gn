@@ -86,6 +86,8 @@ ohos_unittest("bm_command_dump_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_unittest("bm_command_dump_dependencies_test") {
@@ -138,6 +140,8 @@ ohos_unittest("bm_command_dump_dependencies_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_unittest("bm_command_install_test") {
@@ -190,6 +194,8 @@ ohos_unittest("bm_command_install_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_unittest("bm_command_test") {
@@ -242,6 +248,8 @@ ohos_unittest("bm_command_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_unittest("bm_command_uninstall_test") {
@@ -294,6 +302,8 @@ ohos_unittest("bm_command_uninstall_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_unittest("bm_command_quickfix_test") {
@@ -346,6 +356,8 @@ ohos_unittest("bm_command_quickfix_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 }
 
 ohos_unittest("bm_command_overlay_test") {
@@ -398,6 +410,8 @@ ohos_unittest("bm_command_overlay_test") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
+
+  external_deps += bm_install_external_deps
 
   defines = []
   if (overlay_install_bm) {
