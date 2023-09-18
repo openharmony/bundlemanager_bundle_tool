@@ -33,6 +33,8 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_proxy.h"
 #include "bundle_tool_callback_stub.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
 #include "data_group_info.h"
 #include "directory_ex.h"
 #include "parameter.h"
@@ -151,7 +153,9 @@ static const std::string HELP_MSG = "usage: bundle_test_tool <command> <options>
                              "  getBundleStats        get bundle stats\n"
                              "  getAppProvisionInfo   get appProvisionInfo\n"
                              "  getDistributedBundleName   get distributedBundleName\n"
-                             "  eventCB        register then unregister bundle event callback\n";
+                             "  eventCB        register then unregister bundle event callback\n"
+                             "  resetAOTCompileStatus        reset AOTCompileStatus\n"
+                             "  sendCommonEvent        send common event\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -408,6 +412,15 @@ const std::string HELP_MSG_BUNDLE_EVENT_CALLBACK =
     "  -o, --onlyUnregister only call unregister, default will call register then unregister\n"
     "  -u, --uid            specify a uid, default is foundation uid\n";
 
+const std::string HELP_MSG_RESET_AOT_COMPILE_StATUS =
+    "usage: bundle_test_tool resetAOTCompileStatus <options>\n"
+    "options list:\n"
+    "  -h, --help           list available commands\n"
+    "  -b, --bundle-name    specify bundle name\n"
+    "  -m, --module-name    specify module name\n"
+    "  -t, --trigger-mode   specify trigger mode, default is 0\n"
+    "  -u, --uid            specify a uid, default is bundleName's uid\n";
+
 const std::string HELP_MSG_GET_PROXY_DATA =
     "usage: bundle_test_tool getProxyDataInfos <options>\n"
     "eg:bundle_test_tool getProxyDataInfos -m <module-name> -n <bundle-name> -u <user-id>\n"
@@ -627,6 +640,16 @@ const struct option LONG_OPTIONS_BUNDLE_EVENT_CALLBACK[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_RESET_AOT_COMPILE_StATUS = "b:m:t:u:";
+const struct option LONG_OPTIONS_RESET_AOT_COMPILE_StATUS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'b'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"trigger-mode", required_argument, nullptr, 't'},
+    {"uid", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_PROXY_DATA = "hn:m:u:";
 const struct option LONG_OPTIONS_PROXY_DATA[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -716,6 +739,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getAppProvisionInfo", std::bind(&BundleTestTool::RunAsGetAppProvisionInfo, this)},
         {"getDistributedBundleName", std::bind(&BundleTestTool::RunAsGetDistributedBundleName, this)},
         {"eventCB", std::bind(&BundleTestTool::HandleBundleEventCallback, this)},
+        {"resetAOTCompileStatus", std::bind(&BundleTestTool::ResetAOTCompileStatus, this)},
+        {"sendCommonEvent", std::bind(&BundleTestTool::SendCommonEvent, this)},
         {"getProxyDataInfos", std::bind(&BundleTestTool::RunAsGetProxyDataCommand, this)},
         {"getAllProxyDataInfos", std::bind(&BundleTestTool::RunAsGetAllProxyDataCommand, this)},
         {"setExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsSetExtNameOrMIMEToAppCommand, this)},
@@ -3344,6 +3369,55 @@ bool BundleTestTool::ParseEventCallbackOptions(bool &onlyUnregister, int32_t &ui
     return true;
 }
 
+bool BundleTestTool::ParseResetAOTCompileStatusOptions(std::string &bundleName, std::string &moduleName,
+    int32_t &triggerMode, int32_t &uid)
+{
+    int32_t opt;
+    while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_RESET_AOT_COMPILE_StATUS.c_str(),
+        LONG_OPTIONS_RESET_AOT_COMPILE_StATUS, nullptr)) != -1) {
+        switch (opt) {
+            case 'b': {
+                bundleName = optarg;
+                break;
+            }
+            case 'm': {
+                moduleName = optarg;
+                break;
+            }
+            case 't': {
+                if (!OHOS::StrToInt(optarg, triggerMode)) {
+                    std::string msg = "invalid param, triggerMode should be int";
+                    resultReceiver_.append(msg).append(LINE_BREAK);
+                    APP_LOGE("%{public}s", msg.c_str());
+                    return false;
+                }
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, uid)) {
+                    std::string msg = "invalid param, uid should be int";
+                    resultReceiver_.append(msg).append(LINE_BREAK);
+                    APP_LOGE("%{public}s", msg.c_str());
+                    return false;
+                }
+                break;
+            }
+            case 'h': {
+                resultReceiver_.append(HELP_MSG_RESET_AOT_COMPILE_StATUS);
+                return false;
+            }
+            default: {
+                std::string msg = "unsupported option";
+                resultReceiver_.append(msg).append(LINE_BREAK);
+                APP_LOGE("%{public}s", msg.c_str());
+                return false;
+            }
+        }
+    }
+    APP_LOGI("ParseResetAOTCompileStatusOptions success");
+    return true;
+}
+
 void BundleTestTool::Sleep(int32_t seconds)
 {
     APP_LOGI("begin to sleep %{public}d seconds", seconds);
@@ -3419,6 +3493,46 @@ ErrCode BundleTestTool::HandleBundleEventCallback()
         return ret;
     }
     Sleep(SLEEP_SECONDS);
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::ResetAOTCompileStatus()
+{
+    APP_LOGI("begin to ResetAOTCompileStatus");
+    std::string bundleName;
+    std::string moduleName;
+    int32_t triggerMode = 0;
+    int32_t uid = -1;
+    if (!ParseResetAOTCompileStatusOptions(bundleName, moduleName, triggerMode, uid)) {
+        APP_LOGE("ParseResetAOTCompileStatusOptions failed");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    APP_LOGI("bundleName : %{public}s, moduleName : %{public}s, triggerMode : %{public}d",
+        bundleName.c_str(), moduleName.c_str(), triggerMode);
+    if (bundleMgrProxy_ == nullptr) {
+        std::string msg = "bundleMgrProxy_ is nullptr";
+        resultReceiver_.append(msg).append(LINE_BREAK);
+        APP_LOGE("%{public}s", msg.c_str());
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    if (uid == -1) {
+        int32_t userId = 100;
+        uid = bundleMgrProxy_->GetUidByBundleName(bundleName, userId);
+    }
+    APP_LOGI("uid : %{public}d", uid);
+    seteuid(uid);
+    ErrCode ret = bundleMgrProxy_->ResetAOTCompileStatus(bundleName, moduleName, triggerMode);
+    APP_LOGI("ret : %{public}d", ret);
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::SendCommonEvent()
+{
+    APP_LOGI("begin to SendCommonEvent");
+    OHOS::AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGE_IDLE_MODE_CHANGED);
+    EventFwk::CommonEventData commonData { want };
+    EventFwk::CommonEventManager::PublishCommonEvent(commonData);
     return OHOS::ERR_OK;
 }
 
