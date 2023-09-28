@@ -76,13 +76,6 @@ ohos_source_set("tools_bm_source_set") {
 }
 
 ohos_executable("bm") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  stack_protector_ret = true
-
   deps = [ ":tools_bm_source_set" ]
 
   install_enable = true
@@ -147,13 +140,6 @@ ohos_source_set("tools_test_bm_source_set") {
 }
 
 ohos_executable("bundle_test_tool") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  stack_protector_ret = true
-
   deps = [ ":tools_test_bm_source_set" ]
 
   install_enable = false
