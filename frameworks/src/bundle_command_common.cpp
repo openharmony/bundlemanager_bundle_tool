@@ -651,6 +651,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: copy file failed",
     },
     {
+        IStatusReceiver::ERR_INSTALL_GWP_ASAN_ENABLED_NOT_SAME,
+        "error: install GWPAsanEnabled not same",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
