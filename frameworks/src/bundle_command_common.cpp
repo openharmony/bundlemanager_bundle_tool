@@ -655,6 +655,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: install GWPAsanEnabled not same",
     },
     {
+        IStatusReceiver::ERR_INSTALL_DEBUG_BUNDLE_NOT_ALLOWED,
+        "error: debug bundle can only be installed in developer mode",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
