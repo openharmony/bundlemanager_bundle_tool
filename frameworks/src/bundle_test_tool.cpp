@@ -483,6 +483,12 @@ const std::string HELP_MSG_GET_GROUP_DIR =
     "  -h, --help                             list available commands\n"
     "  -d, --data-group-id  <data-group-id>       specify bundle name of the application\n";
 
+const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
+    "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
+    "and a module name with '-m' or '--module-name' \n"
+    "and a userId with '-u' or '--user-id' \n"
+    "and a json profile type with '-p' or '--profile-type' \n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -529,6 +535,8 @@ const std::string STRING_QUERY_DATA_GROUP_INFOS_NG = "queryDataGroupInfos failed
 
 const std::string STRING_GET_GROUP_DIR_OK = "getGroupDir successfully\n";
 const std::string STRING_GET_GROUP_DIR_NG = "getGroupDir failed\n";
+
+const std::string STRING_GET_JSON_PROFILE_NG = "getJsonProfile failed\n";
 
 const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
     "error: you must specify a control type with '-n' or '--network-id' \n"
@@ -683,6 +691,16 @@ const struct option LONG_OPTIONS_GET_GROUP_DIR[] = {
     {"data-group-id", required_argument, nullptr, 'd'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_GET_JSON_PROFILE = "hp:n:m:u:";
+const struct option LONG_OPTIONS_GET_JSON_PROFILE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"profile-type", required_argument, nullptr, 'p'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -747,6 +765,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"delExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsDelExtNameOrMIMEToAppCommand, this)},
         {"queryDataGroupInfos", std::bind(&BundleTestTool::RunAsQueryDataGroupInfos, this)},
         {"getGroupDir", std::bind(&BundleTestTool::RunAsGetGroupDir, this)},
+        {"getJsonProfile", std::bind(&BundleTestTool::RunAsGetJsonProfile, this)}
     };
 
     return OHOS::ERR_OK;
@@ -1464,6 +1483,10 @@ bool BundleTestTool::CheckGetStringCorrectOption(
             break;
         }
         case 'u': {
+            StringToInt(optarg, commandName, temp, ret);
+            break;
+        }
+        case 'p': {
             StringToInt(optarg, commandName, temp, ret);
             break;
         }
@@ -3658,6 +3681,62 @@ bool BundleTestTool::GetGroupDir(const std::string &dataGroupId, std::string& ms
     }
 
     return false;
+}
+
+ErrCode BundleTestTool::RunAsGetJsonProfile()
+{
+    APP_LOGI("RunAsGetJsonProfile start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getJsonProfile";
+    std::string name = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+    int jsonProfileType = -1;
+    int userId = 100;
+    APP_LOGD("RunAsGetStringCommand is start");
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_JSON_PROFILE.c_str(),
+            LONG_OPTIONS_GET_JSON_PROFILE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                // 'GetStringById' with no option: GetStringById
+                // 'GetStringById' with a wrong argument: GetStringById
+                APP_LOGD("bundle_test_tool getStr with no option.");
+                resultReceiver_.append(HELP_MSG_NO_GET_JSON_PROFILE_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        moduleName = option == 'm' ? name : moduleName;
+        bundleName = option == 'n' ? name : bundleName;
+        userId = option == 'u' ? temp : userId;
+        jsonProfileType = option == 'p' ? temp : jsonProfileType;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_STRING);
+    } else {
+        std::string results = "";
+        auto res = bundleMgrProxy_->GetJsonProfile(static_cast<ProfileType>(jsonProfileType),
+            bundleName, moduleName, results, userId);
+        if (res != OHOS::ERR_OK || results.empty()) {
+            resultReceiver_.append(STRING_GET_JSON_PROFILE_NG);
+            return result;
+        }
+        resultReceiver_.append(results);
+        resultReceiver_.append("\n");
+    }
+    return result;
 }
 } // AppExecFwk
 } // OHOS

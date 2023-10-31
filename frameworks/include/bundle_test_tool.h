@@ -85,6 +85,7 @@ private:
     ErrCode RunAsDelExtNameOrMIMEToAppCommand();
     ErrCode RunAsQueryDataGroupInfos();
     ErrCode RunAsGetGroupDir();
+    ErrCode RunAsGetJsonProfile();
 
     std::condition_variable cv_;
     std::mutex mutex_;
