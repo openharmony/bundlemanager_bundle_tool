@@ -659,6 +659,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: debug bundle can only be installed in developer mode",
     },
     {
+        IStatusReceiver::ERR_INSTALL_CHECK_ENCRYPTION_FAILED,
+        "error: check encryption failed",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
