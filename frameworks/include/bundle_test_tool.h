@@ -132,7 +132,7 @@ private:
         std::string &dumpResults);
     ErrCode StringToInt(std::string option, const std::string &commandName, int &temp, bool &result);
     ErrCode DeployQuickFix(const std::vector<std::string> &quickFixPaths,
-        std::shared_ptr<QuickFixResult> &quickFixRes);
+        std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug);
     ErrCode SwitchQuickFix(const std::string &bundleName, int32_t enable,
         std::shared_ptr<QuickFixResult> &quickFixRes);
     ErrCode DeleteQuickFix(const std::string &bundleName, std::shared_ptr<QuickFixResult> &quickFixRes);
