@@ -354,7 +354,8 @@ const std::string HELP_MSG_DEPLOY_QUICK_FIX =
     "eg:bundle_test_tool deployQuickFix -p <quickFixPath> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -p, --patch-path  <patch-path>         specify patch path of the patch\n";
+    "  -p, --patch-path  <patch-path>         specify patch path of the patch\n"
+    "  -d, --debug  <debug>                   specify deploy mode, 0 represents release, 1 represents debug\n";
 
 const std::string HELP_MSG_SWITCH_QUICK_FIX =
     "usage: bundle_test_tool switch quick fix <options>\n"
@@ -609,12 +610,13 @@ const struct option LONG_OPTIONS_RULE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_QUICK_FIX = "hp:n:e:";
+const std::string SHORT_OPTIONS_QUICK_FIX = "hp:n:e:d:";
 const struct option LONG_OPTIONS_QUICK_FIX[] = {
     {"help", no_argument, nullptr, 'h'},
     {"patch-path", required_argument, nullptr, 'p'},
     {"bundle-name", required_argument, nullptr, 'n'},
     {"enable", required_argument, nullptr, 'e'},
+    {"debug", required_argument, nullptr, 'd'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -2717,6 +2719,7 @@ ErrCode BundleTestTool::RunAsDeployQuickFix()
     int32_t counter = 0;
     int32_t index = 0;
     std::vector<std::string> quickFixPaths;
+    int32_t isDebug = 0;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_QUICK_FIX.c_str(), LONG_OPTIONS_QUICK_FIX, nullptr);
@@ -2731,8 +2734,9 @@ ErrCode BundleTestTool::RunAsDeployQuickFix()
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
-            if (optopt == 'p') {
+            if ((optopt == 'p') || (optopt == 'd')) {
                 // 'bm deployQuickFix --patch-path' with no argument
+                // 'bm deployQuickFix -d' with no argument
                 resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -2746,6 +2750,11 @@ ErrCode BundleTestTool::RunAsDeployQuickFix()
             index = optind;
             continue;
         }
+        if ((option == 'd') && OHOS::StrToInt(optarg, isDebug)) {
+            APP_LOGD("'bm deployQuickFix -d %{public}s'", argv_[optind - 1]);
+            continue;
+        }
+
         result = OHOS::ERR_INVALID_VALUE;
         break;
     }
@@ -2756,7 +2765,7 @@ ErrCode BundleTestTool::RunAsDeployQuickFix()
     }
 
     std::shared_ptr<QuickFixResult> deployRes = nullptr;
-    result = DeployQuickFix(quickFixPaths, deployRes);
+    result = DeployQuickFix(quickFixPaths, deployRes, isDebug != 0);
     resultReceiver_ = (result == OHOS::ERR_OK) ? STRING_DEPLOY_QUICK_FIX_OK : STRING_DEPLOY_QUICK_FIX_NG;
     resultReceiver_ += GetResMsg(result, deployRes);
 
@@ -2886,7 +2895,7 @@ ErrCode BundleTestTool::RunAsDeleteQuickFix()
 }
 
 ErrCode BundleTestTool::DeployQuickFix(const std::vector<std::string> &quickFixPaths,
-    std::shared_ptr<QuickFixResult> &quickFixRes)
+    std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug)
 {
 #ifdef BUNDLE_FRAMEWORK_QUICK_FIX
     std::set<std::string> realPathSet;
@@ -2923,7 +2932,7 @@ ErrCode BundleTestTool::DeployQuickFix(const std::vector<std::string> &quickFixP
         APP_LOGE("Copy files failed with %{public}d.", res);
         return res;
     }
-    res = quickFixProxy->DeployQuickFix(destFiles, callback);
+    res = quickFixProxy->DeployQuickFix(destFiles, callback, isDebug);
     if (res != ERR_OK) {
         APP_LOGE("DeployQuickFix failed");
         return res;
