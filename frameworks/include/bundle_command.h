@@ -122,6 +122,7 @@ const std::string HELP_MSG_QUICK_FIX =
     "-h, --help                                   list available commands\n"
     "-q, --query                                  indicates query quickfix, used with -b or --bundle-name\n"
     "-b, --bundle-name <bundle-name>              query quickfix status and information by a specified bundle name\n"
+    "-d, --debug                                  apply a quickfix debug mode\n"
     "-a, --apply                                  indicates apply quickfix, used with -f or --file-path\n"
     "-f, --file-path <file-path>                  apply a quickfix file by a specified path\n"
     "-f, --file-path <file-path> <file-path> ...  apply some quickfix files of one bundle\n"

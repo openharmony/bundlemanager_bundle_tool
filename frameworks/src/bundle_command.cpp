@@ -21,7 +21,6 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <vector>
-
 #include "app_log_wrapper.h"
 #include "appexecfwk_errors.h"
 #include "bundle_command_common.h"
@@ -1337,6 +1336,7 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
             index++;
             if (argKey == "-f" || argKey == "--file-path") {
                 std::vector<std::string> quickFixFiles;
+                bool isDebug = false;
                 // collect value of multi file-path.
                 for (; index < argc_ && index >= INDEX_OFFSET; ++index) {
                     if (argList_[index - INDEX_OFFSET] == "-q" || argList_[index - INDEX_OFFSET] == "--query" ||
@@ -1344,11 +1344,14 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                         argList_[index - INDEX_OFFSET] == "-a" || argList_[index - INDEX_OFFSET] == "--apply" ||
                         argList_[index - INDEX_OFFSET] == "-f" || argList_[index - INDEX_OFFSET] == "--file-path") {
                         break;
+                    } else if (argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--debug") {
+                        isDebug = true;
+                        break;
                     }
                     quickFixFiles.emplace_back(argList_[index - INDEX_OFFSET]);
                 }
 
-                return QuickFixCommand::ApplyQuickFix(quickFixFiles, resultReceiver_);
+                return QuickFixCommand::ApplyQuickFix(quickFixFiles, resultReceiver_, isDebug);
             }
         } else if ((opt == "-q") || (opt == "--query")) {
             if (index >= argc_ - INDEX_OFFSET) {

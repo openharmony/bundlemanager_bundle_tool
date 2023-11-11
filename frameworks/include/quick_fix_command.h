@@ -24,7 +24,8 @@ namespace OHOS {
 namespace AppExecFwk {
 class QuickFixCommand {
 public:
-static int32_t ApplyQuickFix(const std::vector<std::string> &quickFixFiles, std::string &resultInfo);
+static int32_t ApplyQuickFix(const std::vector<std::string> &quickFixFiles, std::string &resultInfo,
+    bool isDebug = false);
 static int32_t GetApplyedQuickFixInfo(const std::string &bundleName, std::string &resultInfo);
 static std::string GetQuickFixInfoString(const AAFwk::ApplicationQuickFixInfo &quickFixInfo);
 };
