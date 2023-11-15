@@ -490,6 +490,9 @@ const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
     "and a userId with '-u' or '--user-id' \n"
     "and a json profile type with '-p' or '--profile-type' \n";
 
+const std::string HELP_MSG_NO_GET_UNINSTALLED_BUNDLE_INFO_OPTION =
+    "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -538,6 +541,8 @@ const std::string STRING_GET_GROUP_DIR_OK = "getGroupDir successfully\n";
 const std::string STRING_GET_GROUP_DIR_NG = "getGroupDir failed\n";
 
 const std::string STRING_GET_JSON_PROFILE_NG = "getJsonProfile failed\n";
+
+const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleInfo failed\n";
 
 const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
     "error: you must specify a control type with '-n' or '--network-id' \n"
@@ -703,6 +708,13 @@ const struct option LONG_OPTIONS_GET_JSON_PROFILE[] = {
     {"user-id", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_UNINSTALLED_BUNDLE_INFO = "hn:";
+const struct option LONG_OPTIONS_UNINSTALLED_BUNDLE_INFO[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -767,7 +779,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"delExtNameOrMimeToApp", std::bind(&BundleTestTool::RunAsDelExtNameOrMIMEToAppCommand, this)},
         {"queryDataGroupInfos", std::bind(&BundleTestTool::RunAsQueryDataGroupInfos, this)},
         {"getGroupDir", std::bind(&BundleTestTool::RunAsGetGroupDir, this)},
-        {"getJsonProfile", std::bind(&BundleTestTool::RunAsGetJsonProfile, this)}
+        {"getJsonProfile", std::bind(&BundleTestTool::RunAsGetJsonProfile, this)},
+        {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)}
     };
 
     return OHOS::ERR_OK;
@@ -3692,6 +3705,29 @@ bool BundleTestTool::GetGroupDir(const std::string &dataGroupId, std::string& ms
     return false;
 }
 
+ErrCode BundleTestTool::CheckGetBundleNameOption(int32_t option, std::string &bundleName)
+{
+    ErrCode result = OHOS::ERR_OK;
+    switch (option) {
+        case 'h': {
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+        case 'n': {
+            bundleName = optarg;
+            if (bundleName.size() == 0) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        default: {
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+    }
+    return result;
+}
+
 ErrCode BundleTestTool::RunAsGetJsonProfile()
 {
     APP_LOGI("RunAsGetJsonProfile start");
@@ -3742,6 +3778,50 @@ ErrCode BundleTestTool::RunAsGetJsonProfile()
             resultReceiver_.append(STRING_GET_JSON_PROFILE_NG);
             return result;
         }
+        resultReceiver_.append(results);
+        resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetUninstalledBundleInfo()
+{
+    APP_LOGI("RunAsGetUninstalledBundleInfo start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getUninstalledBundleInfo";
+    std::string bundleName = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_UNINSTALLED_BUNDLE_INFO.c_str(),
+            LONG_OPTIONS_UNINSTALLED_BUNDLE_INFO, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_NO_GET_UNINSTALLED_BUNDLE_INFO_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckGetBundleNameOption(option, bundleName);
+        APP_LOGD("getUninstalledBundleInfo optind: %{public}s", bundleName.c_str());
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_NO_GET_UNINSTALLED_BUNDLE_INFO_OPTION);
+    } else {
+        BundleInfo bundleInfo;
+        auto res = bundleMgrProxy_->GetUninstalledBundleInfo(bundleName, bundleInfo);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_GET_UNINSTALLED_BUNDLE_INFO_NG);
+            return result;
+        }
+        nlohmann::json jsonObject = bundleInfo;
+        jsonObject["applicationInfo"] = bundleInfo.applicationInfo;
+        std::string results = jsonObject.dump(Constants::DUMP_INDENT);
         resultReceiver_.append(results);
         resultReceiver_.append("\n");
     }
