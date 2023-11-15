@@ -86,6 +86,7 @@ private:
     ErrCode RunAsQueryDataGroupInfos();
     ErrCode RunAsGetGroupDir();
     ErrCode RunAsGetJsonProfile();
+    ErrCode RunAsGetUninstalledBundleInfo();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -153,6 +154,7 @@ private:
     ErrCode CallUnRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CheckGetGroupIdCorrectOption(int32_t option, std::string &dataGroupId);
     bool GetGroupDir(const std::string &dataGroupId, std::string& msg);
+    ErrCode CheckGetBundleNameOption(int32_t option, std::string &bundleName);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
