@@ -57,7 +57,8 @@ private:
     std::string resultInfo_;
 };
 
-int32_t QuickFixCommand::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, std::string &resultInfo)
+int32_t QuickFixCommand::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, std::string &resultInfo,
+    bool isDebug)
 {
     if (quickFixFiles.empty()) {
         resultInfo.append("quick fix file is empty.\n");
@@ -67,6 +68,8 @@ int32_t QuickFixCommand::ApplyQuickFix(const std::vector<std::string> &quickFixF
     for (auto file : quickFixFiles) {
         APP_LOGI("apply hqf file %{private}s.", file.c_str());
     }
+
+    APP_LOGI("IsDEBUG is %d", isDebug);
 
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
@@ -80,7 +83,7 @@ int32_t QuickFixCommand::ApplyQuickFix(const std::vector<std::string> &quickFixF
     auto applyMonitor = std::make_shared<ApplyQuickFixMonitor>(subscribeInfo, statusReceiver);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
 
-    auto result = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance()->ApplyQuickFix(quickFixFiles);
+    auto result = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance()->ApplyQuickFix(quickFixFiles, isDebug);
     if (result == ERR_OK) {
         APP_LOGD("Waiting apply finished.");
         result = statusReceiver->GetResultCode();

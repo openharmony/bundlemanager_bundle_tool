@@ -185,6 +185,7 @@ bm get -u
 | bm quickfix -h | 显示quickfix支持的命令信息 |
 | bm quickfix -a -f <file-path> | 执行补丁安装命令 |
 | bm quickfix -q -b <bundle-name> | 根据包名查询补丁包信息 |
+| bm quickfix -a -f <file-path> -d | 选择debug模式执行补丁安装命令 |
 
 * 示例
 ```Bash
