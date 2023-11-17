@@ -45,7 +45,6 @@ const std::string OVERLAY_MODULE_INFO = "overlayModuleInfo";
 const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
 const std::string DEPENDENCIES = "dependencies";
 const int32_t INDEX_OFFSET = 2;
-const int32_t MIN_FILE_SIZE = 2;
 const int32_t MAX_WAITING_TIME = 3000;
 const int32_t DEVICE_UDID_LENGTH = 65;
 const int32_t MAX_ARGUEMENTS_NUMBER = 3;
@@ -53,7 +52,7 @@ const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
 
-const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:v:";
+const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-path", required_argument, nullptr, 'p'},
@@ -69,7 +68,6 @@ const struct option LONG_OPTIONS[] = {
     {"waitting-time", required_argument, nullptr, 'w'},
     {"keep-data", no_argument, nullptr, 'k'},
     {"shared-bundle-dir-path", required_argument, nullptr, 's'},
-    {"verify-code-signature-path", required_argument, nullptr, 'v'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -240,8 +238,7 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
         argList_[index - INDEX_OFFSET] == "-p" || argList_[index - INDEX_OFFSET] == "--bundle-path" ||
         argList_[index - INDEX_OFFSET] == "-u" || argList_[index - INDEX_OFFSET] == "--user-id" ||
         argList_[index - INDEX_OFFSET] == "-w" || argList_[index - INDEX_OFFSET] == "--waitting-time" ||
-        argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path" ||
-        argList_[index - INDEX_OFFSET] == "-v" || argList_[index - INDEX_OFFSET] == "--verify-code-signature-path") {
+        argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path") {
         return true;
     }
     return false;
@@ -258,8 +255,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     int hspIndex = 0;
     int32_t userId = Constants::ALL_USERID;
     int32_t waittingTime = MINIMUM_WAITTING_TIME;
-    std::string codeSignatureFilePath = "";
-    std::string moduleName = "";
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -303,15 +298,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                     // 'bm install -w' with no argument: bm install -w
                     // 'bm install --waitting-time' with no argument: bm install --waitting-time
                     APP_LOGD("'bm install -w' with no argument.");
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
-                case 'v': {
-                    // 'bm install -v' with no argument: bm install -v
-                    // 'bm install --verify-code-signature-path' with no argument:
-                    // bm install --verify-code-signature-path
-                    APP_LOGD("'bm install -v' with no argument.");
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
@@ -389,18 +375,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 hspIndex = optind;
                 break;
             }
-            case 'v': {
-                // 'bm install -v <code-signature-file-path>'
-                // 'bm install --verify-code-signature-path <code-signature-file-path>'
-                APP_LOGD("'bm install %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
-                codeSignatureFilePath = optarg;
-                if (codeSignatureFilePath.empty()) {
-                    APP_LOGD("'bm install -v' with no argument.");
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
-                break;
-            }
             default: {
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -450,26 +424,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         }
     }
 
-    if ((!codeSignatureFilePath.empty()) && (bundlePath.size() > MIN_FILE_SIZE)) {
-        APP_LOGW("'bm install -v' does not support install multi hap or hsp simultaneously.");
-        resultReceiver_.append(HELP_MSG_NOT_SUPPORT_MULTI_HAP_OR_HSP_INSTALLATION);
-        result = OHOS::ERR_INVALID_VALUE;
-    }
-
-    if (!sharedBundleDirPaths.empty() && !codeSignatureFilePath.empty()) {
-        APP_LOGW("the command 'bm install -s <sharedLibraryDir> -v signatureFilePath' is not supported.");
-        resultReceiver_.append(HELP_MSG_COMMAND_IS_NOT_SUPPORTED);
-        result = OHOS::ERR_INVALID_VALUE;
-    }
-
-    if ((!codeSignatureFilePath.empty()) && (!bundlePath.empty())) {
-        if (!ObtainModuleNameFromBundlePaths(bundlePath, moduleName)) {
-            APP_LOGW("ObtainModuleNameFromBundlePaths failed");
-            resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-            result = OHOS::ERR_INVALID_VALUE;
-        }
-    }
-
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_INSTALL);
     } else {
@@ -477,9 +431,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         installParam.installFlag = installFlag;
         installParam.userId = userId;
         installParam.sharedBundleDirPaths = sharedBundleDirPaths;
-        if (!codeSignatureFilePath.empty() && !moduleName.empty()) {
-            installParam.verifyCodeParams.emplace(moduleName, codeSignatureFilePath);
-        }
         int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime);
         if (installResult == OHOS::ERR_OK) {
             resultReceiver_ = STRING_INSTALL_BUNDLE_OK + "\n";
@@ -500,7 +451,7 @@ ErrCode BundleManagerShellCommand::GetBundlePath(const std::string& param,
     }
     if (param == "-r" || param == "--replace" || param == "-p" ||
         param == "--bundle-path" || param == "-u" || param == "--user-id" ||
-        param == "-w" || param == "--waitting-time" || param == "-v" || param == "--verify-code-signature-path") {
+        param == "-w" || param == "--waitting-time") {
         return OHOS::ERR_INVALID_VALUE;
     }
     bundlePaths.emplace_back(param);
@@ -1805,10 +1756,6 @@ int32_t BundleManagerShellCommand::InstallOperation(const std::vector<std::strin
         APP_LOGE("install failed due to no space left");
         return IStatusReceiver::ERR_INSTALL_DISK_MEM_INSUFFICIENT;
     }
-    if (res == ERR_BUNDLEMANAGER_INSTALL_CODE_SIGNATURE_FILE_IS_INVALID) {
-        APP_LOGE("install failed due to code signature file is invalid");
-        return IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_FILE_IS_INVALID;
-    }
 
     return res;
 }
@@ -2249,28 +2196,6 @@ std::string BundleManagerShellCommand::DumpSharedAll() const
         dumpResults.append("\n");
     }
     return dumpResults;
-}
-
-bool BundleManagerShellCommand::ObtainModuleNameFromBundlePaths(const std::vector<std::string> &bundlePaths,
-    std::string &moduleName)
-{
-    BundleInfo info;
-    std::vector<std::string> absPaths;
-    GetAbsPaths(bundlePaths, absPaths);
-    if (absPaths.empty()) {
-        APP_LOGE("asbPaths is empty");
-        return false;
-    }
-    APP_LOGD("bundlePath is %{public}s", absPaths[0].c_str());
-    if ((!bundleMgrProxy_->GetBundleArchiveInfo(absPaths[0], BundleFlag::GET_BUNDLE_DEFAULT, info)) ||
-        (info.moduleNames.empty())) {
-        APP_LOGE("obtain module name failed");
-        return false;
-    }
-
-    moduleName = info.moduleNames[0];
-    APP_LOGD("moduleName is %{public}s", moduleName.c_str());
-    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

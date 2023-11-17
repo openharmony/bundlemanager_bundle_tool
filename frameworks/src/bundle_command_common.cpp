@@ -635,10 +635,6 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: verify code signature failed.",
     },
     {
-        IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_FILE_IS_INVALID,
-        "error: code signature file is invalid",
-    },
-    {
         IStatusReceiver::ERR_UNINSTALL_FROM_BMS_EXTENSION_FAILED,
         "error: uninstall bundle from extension failed",
     },
@@ -661,6 +657,14 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_CHECK_ENCRYPTION_FAILED,
         "error: check encryption failed",
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_DELIVERY_FILE_FAILED,
+        "error: delivery sign profile failed",
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_REMOVE_FILE_FAILED,
+        "error: remove sign profile failed",
     },
     {
         IStatusReceiver::ERR_UNKNOWN,
