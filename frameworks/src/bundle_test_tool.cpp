@@ -3789,7 +3789,6 @@ ErrCode BundleTestTool::RunAsGetUninstalledBundleInfo()
     APP_LOGI("RunAsGetUninstalledBundleInfo start");
     int result = OHOS::ERR_OK;
     int counter = 0;
-    std::string commandName = "getUninstalledBundleInfo";
     std::string bundleName = "";
     while (true) {
         counter++;
