@@ -25,7 +25,7 @@ namespace OHOS {
 namespace AppExecFwk {
 class MockBundleMgrHost : public BundleMgrHost {
 public:
-    ErrCode CleanBundleCacheFiles(const std::string &bundleName, const sptr<ICleanCacheCallback> &cleanCacheCallback,
+    ErrCode CleanBundleCacheFiles(const std::string &bundleName, const sptr<ICleanCacheCallback> cleanCacheCallback,
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
     bool CleanBundleDataFiles(const std::string &bundleName, const int userId = 0);
     bool DumpInfos(
