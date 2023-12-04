@@ -34,6 +34,7 @@
 #include "quick_fix_command.h"
 #include "status_receiver_impl.h"
 #include "string_ex.h"
+#include "ability_manager_client.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -1824,13 +1825,14 @@ bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string
 
 bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId) const
 {
-    APP_LOGD("bundleName: %{public}s, userId:%{public}d", bundleName.c_str(), userId);
     userId = BundleCommandCommon::GetCurrentUserId(userId);
-    bool cleanRet = bundleMgrProxy_->CleanBundleDataFiles(bundleName, userId);
-    if (!cleanRet) {
-        APP_LOGE("clean bundle data files operation failed");
+    APP_LOGD("bundleName: %{public}s, userId:%{public}d", bundleName.c_str(), userId);
+    ErrCode cleanRet = AbilityManagerClient::GetInstance()->ClearUpApplicationData(bundleName, userId);
+    if (cleanRet == ERR_OK) {
+        return true;
     }
-    return cleanRet;
+    APP_LOGE("clean bundle data files operation failed");
+    return false;
 }
 
 bool BundleManagerShellCommand::SetApplicationEnabledOperation(const AbilityInfo &abilityInfo,
