@@ -143,9 +143,9 @@ class CleanCacheCallbackImpl : public CleanCacheCallbackHost {
 public:
     CleanCacheCallbackImpl() : signal_(std::make_shared<std::promise<bool>>())
     {}
-    virtual ~CleanCacheCallbackImpl() override
+    ~CleanCacheCallbackImpl() override
     {}
-    virtual void OnCleanCacheFinished(bool error) override;
+    void OnCleanCacheFinished(bool error) override;
     bool GetResultCode();
 private:
     std::shared_ptr<std::promise<bool>> signal_;
