@@ -50,7 +50,7 @@ const std::string STRING_EMPTY = "";
 class MockBundleInstallerHost : public IRemoteStub<IBundleInstaller> {
 public:
     MockBundleInstallerHost();
-    virtual ~MockBundleInstallerHost() override;
+    ~MockBundleInstallerHost() override;
     bool Install(const std::string &bundleFilePath, const InstallParam &installParam,
         const sptr<IStatusReceiver> &statusReceiver);
     bool Install(const std::vector<std::string> &bundleFilePath, const InstallParam &installParam,
