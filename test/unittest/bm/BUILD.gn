@@ -254,6 +254,11 @@ ohos_unittest("bm_command_test") {
   ]
 
   external_deps += bm_install_external_deps
+  defines = []
+  if (account_enable_bm) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+    defines += [ "ACCOUNT_ENABLE" ]
+  }
 }
 
 ohos_unittest("bm_command_uninstall_test") {
