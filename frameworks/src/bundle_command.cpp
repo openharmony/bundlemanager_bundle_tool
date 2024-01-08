@@ -1827,8 +1827,10 @@ bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string 
 {
     userId = BundleCommandCommon::GetCurrentUserId(userId);
     APP_LOGD("bundleName: %{public}s, userId:%{public}d", bundleName.c_str(), userId);
-    ErrCode cleanRet = AbilityManagerClient::GetInstance()->ClearUpApplicationData(bundleName, userId);
-    if (cleanRet == ERR_OK) {
+    ErrCode cleanRetAms = AbilityManagerClient::GetInstance()->ClearUpApplicationData(bundleName, userId);
+    bool cleanRetBms = bundleMgrProxy_->CleanBundleDataFiles(bundleName, userId);
+    APP_LOGD("cleanRetAms: %{public}d, cleanRetBms: %{public}d", cleanRetAms, cleanRetBms);
+    if ((cleanRetAms == ERR_OK) && cleanRetBms) {
         return true;
     }
     APP_LOGE("clean bundle data files operation failed");
