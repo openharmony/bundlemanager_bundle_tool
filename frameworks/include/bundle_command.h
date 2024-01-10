@@ -36,10 +36,19 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
                              "  disable      disable the bundle\n"
                              "  get          obtain device udid\n"
                              "  quickfix     quick fix, including query and install\n"
+                             "  compile      Compile the software package\n"
                              "  dump-overlay dump overlay info of the specific overlay bundle\n"
                              "  dump-target-overlay dump overlay info of the specific target bundle\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"
                              "  dump-shared dump inter-application shared library information by bundle name\n";
+
+const std::string HELP_MSG_COMPILE =
+    "usage: bm compile [-m mode] [-r reset] (bundle-name | -a)\n"
+    "options list:\n"
+    "  -h, --help                           list available commands.\n"
+    "  -m, --mode <mode-name>               select partial or full mode.\n"
+    "  -r, --reset                          clear bundle configuration file data.\n"
+    "  -a, --all                            compile or reset all software packages.\n";
 
 const std::string HELP_MSG_INSTALL =
     "usage: bm install <options>\n"
@@ -195,6 +204,7 @@ const std::string HELP_MSG_NO_REMOVABLE_OPTION =
     "and a module name with '-m' or '--module-name' \n";
 
 const std::string HELP_MSG_DUMP_FAILED = "error: failed to get information and the parameters may be wrong.";
+const std::string HELP_MSG_COMPILE_FAILED = "error: failed to get information and the parameters may be wrong.";
 const std::string STRING_REQUIRE_CORRECT_VALUE = "error: option requires a correct value.\n";
 
 const std::string STRING_DUMP_OVERLAY_OK = "overlay info is:";
@@ -203,6 +213,8 @@ const std::string STRING_DUMP_OVERLAY_NG = "error: failed to get overlay info";
 const std::string STRING_DUMP_TARGET_OVERLAY_OK = "target overlay info is:";
 const std::string STRING_DUMP_TARGET_OVERLAY_NG = "error: failed to get target overlay info";
 const std::string MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED = "feature is not supported.\n";
+const std::string COMPILE_SUCCESS_OK = "compile AOT success.\n";
+const std::string COMPILE_RESET = "reset AOT success.\n";
 } // namespace
 
 class BundleManagerShellCommand : public ShellCommand {
@@ -229,6 +241,11 @@ private:
     ErrCode RunAsDumpTargetOverlay();
     ErrCode RunAsDumpSharedDependenciesCommand();
     ErrCode RunAsDumpSharedCommand();
+    ErrCode RunAsCompileCommand();
+
+    std::string CompileProcessAot(
+        const std::string &bundleName, const std::string &compileMode, bool isAllBundle) const;
+    std::string CompileReset(const std::string &bundleName, bool isAllBundle) const;
 
     std::string DumpBundleList(int32_t userId) const;
     std::string DumpBundleInfo(const std::string &bundleName, int32_t userId) const;

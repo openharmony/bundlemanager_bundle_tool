@@ -53,6 +53,14 @@ const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
 
+const std::string SHORT_OPTIONS_COMPILE = "hm:r:";
+const struct option LONG_OPTIONS_COMPILE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"mode", required_argument, nullptr, 'm'},
+    {"reset", required_argument, nullptr, 'r'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -187,6 +195,7 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"disable", std::bind(&BundleManagerShellCommand::RunAsDisableCommand, this)},
         {"get", std::bind(&BundleManagerShellCommand::RunAsGetCommand, this)},
         {"quickfix", std::bind(&BundleManagerShellCommand::RunAsQuickFixCommand, this)},
+        {"compile", std::bind(&BundleManagerShellCommand::RunAsCompileCommand, this)},
         {"dump-overlay", std::bind(&BundleManagerShellCommand::RunAsDumpOverlay, this)},
         {"dump-target-overlay", std::bind(&BundleManagerShellCommand::RunAsDumpTargetOverlay, this)},
         {"dump-dependencies", std::bind(&BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand, this)},
@@ -243,6 +252,111 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
         return true;
     }
     return false;
+}
+
+ErrCode BundleManagerShellCommand::RunAsCompileCommand()
+{
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string compileMode = "";
+    std::string bundleName = "";
+    bool bundleCompile = false;
+    bool resetCompile = false;
+    bool isAllBundle = false;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_COMPILE.c_str(), LONG_OPTIONS_COMPILE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                // When scanning the first argument
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    // 'bm compile' with no option: bm compile
+                    // 'bm compile' with a wrong argument: bm compile xxx
+                    APP_LOGD("'bm compile' %{public}s", HELP_MSG_NO_OPTION.c_str());
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+        if (option == '?') {
+            switch (optopt) {
+                case 'a': {
+                    // 'bm compile -m' with no argument: bm compile -m
+                    // 'bm compile --mode' with no argument: bm compile --mode
+                    APP_LOGD("'bm compile %{public}s'", argv_[optind - 1]);
+                    isAllBundle = true;
+                    break;
+                }
+                default: {
+                    // 'bm compile' with an unknown option: bm compile -x
+                    // 'bm compile' with an unknown option: bm compile -xxx
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    APP_LOGE("'bm compile' with an unknown option.");
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+        switch (option) {
+            case 'h': {
+                // 'bm compile -h'
+                // 'bm compile --help'
+                APP_LOGD("'bm compile %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'm': {
+                // 'bm compile -m xxx'
+                // 'bm compile --mode xxx'
+                APP_LOGD("'bm compile %{public}s %{public}s %{public}s'",
+                    argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg, argv_[optind + 1]);
+                bundleCompile = true;
+                compileMode = optarg;
+                bundleName = argv_[optind + 1];
+                break;
+            }
+            case 'r': {
+                // 'bm compile -r xxx'
+                // 'bm compile --reset xxx'
+                APP_LOGD("'bm compile %{public}s'", argv_[optind - 1]);
+                resetCompile = true;
+                bundleName = optarg;
+                if (bundleName == "-a") {
+                    isAllBundle = true;
+                }
+                break;
+            }
+            default: {
+                APP_LOGD("'bm compile %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_COMPILE);
+    } else {
+        std::string compileResults = "";
+        APP_LOGD("compileResults: %{public}s", compileResults.c_str());
+        if (bundleCompile) {
+            compileResults = CompileProcessAot(bundleName, compileMode, isAllBundle);
+        } else if (resetCompile) {
+            compileResults = CompileReset(bundleName, isAllBundle);
+        }
+        if (compileResults.empty() || (compileResults == "")) {
+            compileResults = HELP_MSG_COMPILE_FAILED + "\n";
+        }
+        resultReceiver_.append(compileResults);
+    }
+    return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsInstallCommand()
@@ -1607,6 +1721,31 @@ std::string BundleManagerShellCommand::GetUdid() const
     }
     std::string udid = innerUdid;
     return udid;
+}
+
+std::string BundleManagerShellCommand::CompileProcessAot(
+    const std::string &bundleName, const std::string &compileMode, bool isAllBundle) const
+{
+    std::string CompileResults;
+    ErrCode CompileRet = bundleMgrProxy_->CompileProcessAOT(bundleName, compileMode, isAllBundle);
+    if (CompileRet == ERR_APPEXECFWK_PARCEL_ERROR) {
+        APP_LOGE("failed to compile AOT.");
+        return CompileResults;
+    }
+    CompileResults = COMPILE_SUCCESS_OK;
+    return CompileResults;
+}
+
+std::string BundleManagerShellCommand::CompileReset(const std::string &bundleName, bool isAllBundle) const
+{
+    std::string ResetResults;
+    ErrCode ResetRet = bundleMgrProxy_->CompileReset(bundleName, isAllBundle);
+    if (ResetRet == ERR_APPEXECFWK_PARCEL_ERROR) {
+        APP_LOGE("failed to reset AOT.");
+        return ResetResults;
+    }
+    ResetResults = COMPILE_RESET;
+    return ResetResults;
 }
 
 std::string BundleManagerShellCommand::DumpBundleList(int32_t userId) const
