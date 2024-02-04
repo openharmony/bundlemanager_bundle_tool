@@ -256,6 +256,7 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
 
 ErrCode BundleManagerShellCommand::RunAsCompileCommand()
 {
+    APP_LOGI("begin to RunAsCompileCommand");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string compileMode = "";
@@ -356,11 +357,13 @@ ErrCode BundleManagerShellCommand::RunAsCompileCommand()
         }
         resultReceiver_.append(compileResults);
     }
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsInstallCommand()
 {
+    APP_LOGI("begin to RunAsInstallCommand");
     int result = OHOS::ERR_OK;
     InstallFlag installFlag = InstallFlag::REPLACE_EXISTING;
     int counter = 0;
@@ -554,7 +557,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
             resultReceiver_.append(GetMessageFromCode(installResult));
         }
     }
-
+    APP_LOGI("end, run success");
     return result;
 }
 
@@ -575,6 +578,7 @@ ErrCode BundleManagerShellCommand::GetBundlePath(const std::string& param,
 
 ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
 {
+    APP_LOGI("begin to RunAsUninstallCommand");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string bundleName = "";
@@ -760,12 +764,13 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
             resultReceiver_.append(GetMessageFromCode(uninstallResult));
         }
     }
-
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsDumpCommand()
 {
+    APP_LOGI("begin to RunAsDumpCommand");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string bundleName = "";
@@ -922,12 +927,13 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
         }
         resultReceiver_.append(dumpResults);
     }
-
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsCleanCommand()
 {
+    APP_LOGI("begin to RunAsCleanCommand");
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     int32_t userId = Constants::UNSPECIFIED_USERID;
@@ -1069,11 +1075,13 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             }
         }
     }
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsEnableCommand()
 {
+    APP_LOGI("begin to RunAsEnableCommand");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string bundleName = "";
@@ -1202,11 +1210,13 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
             resultReceiver_ = STRING_ENABLE_BUNDLE_NG + "\n";
         }
     }
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsDisableCommand()
 {
+    APP_LOGI("begin to RunAsDisableCommand");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string bundleName = "";
@@ -1329,11 +1339,13 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
             resultReceiver_ = STRING_DISABLE_BUNDLE_NG + "\n";
         }
     }
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsGetCommand()
 {
+    APP_LOGI("begin to RunAsGetCommand");
     int result = OHOS::ERR_OK;
     int counter = 0;
     while (true) {
@@ -1380,11 +1392,13 @@ ErrCode BundleManagerShellCommand::RunAsGetCommand()
     }
     resultReceiver_.append(STRING_GET_UDID_OK + "\n");
     resultReceiver_.append(GetUdid() + "\n");
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
 {
+    APP_LOGI("begin to RunAsQuickFixCommand");
     for (auto index = INDEX_OFFSET; index < argc_; ++index) {
         APP_LOGD("argv_[%{public}d]: %{public}s", index, argv_[index]);
         std::string opt = argv_[index];
@@ -1443,11 +1457,13 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
 
     resultReceiver_.append("error: parameter is not enough.\n");
     resultReceiver_.append(HELP_MSG_QUICK_FIX);
+    APP_LOGI("end, run success");
     return ERR_INVALID_VALUE;
 }
 
 ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
 {
+    APP_LOGI("begin to RunAsDumpOverlay");
     int result = OHOS::ERR_OK;
     int counter = 0;
     int32_t userId = Constants::UNSPECIFIED_USERID;
@@ -1582,11 +1598,13 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
 #else
     resultReceiver_.append(MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED);
 #endif
+    APP_LOGI("end, run success");
     return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
 {
+    APP_LOGI("begin to RunAsDumpTargetOverlay");
     int result = OHOS::ERR_OK;
     int counter = 0;
     int32_t userId = Constants::UNSPECIFIED_USERID;
@@ -1707,6 +1725,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
 #else
     resultReceiver_.append(MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED);
 #endif
+    APP_LOGI("end, run success");
     return result;
 }
 
@@ -2083,6 +2102,7 @@ std::string BundleManagerShellCommand::DumpTargetOverlayInfo(const std::string &
 
 ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
 {
+    APP_LOGI("begin to RunAsDumpSharedDependenciesCommand");
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     std::string bundleName;
@@ -2127,6 +2147,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
         }
         resultReceiver_.append(dumpResults);
     }
+    APP_LOGI("end, run success");
     return result;
 }
 
@@ -2208,6 +2229,7 @@ std::string BundleManagerShellCommand::DumpSharedDependencies(const std::string 
 
 ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
 {
+    APP_LOGI("begin to RunAsDumpSharedCommand");
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     std::string bundleName;
@@ -2254,6 +2276,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
         }
         resultReceiver_.append(dumpResults);
     }
+    APP_LOGI("end, run success");
     return result;
 }
 
