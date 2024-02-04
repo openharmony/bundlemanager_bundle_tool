@@ -357,7 +357,7 @@ ErrCode BundleManagerShellCommand::RunAsCompileCommand()
         }
         resultReceiver_.append(compileResults);
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -557,7 +557,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
             resultReceiver_.append(GetMessageFromCode(installResult));
         }
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -764,7 +764,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
             resultReceiver_.append(GetMessageFromCode(uninstallResult));
         }
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -927,7 +927,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
         }
         resultReceiver_.append(dumpResults);
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -1075,7 +1075,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             }
         }
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -1210,7 +1210,7 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
             resultReceiver_ = STRING_ENABLE_BUNDLE_NG + "\n";
         }
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -1339,7 +1339,7 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
             resultReceiver_ = STRING_DISABLE_BUNDLE_NG + "\n";
         }
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -1392,7 +1392,7 @@ ErrCode BundleManagerShellCommand::RunAsGetCommand()
     }
     resultReceiver_.append(STRING_GET_UDID_OK + "\n");
     resultReceiver_.append(GetUdid() + "\n");
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -1404,11 +1404,13 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
         std::string opt = argv_[index];
         if ((opt == "-h") || (opt == "--help")) {
             resultReceiver_.append(HELP_MSG_QUICK_FIX);
+            APP_LOGI("end");
             return ERR_OK;
         } else if ((opt == "-a") || (opt == "--apply")) {
             if (index >= argc_ - INDEX_OFFSET) {
                 resultReceiver_.append("error: option [--apply] is incorrect.\n");
                 resultReceiver_.append(HELP_MSG_QUICK_FIX);
+                APP_LOGI("end");
                 return ERR_INVALID_VALUE;
             }
 
@@ -1430,13 +1432,14 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                     }
                     quickFixFiles.emplace_back(argList_[index - INDEX_OFFSET]);
                 }
-
+                APP_LOGI("end");
                 return QuickFixCommand::ApplyQuickFix(quickFixFiles, resultReceiver_, isDebug);
             }
         } else if ((opt == "-q") || (opt == "--query")) {
             if (index >= argc_ - INDEX_OFFSET) {
                 resultReceiver_.append("error: option [--query] is incorrect.\n");
                 resultReceiver_.append(HELP_MSG_QUICK_FIX);
+                APP_LOGI("end");
                 return ERR_INVALID_VALUE;
             }
 
@@ -1446,18 +1449,19 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
             if (argKey == "-b" || argKey == "--bundle-name") {
                 bundleName = argValue;
             }
-
+            APP_LOGI("end");
             return QuickFixCommand::GetApplyedQuickFixInfo(bundleName, resultReceiver_);
         } else {
             resultReceiver_.append("error: unknown option.\n");
             resultReceiver_.append(HELP_MSG_QUICK_FIX);
+            APP_LOGI("end");
             return ERR_INVALID_VALUE;
         }
     }
 
     resultReceiver_.append("error: parameter is not enough.\n");
     resultReceiver_.append(HELP_MSG_QUICK_FIX);
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return ERR_INVALID_VALUE;
 }
 
@@ -1598,7 +1602,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
 #else
     resultReceiver_.append(MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED);
 #endif
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -1725,7 +1729,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
 #else
     resultReceiver_.append(MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED);
 #endif
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -2147,7 +2151,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
         }
         resultReceiver_.append(dumpResults);
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
@@ -2276,7 +2280,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
         }
         resultReceiver_.append(dumpResults);
     }
-    APP_LOGI("end, run success");
+    APP_LOGI("end");
     return result;
 }
 
