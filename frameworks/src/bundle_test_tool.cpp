@@ -3273,6 +3273,7 @@ ErrCode BundleTestTool::GetAppProvisionInfo(const std::string &bundleName,
         msg += "        notBefore: " + std::to_string(info.validity.notBefore) + "\n";
         msg += "        notAfter: " + std::to_string(info.validity.notAfter) + "\n";
         msg += "    }\n";
+        msg += "    appServiceCapabilities: " + info.appServiceCapabilities + "\n";
         msg += "}\n";
     }
     return ret;
