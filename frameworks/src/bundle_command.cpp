@@ -45,6 +45,7 @@ const std::string OVERLAY_BUNDLE_INFOS = "overlayBundleInfos";
 const std::string OVERLAY_MODULE_INFO = "overlayModuleInfo";
 const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
 const std::string DEPENDENCIES = "dependencies";
+const char* IS_ROOT_MODE_PARAM = "const.debuggable";
 const int32_t INDEX_OFFSET = 2;
 const int32_t MAX_WAITING_TIME = 3000;
 const int32_t DEVICE_UDID_LENGTH = 65;
@@ -234,7 +235,11 @@ ErrCode BundleManagerShellCommand::Init()
 
 ErrCode BundleManagerShellCommand::RunAsHelpCommand()
 {
-    resultReceiver_.append(HELP_MSG);
+    if (GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
+        resultReceiver_.append(HELP_MSG);
+    } else {
+        resultReceiver_.append(HELP_MSG_USER_MODE);
+    }
 
     return OHOS::ERR_OK;
 }
@@ -928,6 +933,10 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
 
 ErrCode BundleManagerShellCommand::RunAsCleanCommand()
 {
+    if (!GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
+        APP_LOGD("in user mode");
+        return ERR_OK;
+    }
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     int32_t userId = Constants::UNSPECIFIED_USERID;
@@ -1074,6 +1083,10 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
 
 ErrCode BundleManagerShellCommand::RunAsEnableCommand()
 {
+    if (!GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
+        APP_LOGD("in user mode");
+        return ERR_OK;
+    }
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string bundleName = "";
@@ -1207,6 +1220,10 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
 
 ErrCode BundleManagerShellCommand::RunAsDisableCommand()
 {
+    if (!GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
+        APP_LOGD("in user mode");
+        return ERR_OK;
+    }
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string bundleName = "";
