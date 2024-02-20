@@ -87,6 +87,7 @@ private:
     ErrCode RunAsGetGroupDir();
     ErrCode RunAsGetJsonProfile();
     ErrCode RunAsGetUninstalledBundleInfo();
+    ErrCode RunAsGetOdid();
 
     std::condition_variable cv_;
     std::mutex mutex_;

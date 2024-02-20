@@ -48,6 +48,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
+using OptionHandler = std::function<void(const std::string&)>;
+
 const std::string LINE_BREAK = "\n";
 constexpr int32_t SLEEP_SECONDS = 20;
 // param
@@ -117,45 +119,50 @@ const std::string MSG_ERR_BUNDLEMANAGER_SET_DEBUG_MODE_SEND_REQUEST_ERROR = "err
 const std::string MSG_ERR_BUNDLEMANAGER_SET_DEBUG_MODE_UID_CHECK_FAILED = "error: uid check failed.\n";
 
 static const std::string TOOL_NAME = "bundle_test_tool";
-static const std::string HELP_MSG = "usage: bundle_test_tool <command> <options>\n"
-                             "These are common bundle_test_tool commands list:\n"
-                             "  help         list available commands\n"
-                             "  setrm        set module isRemovable by given bundle name and module name\n"
-                             "  getrm        obtain the value of isRemovable by given bundle name and module name\n"
-                             "  installSandbox      indicates install sandbox\n"
-                             "  uninstallSandbox    indicates uninstall sandbox\n"
-                             "  dumpSandbox         indicates dump sandbox info\n"
-                             "  getStr      obtain the value of label by given bundle name, module name and label id\n"
-                             "  getIcon     obtain the value of icon by given bundle name, module name,\n"
-                             "              density and icon id\n"
-                             "  addAppInstallRule     obtain the value of install controlRule by given some app id\n"
-                             "                        control rule type, user id and euid\n"
-                             "  getAppInstallRule     obtain the value of install controlRule by given some app id\n"
-                             "                        rule type, user id and euid\n"
-                             "  deleteAppInstallRule  obtain the value of install controlRule by given some app id\n"
-                             "                        user id and euid\n"
-                             "  cleanAppInstallRule   obtain the value of install controlRule by given rule type\n"
-                             "                        user id and euid\n"
-                             "  addAppRunningRule     obtain the value of app running control rule\n"
-                             "                        by given controlRule user id and euidn"
-                             "  deleteAppRunningRule  obtain the value of app running control rule\n"
-                             "                        by given controlRule user id and euid\n"
-                             "  cleanAppRunningRule   obtain the value of app running control\n"
-                             "                        rule by given user id and euid\n"
-                             "  getAppRunningControlRule  obtain the value of app running control rule\n"
-                             "                            by given user id and euid and some app id\n"
-                             "  getAppRunningControlRuleResult     obtain the value of app running control rule\n"
-                             "                      by given bundleName user id, euid and controlRuleResult\n"
-                             "  deployQuickFix      deploy a quick fix patch of an already installed bundle\n"
-                             "  switchQuickFix      switch a quick fix patch of an already installed bundle\n"
-                             "  deleteQuickFix      delete a quick fix patch of an already installed bundle\n"
-                             "  setDebugMode        enable signature debug mode\n"
-                             "  getBundleStats        get bundle stats\n"
-                             "  getAppProvisionInfo   get appProvisionInfo\n"
-                             "  getDistributedBundleName   get distributedBundleName\n"
-                             "  eventCB        register then unregister bundle event callback\n"
-                             "  resetAOTCompileStatus        reset AOTCompileStatus\n"
-                             "  sendCommonEvent        send common event\n";
+static const std::string HELP_MSG =
+    "usage: bundle_test_tool <command> <options>\n"
+    "These are common bundle_test_tool commands list:\n"
+    "  help                             list available commands\n"
+    "  setrm                            set module isRemovable by given bundle name and module name\n"
+    "  getrm                            obtain the value of isRemovable by given bundle name and module name\n"
+    "  installSandbox                   indicates install sandbox\n"
+    "  uninstallSandbox                 indicates uninstall sandbox\n"
+    "  dumpSandbox                      indicates dump sandbox info\n"
+    "  getStr                           obtain the value of label by given bundle name, module name and label id\n"
+    "  getIcon                          obtain the value of icon by given bundle name, module name, "
+    "density and icon id\n"
+    "  addAppInstallRule                obtain the value of install controlRule by given some app id "
+    "control rule type, user id and euid\n"
+    "  getAppInstallRule                obtain the value of install controlRule by given some app id "
+    "rule type, user id and euid\n"
+    "  deleteAppInstallRule             obtain the value of install controlRule by given some app id "
+    "user id and euid\n"
+    "  cleanAppInstallRule              obtain the value of install controlRule by given rule type "
+    "user id and euid\n"
+    "  addAppRunningRule                obtain the value of app running control rule "
+    "by given controlRule user id and euidn\n"
+    "  deleteAppRunningRule             obtain the value of app running control rule "
+    "by given controlRule user id and euid\n"
+    "  cleanAppRunningRule              obtain the value of app running control "
+    "rule by given user id and euid\n"
+    "  getAppRunningControlRule         obtain the value of app running control rule "
+    "by given user id and euid and some app id\n"
+    "  getAppRunningControlRuleResult   obtain the value of app running control rule "
+    "by given bundleName user id, euid and controlRuleResult\n"
+    "  deployQuickFix                   deploy a quick fix patch of an already installed bundle\n"
+    "  switchQuickFix                   switch a quick fix patch of an already installed bundle\n"
+    "  deleteQuickFix                   delete a quick fix patch of an already installed bundle\n"
+    "  setDebugMode                     enable signature debug mode\n"
+    "  getBundleStats                   get bundle stats\n"
+    "  getAppProvisionInfo              get appProvisionInfo\n"
+    "  getDistributedBundleName         get distributedBundleName\n"
+    "  eventCB                          register then unregister bundle event callback\n"
+    "  resetAOTCompileStatus            reset AOTCompileStatus\n"
+    "  sendCommonEvent                  send common event\n"
+    "  queryDataGroupInfos              obtain the data group infos of the application\n"
+    "  getGroupDir                      obtain the data group dir path by data group id\n"
+    "  getJsonProfile                   obtain the json string of the specified module\n"
+    "  getOdid                          obtain the odid of the application\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -493,6 +500,13 @@ const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
 const std::string HELP_MSG_NO_GET_UNINSTALLED_BUNDLE_INFO_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
 
+const std::string HELP_MSG_GET_ODID =
+    "usage: bundle_test_tool getOdid <options>\n"
+    "eg:bundle_test_tool getOdid -u <uid>\n"
+    "options list:\n"
+    "  -h, --help               list available commands\n"
+    "  -u, --uid  <uid>         specify uid of the application\n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -543,6 +557,9 @@ const std::string STRING_GET_GROUP_DIR_NG = "getGroupDir failed\n";
 const std::string STRING_GET_JSON_PROFILE_NG = "getJsonProfile failed\n";
 
 const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleInfo failed\n";
+
+const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
+const std::string STRING_GET_ODID_NG = "getOdid failed\n";
 
 const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
     "error: you must specify a control type with '-n' or '--network-id' \n"
@@ -715,6 +732,12 @@ const struct option LONG_OPTIONS_UNINSTALLED_BUNDLE_INFO[] = {
     {"bundle-name", required_argument, nullptr, 'n'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_GET_ODID = "hu:";
+const struct option LONG_OPTIONS_GET_ODID[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"uid", required_argument, nullptr, 'u'},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -780,7 +803,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"queryDataGroupInfos", std::bind(&BundleTestTool::RunAsQueryDataGroupInfos, this)},
         {"getGroupDir", std::bind(&BundleTestTool::RunAsGetGroupDir, this)},
         {"getJsonProfile", std::bind(&BundleTestTool::RunAsGetJsonProfile, this)},
-        {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)}
+        {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)},
+        {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)}
     };
 
     return OHOS::ERR_OK;
@@ -3824,6 +3848,42 @@ ErrCode BundleTestTool::RunAsGetUninstalledBundleInfo()
         std::string results = jsonObject.dump(Constants::DUMP_INDENT);
         resultReceiver_.append(results);
         resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetOdid()
+{
+    int result = OHOS::ERR_OK;
+    std::string commandName = "getOdid";
+    int uid = Constants::INVALID_UID;
+    int opt = 0;
+
+    const std::map<char, OptionHandler> getOdidOptionHandlers = {
+        {'u', [&uid, &commandName, this](const std::string& value) {
+            bool ret;
+            StringToInt(value, commandName, uid, ret); }}
+    };
+    while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ODID.c_str(), LONG_OPTIONS_GET_ODID, nullptr)) != -1) {
+        auto it = getOdidOptionHandlers.find(opt);
+        if (it != getOdidOptionHandlers.end()) {
+            it->second(optarg);
+        } else {
+            resultReceiver_.append(HELP_MSG_GET_ODID);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    std::string odid;
+    setuid(uid);
+    result = bundleMgrProxy_->GetOdid(odid);
+    setuid(Constants::ROOT_UID);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_GET_ODID_OK);
+        resultReceiver_.append(odid + "\n");
+    } else if (result == ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST) {
+        resultReceiver_.append(STRING_GET_ODID_NG + "Please enter a valid uid\n");
+    } else {
+        resultReceiver_.append(STRING_GET_ODID_NG + "errCode is "+ std::to_string(result) + "\n");
     }
     return result;
 }
