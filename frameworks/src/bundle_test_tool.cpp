@@ -162,7 +162,8 @@ static const std::string HELP_MSG =
     "  queryDataGroupInfos              obtain the data group infos of the application\n"
     "  getGroupDir                      obtain the data group dir path by data group id\n"
     "  getJsonProfile                   obtain the json string of the specified module\n"
-    "  getOdid                          obtain the odid of the application\n";
+    "  getOdid                          obtain the odid of the application\n"
+    "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -500,6 +501,11 @@ const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
 const std::string HELP_MSG_NO_GET_UNINSTALLED_BUNDLE_INFO_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
 
+const std::string HELP_MSG_NO_IMPLICIT_QUERY_SKILL_URI_INFO =
+    "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
+    "and a action with '-a' or '--action' \n"
+    "and a entity with '-e' or '--entity' \n";
+
 const std::string HELP_MSG_GET_ODID =
     "usage: bundle_test_tool getOdid <options>\n"
     "eg:bundle_test_tool getOdid -u <uid>\n"
@@ -560,6 +566,9 @@ const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleI
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
+
+const std::string STRING_IMPLICIT_QUERY_SKILL_URI_INFO_NG =
+    "implicitQuerySkillUriInfo failed\n";
 
 const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
     "error: you must specify a control type with '-n' or '--network-id' \n"
@@ -738,6 +747,15 @@ const struct option LONG_OPTIONS_GET_ODID[] = {
     {"help", no_argument, nullptr, 'h'},
     {"uid", required_argument, nullptr, 'u'},
 };
+
+const std::string SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO = "hn:a:e:";
+const struct option LONG_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"action", required_argument, nullptr, 'n'},
+    {"entity", required_argument, nullptr, 'n'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -804,7 +822,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getGroupDir", std::bind(&BundleTestTool::RunAsGetGroupDir, this)},
         {"getJsonProfile", std::bind(&BundleTestTool::RunAsGetJsonProfile, this)},
         {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)},
-        {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)}
+        {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)},
+        {"implicitQuerySkillUriInfo",
+            std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)}
     };
 
     return OHOS::ERR_OK;
@@ -3884,6 +3904,117 @@ ErrCode BundleTestTool::RunAsGetOdid()
         resultReceiver_.append(STRING_GET_ODID_NG + "Please enter a valid uid\n");
     } else {
         resultReceiver_.append(STRING_GET_ODID_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::CheckImplicitQueryWantOption(int option, std::string &value)
+{
+    ErrCode result = OHOS::ERR_OK;
+    switch (option) {
+        case 'n': {
+            value = optarg;
+            break;
+        }
+        case 'a': {
+            value = optarg;
+            break;
+        }
+        case 'e': {
+            value = optarg;
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            resultReceiver_.append(unknownOptionMsg);
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::ImplicitQuerySkillUriInfo(const std::string &bundleName,
+    const std::string &action, const std::string &entity, std::string &msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    AAFwk::Want want;
+    want.SetAction(action);
+    want.AddEntity(entity);
+    ElementName elementName("", bundleName, "", "");
+    want.SetElement(elementName);
+
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    std::vector<AbilityInfo> abilityInfos;
+    int32_t flags = static_cast<int32_t>(GetAbilityInfoFlag::GET_ABILITY_INFO_WITH_SKILL_URI);
+    ErrCode res = bundleMgrProxy_->QueryAbilityInfosV9(want, flags, userId, abilityInfos);
+    if (res != OHOS::ERR_OK) {
+        return res;
+    }
+    for (auto &ability: abilityInfos) {
+        for (auto &uri: ability.skillUri) {
+            msg += "{\n";
+            msg += "    scheme: " + uri.scheme + "\n";
+            msg += "    host: " + uri.host + "\n";
+            msg += "    port: " + uri.port + "\n";
+            msg += "    path: " + uri.path + "\n";
+            msg += "    pathStartWith: " + uri.pathStartWith + "\n";
+            msg += "    pathRegex: " + uri.pathRegex + "\n";
+            msg += "    type: " + uri.type + "\n";
+            msg += "    type: " + uri.type + "\n";
+            msg += "    maxFileSupported: " + std::to_string(uri.maxFileSupported) + "\n";
+            msg += "    linkFeature: " + uri.linkFeature + "\n";
+            msg += "}\n";
+        }
+    }
+    return res;
+}
+
+ErrCode BundleTestTool::RunAsImplicitQuerySkillUriInfo()
+{
+    APP_LOGI("RunAsGetAbilityInfoWithSkillUriFlag start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string bundleName = "";
+    std::string action = "";
+    std::string entity = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO.c_str(),
+            LONG_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_NO_IMPLICIT_QUERY_SKILL_URI_INFO);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        std::string value = "";
+        result = CheckImplicitQueryWantOption(option, value);
+        bundleName = option == 'n' ? value : bundleName;
+        action = option == 'a' ? value : action;
+        entity = option == 'e' ? value : entity;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_NO_IMPLICIT_QUERY_SKILL_URI_INFO);
+    } else {
+        std::string msg;
+        result = ImplicitQuerySkillUriInfo(bundleName, action, entity, msg);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_IMPLICIT_QUERY_SKILL_URI_INFO_NG);
+        } else {
+            resultReceiver_.append(msg);
+        }
+        resultReceiver_.append("\n");
     }
     return result;
 }

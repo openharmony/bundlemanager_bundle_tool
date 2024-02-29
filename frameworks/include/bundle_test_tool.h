@@ -88,6 +88,10 @@ private:
     ErrCode RunAsGetJsonProfile();
     ErrCode RunAsGetUninstalledBundleInfo();
     ErrCode RunAsGetOdid();
+    ErrCode CheckImplicitQueryWantOption(int option, std::string &value);
+    ErrCode ImplicitQuerySkillUriInfo(const std::string &bundleName,
+        const std::string &action, const std::string &entity, std::string &msg);
+    ErrCode RunAsImplicitQuerySkillUriInfo();
 
     std::condition_variable cv_;
     std::mutex mutex_;
