@@ -79,6 +79,8 @@ ohos_source_set("tools_bm_source_set") {
 ohos_executable("bm") {
   deps = [ ":tools_bm_source_set" ]
 
+  external_deps = [ "hilog:libhilog" ]
+
   install_enable = true
 
   subsystem_name = "bundlemanager"
@@ -144,6 +146,8 @@ ohos_executable("bundle_test_tool") {
   deps = [ ":tools_test_bm_source_set" ]
 
   install_enable = false
+
+  external_deps = [ "hilog:libhilog" ]
 
   subsystem_name = "bundlemanager"
   part_name = "bundle_tool"
