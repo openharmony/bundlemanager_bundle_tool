@@ -31,9 +31,6 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
                              "  install      install a bundle with options\n"
                              "  uninstall    uninstall a bundle with options\n"
                              "  dump         dump the bundle info\n"
-                             "  clean        clean the bundle data\n"
-                             "  enable       enable the bundle\n"
-                             "  disable      disable the bundle\n"
                              "  get          obtain device udid\n"
                              "  quickfix     quick fix, including query and install\n"
                              "  compile      Compile the software package\n"
@@ -42,19 +39,10 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"
                              "  dump-shared dump inter-application shared library information by bundle name\n";
 
-const std::string HELP_MSG_USER_MODE = "usage: bm <command> <options>\n"
-                             "These are common bm commands list:\n"
-                             "  help         list available commands\n"
-                             "  install      install a bundle with options\n"
-                             "  uninstall    uninstall a bundle with options\n"
-                             "  dump         dump the bundle info\n"
-                             "  get          obtain device udid\n"
-                             "  quickfix     quick fix, including query and install\n"
-                             "  compile      Compile the software package\n"
-                             "  dump-overlay dump overlay info of the specific overlay bundle\n"
-                             "  dump-target-overlay dump overlay info of the specific target bundle\n"
-                             "  dump-dependencies dump dependencies by given bundle name and module name\n"
-                             "  dump-shared dump inter-application shared library information by bundle name\n";
+const std::string ENABLE_DISABLE_HELP_MSG = "  enable       enable the bundle\n"
+                                            "  disable      disable the bundle\n";
+
+const std::string CLEAN_HELP_MSG = "  clean        clean the bundle data\n";
 
 const std::string HELP_MSG_COMPILE =
     "usage: bm compile [-m mode] [-r reset] (bundle-name | -a)\n"

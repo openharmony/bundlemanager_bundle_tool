@@ -31,6 +31,7 @@
 #include "json_serializer.h"
 #include "nlohmann/json.hpp"
 #include "parameter.h"
+#include "parameters.h"
 #include "quick_fix_command.h"
 #include "status_receiver_impl.h"
 #include "string_ex.h"
@@ -46,6 +47,7 @@ const std::string OVERLAY_MODULE_INFO = "overlayModuleInfo";
 const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
 const std::string DEPENDENCIES = "dependencies";
 const char* IS_ROOT_MODE_PARAM = "const.debuggable";
+const std::string IS_DEVELOPER_MODE_PARAM = "const.security.developermode.state";
 const int32_t ROOT_MODE = 1;
 const int32_t INDEX_OFFSET = 2;
 const int32_t MAX_WAITING_TIME = 3000;
@@ -236,12 +238,18 @@ ErrCode BundleManagerShellCommand::Init()
 
 ErrCode BundleManagerShellCommand::RunAsHelpCommand()
 {
-    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, false);
+    resultReceiver_.append(HELP_MSG);
+
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
     APP_LOGD("current mode is: %{public}d", mode);
     if (mode == ROOT_MODE) {
-        resultReceiver_.append(HELP_MSG);
-    } else {
-        resultReceiver_.append(HELP_MSG_USER_MODE);
+        resultReceiver_.append(ENABLE_DISABLE_HELP_MSG);
+    }
+
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    APP_LOGD("current developer mode is: %{public}d", isDeveloperMode);
+    if (mode == ROOT_MODE || isDeveloperMode) {
+        resultReceiver_.append(CLEAN_HELP_MSG);
     }
 
     return OHOS::ERR_OK;
@@ -941,8 +949,10 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
 
 ErrCode BundleManagerShellCommand::RunAsCleanCommand()
 {
-    if (!GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
-        APP_LOGD("in user mode");
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode != ROOT_MODE && !isDeveloperMode) {
+        APP_LOGD("in user mode but not in developer mode");
         return ERR_OK;
     }
 
@@ -1094,7 +1104,8 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
 
 ErrCode BundleManagerShellCommand::RunAsEnableCommand()
 {
-    if (!GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode != ROOT_MODE) {
         APP_LOGD("in user mode");
         return ERR_OK;
     }
@@ -1233,7 +1244,8 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
 
 ErrCode BundleManagerShellCommand::RunAsDisableCommand()
 {
-    if (!GetIntParameter(IS_ROOT_MODE_PARAM, false)) {
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode != ROOT_MODE) {
         APP_LOGD("in user mode");
         return ERR_OK;
     }
