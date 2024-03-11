@@ -3965,9 +3965,10 @@ ErrCode BundleTestTool::ImplicitQuerySkillUriInfo(const std::string &bundleName,
             msg += "    pathStartWith: " + uri.pathStartWith + "\n";
             msg += "    pathRegex: " + uri.pathRegex + "\n";
             msg += "    type: " + uri.type + "\n";
-            msg += "    type: " + uri.type + "\n";
+            msg += "    utd: " + uri.utd + "\n";
             msg += "    maxFileSupported: " + std::to_string(uri.maxFileSupported) + "\n";
             msg += "    linkFeature: " + uri.linkFeature + "\n";
+            msg += "    isMatch: " + std::to_string(uri.isMatch) + "\n";
             msg += "}\n";
         }
     }
