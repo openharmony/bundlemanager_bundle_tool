@@ -23,12 +23,20 @@
 #include "iremote_object.h"
 #include "mock_bundle_installer_host.h"
 #include "mock_bundle_mgr_host.h"
+#include "parameter.h"
+#include "parameters.h"
 
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
+namespace {
+    const char* IS_ROOT_MODE_PARAM = "const.debuggable";
+    const std::string IS_DEVELOPER_MODE_PARAM = "const.security.developermode.state";
+    const int32_t ROOT_MODE = 1;
+}
+
 class BmCommandTest : public ::testing::Test {
 public:
     static void SetUpTestCase();
@@ -100,8 +108,19 @@ HWTEST_F(BmCommandTest, Bm_Command_0001, Function | MediumTest | Level1)
 
     // set the mock objects
     SetMockObjects(cmd);
+    
+    std::string message;
+    message += HELP_MSG;
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode == ROOT_MODE) {
+        message += ENABLE_DISABLE_HELP_MSG;
+    }
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode == ROOT_MODE || isDeveloperMode) {
+        message += CLEAN_HELP_MSG;
+    }
 
-    EXPECT_EQ(cmd.ExecCommand(), HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), message);
 }
 
 /**
@@ -123,7 +142,18 @@ HWTEST_F(BmCommandTest, Bm_Command_0002, Function | MediumTest | Level1)
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), cmd.GetCommandErrorMsg() + HELP_MSG);
+    std::string message;
+    message += HELP_MSG;
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode == ROOT_MODE) {
+        message += ENABLE_DISABLE_HELP_MSG;
+    }
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode == ROOT_MODE || isDeveloperMode) {
+        message += CLEAN_HELP_MSG;
+    }
+
+    EXPECT_EQ(cmd.ExecCommand(), cmd.GetCommandErrorMsg() + message);
 }
 
 /**
@@ -145,7 +175,18 @@ HWTEST_F(BmCommandTest, Bm_Command_0003, Function | MediumTest | Level1)
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), cmd.GetCommandErrorMsg() + HELP_MSG);
+    std::string message;
+    message += HELP_MSG;
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode == ROOT_MODE) {
+        message += ENABLE_DISABLE_HELP_MSG;
+    }
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode == ROOT_MODE || isDeveloperMode) {
+        message += CLEAN_HELP_MSG;
+    }
+
+    EXPECT_EQ(cmd.ExecCommand(), cmd.GetCommandErrorMsg() + message);
 }
 
 /**
@@ -167,7 +208,18 @@ HWTEST_F(BmCommandTest, Bm_Command_0004, Function | MediumTest | Level1)
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), cmd.GetCommandErrorMsg() + HELP_MSG);
+    std::string message;
+    message += HELP_MSG;
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode == ROOT_MODE) {
+        message += ENABLE_DISABLE_HELP_MSG;
+    }
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode == ROOT_MODE || isDeveloperMode) {
+        message += CLEAN_HELP_MSG;
+    }
+
+    EXPECT_EQ(cmd.ExecCommand(), cmd.GetCommandErrorMsg() + message);
 }
 
 /**
@@ -189,7 +241,18 @@ HWTEST_F(BmCommandTest, Bm_Command_0005, Function | MediumTest | Level1)
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), HELP_MSG);
+    std::string message;
+    message += HELP_MSG;
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    if (mode == ROOT_MODE) {
+        message += ENABLE_DISABLE_HELP_MSG;
+    }
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode == ROOT_MODE || isDeveloperMode) {
+        message += CLEAN_HELP_MSG;
+    }
+
+    EXPECT_EQ(cmd.ExecCommand(), message);
 }
 
 /**
