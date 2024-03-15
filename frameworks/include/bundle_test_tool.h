@@ -90,7 +90,8 @@ private:
     ErrCode RunAsGetOdid();
     ErrCode CheckImplicitQueryWantOption(int option, std::string &value);
     ErrCode ImplicitQuerySkillUriInfo(const std::string &bundleName,
-        const std::string &action, const std::string &entity, std::string &msg);
+        const std::string &action, const std::string &entity, const std::string &uri,
+        const std::string &type, std::string &msg);
     ErrCode RunAsImplicitQuerySkillUriInfo();
 
     std::condition_variable cv_;

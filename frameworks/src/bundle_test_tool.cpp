@@ -748,12 +748,14 @@ const struct option LONG_OPTIONS_GET_ODID[] = {
     {"uid", required_argument, nullptr, 'u'},
 };
 
-const std::string SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO = "hn:a:e:";
+const std::string SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO = "hn:a:e:u:t:";
 const struct option LONG_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
-    {"action", required_argument, nullptr, 'n'},
-    {"entity", required_argument, nullptr, 'n'},
+    {"action", required_argument, nullptr, 'a'},
+    {"entity", required_argument, nullptr, 'e'},
+    {"uri", required_argument, nullptr, 'u'},
+    {"type", required_argument, nullptr, 't'},
     {nullptr, 0, nullptr, 0},
 };
 }  // namespace
@@ -3924,6 +3926,14 @@ ErrCode BundleTestTool::CheckImplicitQueryWantOption(int option, std::string &va
             value = optarg;
             break;
         }
+        case 'u': {
+            value = optarg;
+            break;
+        }
+        case 't': {
+            value = optarg;
+            break;
+        }
         default: {
             std::string unknownOption = "";
             std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
@@ -3936,7 +3946,8 @@ ErrCode BundleTestTool::CheckImplicitQueryWantOption(int option, std::string &va
 }
 
 ErrCode BundleTestTool::ImplicitQuerySkillUriInfo(const std::string &bundleName,
-    const std::string &action, const std::string &entity, std::string &msg)
+    const std::string &action, const std::string &entity, const std::string &uri,
+    const std::string &type, std::string &msg)
 {
     if (bundleMgrProxy_ == nullptr) {
         APP_LOGE("bundleMgrProxy_ is nullptr");
@@ -3947,6 +3958,8 @@ ErrCode BundleTestTool::ImplicitQuerySkillUriInfo(const std::string &bundleName,
     want.AddEntity(entity);
     ElementName elementName("", bundleName, "", "");
     want.SetElement(elementName);
+    want.SetUri(uri);
+    want.SetType(type);
 
     int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     std::vector<AbilityInfo> abilityInfos;
@@ -3956,6 +3969,7 @@ ErrCode BundleTestTool::ImplicitQuerySkillUriInfo(const std::string &bundleName,
         return res;
     }
     for (auto &ability: abilityInfos) {
+        msg += "Ability start\n";
         for (auto &uri: ability.skillUri) {
             msg += "{\n";
             msg += "    scheme: " + uri.scheme + "\n";
@@ -3971,6 +3985,7 @@ ErrCode BundleTestTool::ImplicitQuerySkillUriInfo(const std::string &bundleName,
             msg += "    isMatch: " + std::to_string(uri.isMatch) + "\n";
             msg += "}\n";
         }
+        msg += "Ability end\n";
     }
     return res;
 }
@@ -3983,6 +3998,8 @@ ErrCode BundleTestTool::RunAsImplicitQuerySkillUriInfo()
     std::string bundleName = "";
     std::string action = "";
     std::string entity = "";
+    std::string uri = "";
+    std::string type = "";
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO.c_str(),
@@ -4003,13 +4020,16 @@ ErrCode BundleTestTool::RunAsImplicitQuerySkillUriInfo()
         bundleName = option == 'n' ? value : bundleName;
         action = option == 'a' ? value : action;
         entity = option == 'e' ? value : entity;
+        uri = option == 'u' ? value : uri;
+        type = option == 't' ? value : type;
     }
-
+    APP_LOGI("bundleName: %{public}s, action: %{public}s, entity: %{public}s, uri: %{public}s, type: %{public}s",
+        bundleName.c_str(), action.c_str(), entity.c_str(), uri.c_str(), type.c_str());
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_NO_IMPLICIT_QUERY_SKILL_URI_INFO);
     } else {
         std::string msg;
-        result = ImplicitQuerySkillUriInfo(bundleName, action, entity, msg);
+        result = ImplicitQuerySkillUriInfo(bundleName, action, entity, uri, type, msg);
         if (result != OHOS::ERR_OK) {
             resultReceiver_.append(STRING_IMPLICIT_QUERY_SKILL_URI_INFO_NG);
         } else {
