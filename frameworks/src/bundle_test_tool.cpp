@@ -3876,7 +3876,6 @@ ErrCode BundleTestTool::RunAsGetUninstalledBundleInfo()
 
 ErrCode BundleTestTool::RunAsGetOdid()
 {
-    int result = OHOS::ERR_OK;
     std::string commandName = "getOdid";
     int uid = Constants::INVALID_UID;
     int opt = 0;
@@ -3897,7 +3896,7 @@ ErrCode BundleTestTool::RunAsGetOdid()
     }
     std::string odid;
     setuid(uid);
-    result = bundleMgrProxy_->GetOdid(odid);
+    auto result = bundleMgrProxy_->GetOdid(odid);
     setuid(Constants::ROOT_UID);
     if (result == ERR_OK) {
         resultReceiver_.append(STRING_GET_ODID_OK);
