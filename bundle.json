@@ -28,7 +28,8 @@
                 "init",
                 "ipc",
                 "os_account",
-                "samgr"
+                "samgr",
+                "json"
             ],
             "third_party": [
                 "json",
