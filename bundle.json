@@ -29,7 +29,8 @@
                 "ipc",
                 "os_account",
                 "samgr",
-                "json"
+                "json",
+                "jsoncpp"
             ],
             "third_party": [
                 "json",
