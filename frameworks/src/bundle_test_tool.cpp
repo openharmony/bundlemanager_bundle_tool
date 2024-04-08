@@ -110,6 +110,8 @@ const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_INVALID_TARGET_DIR = "error: i
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_CREATE_TARGET_DIR_FAILED = "error: create target dir failed.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_PERMISSION_DENIED = "error: quick fix permission denied.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_WRITE_FILE_FAILED = "error: write file to target dir failed.\n";
+const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_RELEASE_HAP_HAS_RESOURCES_FILE_FAILED =
+    "error: the hqf of release hap cannot contains resources/rawfile.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_SET_DEBUG_MODE_INVALID_PARAM =
     "error: invalid param for setting debug mode.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_SET_DEBUG_MODE_INTERNAL_ERROR =
@@ -923,7 +925,9 @@ void BundleTestTool::CreateQuickFixMsgMap(std::unordered_map<int32_t, std::strin
         { ERR_BUNDLEMANAGER_QUICK_FIX_CREATE_PATCH_PATH_FAILED,
             MSG_ERR_BUNDLEMANAGER_QUICK_FIX_CREATE_PATCH_PATH_FAILED },
         { ERR_BUNDLEMANAGER_QUICK_FIX_OLD_PATCH_OR_HOT_RELOAD_IN_DB,
-            MSG_ERR_BUNDLEMANAGER_QUICK_FIX_OLD_PATCH_OR_HOT_RELOAD_IN_DB }
+            MSG_ERR_BUNDLEMANAGER_QUICK_FIX_OLD_PATCH_OR_HOT_RELOAD_IN_DB },
+        { ERR_BUNDLEMANAGER_QUICK_FIX_RELEASE_HAP_HAS_RESOURCES_FILE_FAILED,
+            MSG_ERR_BUNDLEMANAGER_QUICK_FIX_RELEASE_HAP_HAS_RESOURCES_FILE_FAILED }
     };
 }
 
