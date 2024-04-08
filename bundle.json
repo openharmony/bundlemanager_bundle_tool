@@ -32,10 +32,7 @@
                 "json",
                 "jsoncpp"
             ],
-            "third_party": [
-                "json",
-                "jsoncpp"
-            ]
+            "third_party": []
         },
         "build": {
             "sub_component": [
