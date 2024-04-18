@@ -93,6 +93,7 @@ private:
         const std::string &action, const std::string &entity, const std::string &uri,
         const std::string &type, std::string &msg);
     ErrCode RunAsImplicitQuerySkillUriInfo();
+    ErrCode RunAsQueryAbilityInfoByContinueType();
 
     std::condition_variable cv_;
     std::mutex mutex_;

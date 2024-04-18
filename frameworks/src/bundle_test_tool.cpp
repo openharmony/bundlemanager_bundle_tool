@@ -165,7 +165,8 @@ static const std::string HELP_MSG =
     "  getGroupDir                      obtain the data group dir path by data group id\n"
     "  getJsonProfile                   obtain the json string of the specified module\n"
     "  getOdid                          obtain the odid of the application\n"
-    "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n";
+    "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
+    "  queryAbilityInfoByContinueType   get ability info by continue type\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -515,6 +516,11 @@ const std::string HELP_MSG_GET_ODID =
     "  -h, --help               list available commands\n"
     "  -u, --uid  <uid>         specify uid of the application\n";
 
+const std::string HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE =
+    "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
+    "and a continueType with '-c' or '--continue-type' \n"
+    "and a userId with '-u' or '--user-id' \n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -571,6 +577,9 @@ const std::string STRING_GET_ODID_NG = "getOdid failed\n";
 
 const std::string STRING_IMPLICIT_QUERY_SKILL_URI_INFO_NG =
     "implicitQuerySkillUriInfo failed\n";
+
+const std::string STRING_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE_NG =
+    "queryAbilityInfoByContinueType failed\n";
 
 const std::string HELP_MSG_NO_GET_DISTRIBUTED_BUNDLE_NAME_OPTION =
     "error: you must specify a control type with '-n' or '--network-id' \n"
@@ -760,6 +769,15 @@ const struct option LONG_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO[] = {
     {"type", required_argument, nullptr, 't'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE = "hn:c:u:";
+const struct option LONG_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"continueType", required_argument, nullptr, 'c'},
+    {"userId", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -828,7 +846,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)},
         {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)},
         {"implicitQuerySkillUriInfo",
-            std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)}
+            std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
+        {"queryAbilityInfoByContinueType",
+            std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)}
     };
 
     return OHOS::ERR_OK;
@@ -1544,6 +1564,12 @@ bool BundleTestTool::CheckGetStringCorrectOption(
         case 'm': {
             name = optarg;
             APP_LOGD("bundle_test_tool %{public}s -m module-name:%{public}s, %{public}s",
+                commandName.c_str(), name.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'c': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -m continue-type:%{public}s, %{public}s",
                 commandName.c_str(), name.c_str(), argv_[optind - 1]);
             break;
         }
@@ -4038,6 +4064,56 @@ ErrCode BundleTestTool::RunAsImplicitQuerySkillUriInfo()
         } else {
             resultReceiver_.append(msg);
         }
+        resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsQueryAbilityInfoByContinueType()
+{
+    APP_LOGI("RunAsQueryAbilityInfoByContinueType start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "queryAbilityInfoByContinueType";
+    std::string name = "";
+    std::string bundleName = "";
+    std::string continueType = "";
+    int userId = 100;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE.c_str(),
+            LONG_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        bundleName = option == 'n' ? name : bundleName;
+        continueType = option == 'c' ? name : continueType;
+        userId = option == 'u' ? temp : userId;
+    }
+    APP_LOGI("bundleName: %{public}s, continueType: %{public}s, userId: %{public}d",
+        bundleName.c_str(), continueType.c_str(), userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE);
+    } else {
+        AbilityInfo abilityInfo;
+        result = bundleMgrProxy_->QueryAbilityInfoByContinueType(bundleName, continueType, abilityInfo, userId);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE_NG);
+        }
+        nlohmann::json jsonObject = abilityInfo;
+        std::string results = jsonObject.dump(Constants::DUMP_INDENT);
+        resultReceiver_.append(results);
         resultReceiver_.append("\n");
     }
     return result;
