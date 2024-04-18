@@ -25,6 +25,8 @@ foundation/bundlemanager/bundle_tool
 | disable | 禁用命令，用来禁用应用 |
 | get | 获取udid命令，用来获取设备的udid |
 | quickfix | 快速修复相关命令，用来执行补丁相关操作，如补丁安装、补丁查询 |
+| compile | 应用执行编译AOT命令 |
+| copy-ap | 把应用的ap文件拷贝到/data/local/pgo目录下，供shell用户读取文件 |
 | dump-dependencies | 查询应用依赖的模块信息 |
 | dump-shared | 查询应用间HSP应用信息 |
 | dump-overlay | 打印overlay应用的的overlayModuleInfo |
@@ -185,6 +187,34 @@ bm get -u
 ```Bash
 # 根据包名查询补丁包信息
 bm quickfix -q -b <bundle-name>
+```
+
+#### 应用编译AOT命令
+| 命令       | 描述                       |
+| ---------- | -------------------------- |
+| bm compile -h | 显示compile支持的命令信息 |
+| bm compile -m partial <bundle-name> | 根据包名编译应用 |
+| bm compile -m partial -a | 编译所有应用 |
+| bm compile -r -a | 移除所有编译应用的结果 |
+| bm compile -r <bundle-name> | 移除应用的结果 |
+
+* 示例
+```Bash
+# 根据包名编译应用
+bm compile -m partial <bundle-name>
+```
+
+#### 拷贝ap文件到/data/local/pgo路径
+| 命令       | 描述                       |
+| ---------- | -------------------------- |
+| bm copy-ap -h | 显示copy-ap支持的命令信息 |
+| bm copy-ap -a | 拷贝所有包相关ap文件 |
+| bm copy-ap -n <bundle-name> | 根据包名拷贝对应包相关的ap文件 |
+
+* 示例
+```Bash
+# 根据包名移动对应包相关的ap文件
+bm copy-ap -n <bundle-name>
 ```
 
 #### 获取overlay应用的Overlay信息命令

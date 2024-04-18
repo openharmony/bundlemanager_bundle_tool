@@ -34,6 +34,7 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
                              "  get          obtain device udid\n"
                              "  quickfix     quick fix, including query and install\n"
                              "  compile      Compile the software package\n"
+                             "  copy-ap      Copy software ap file to /data/local/pgo\n"
                              "  dump-overlay dump overlay info of the specific overlay bundle\n"
                              "  dump-target-overlay dump overlay info of the specific target bundle\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"
@@ -51,6 +52,13 @@ const std::string HELP_MSG_COMPILE =
     "  -m, --mode <mode-name>               select partial or full mode.\n"
     "  -r, --reset                          clear bundle configuration file data.\n"
     "  -a, --all                            compile or reset all software packages.\n";
+
+const std::string HELP_MSG_COPY_AP =
+    "usage: bm copy-ap (bundle-name | -a)\n"
+    "options list:\n"
+    "  -h, --help                           list available commands.\n"
+    "  -n, --bundle-name <bundle-name>      copy ap by bundle name\n"
+    "  -a, --all                            copy all software packages.\n";
 
 const std::string HELP_MSG_INSTALL =
     "usage: bm install <options>\n"
@@ -244,6 +252,9 @@ private:
     ErrCode RunAsDumpSharedDependenciesCommand();
     ErrCode RunAsDumpSharedCommand();
     ErrCode RunAsCompileCommand();
+    ErrCode RunAsCopyApCommand();
+
+    std::string CopyAp(const std::string &bundleName, bool isAllBundle) const;
 
     std::string CompileProcessAot(
         const std::string &bundleName, const std::string &compileMode, bool isAllBundle) const;
@@ -278,6 +289,7 @@ private:
     std::string DumpTargetOverlayInfo(const std::string &bundleName, const std::string &moduleName, int32_t userId);
     ErrCode ParseSharedDependenciesCommand(int32_t option, std::string &bundleName, std::string &moduleName);
     ErrCode ParseSharedCommand(int32_t option, std::string &bundleName, bool &dumpSharedAll);
+    ErrCode ParseCopyApCommand(int32_t option, std::string &bundleName, bool &isAllBundle);
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
