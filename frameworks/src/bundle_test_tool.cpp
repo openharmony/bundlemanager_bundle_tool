@@ -4110,10 +4110,11 @@ ErrCode BundleTestTool::RunAsQueryAbilityInfoByContinueType()
         result = bundleMgrProxy_->QueryAbilityInfoByContinueType(bundleName, continueType, abilityInfo, userId);
         if (result != OHOS::ERR_OK) {
             resultReceiver_.append(STRING_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE_NG);
+        } else {
+            nlohmann::json jsonObject = abilityInfo;
+            std::string results = jsonObject.dump(Constants::DUMP_INDENT);
+            resultReceiver_.append(results);
         }
-        nlohmann::json jsonObject = abilityInfo;
-        std::string results = jsonObject.dump(Constants::DUMP_INDENT);
-        resultReceiver_.append(results);
         resultReceiver_.append("\n");
     }
     return result;
