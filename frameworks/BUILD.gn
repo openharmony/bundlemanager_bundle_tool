@@ -63,6 +63,12 @@ ohos_source_set("tools_bm_source_set") {
     "samgr:samgr_proxy",
   ]
 
+  public_external_deps = [
+    "bundle_framework:bundle_napi_common",
+    "bundle_framework:libappexecfwk_common",
+    "json:nlohmann_json_static",
+  ]
+
   defines = []
   if (account_enable_bm) {
     external_deps += [ "os_account:os_account_innerkits" ]
@@ -108,7 +114,7 @@ ohos_source_set("tools_test_bm_source_set") {
 
   use_exceptions = true
 
-  deps = [ "//third_party/jsoncpp:jsoncpp" ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
@@ -119,8 +125,15 @@ ohos_source_set("tools_test_bm_source_set") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
+  ]
+
+  public_external_deps = [
+    "bundle_framework:bundle_napi_common",
+    "bundle_framework:libappexecfwk_common",
+    "json:nlohmann_json_static",
   ]
 
   defines = []

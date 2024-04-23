@@ -28,12 +28,11 @@
                 "init",
                 "ipc",
                 "os_account",
-                "samgr"
-            ],
-            "third_party": [
+                "samgr",
                 "json",
                 "jsoncpp"
-            ]
+            ],
+            "third_party": []
         },
         "build": {
             "sub_component": [
