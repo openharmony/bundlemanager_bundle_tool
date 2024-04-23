@@ -44,9 +44,10 @@ void StatusReceiverImpl::OnFinished(const int32_t resultCode, const std::string 
     std::lock_guard<std::mutex> lock(setValueMutex_);
     if (!isSetValue) {
         isSetValue = true;
-        resultMsgSignal_.set_value(resultCode);
+        resultCodeSignal_.set_value(resultCode);
+        resultMsgSignal_.set_value(resultMsg);
     } else {
-        APP_LOGW("resultMsgSignal_ is set");
+        APP_LOGW("resultCodeSignal_ is set");
     }
 }
 
@@ -57,12 +58,22 @@ void StatusReceiverImpl::OnStatusNotify(const int progress)
 
 int32_t StatusReceiverImpl::GetResultCode() const
 {
-    auto future = resultMsgSignal_.get_future();
+    auto future = resultCodeSignal_.get_future();
     if (future.wait_for(std::chrono::seconds(waittingTime_)) == std::future_status::ready) {
         int32_t resultCode = future.get();
         return resultCode;
     }
     return ERR_OPERATION_TIME_OUT;
+}
+
+std::string StatusReceiverImpl::GetResultMsg() const
+{
+    auto future = resultMsgSignal_.get_future();
+    if (future.wait_for(std::chrono::seconds(waittingTime_)) == std::future_status::ready) {
+        std::string resultMsg = future.get();
+        return resultMsg;
+    }
+    return "";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

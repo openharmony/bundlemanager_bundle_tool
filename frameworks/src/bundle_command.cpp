@@ -565,12 +565,16 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         installParam.installFlag = installFlag;
         installParam.userId = userId;
         installParam.sharedBundleDirPaths = sharedBundleDirPaths;
-        int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime);
+        std::string resultMsg;
+        int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime, resultMsg);
         if (installResult == OHOS::ERR_OK) {
             resultReceiver_ = STRING_INSTALL_BUNDLE_OK + "\n";
         } else {
             resultReceiver_ = STRING_INSTALL_BUNDLE_NG + "\n";
             resultReceiver_.append(GetMessageFromCode(installResult));
+            if (!resultMsg.empty() && resultMsg[0] != '[') {
+                resultReceiver_.append(resultMsg + "\n");
+            }
         }
     }
     APP_LOGI("end");
@@ -1911,7 +1915,7 @@ void BundleManagerShellCommand::GetAbsPaths(
 }
 
 int32_t BundleManagerShellCommand::InstallOperation(const std::vector<std::string> &bundlePaths,
-    InstallParam &installParam, int32_t waittingTime) const
+    InstallParam &installParam, int32_t waittingTime, std::string &resultMsg) const
 {
     std::vector<std::string> pathVec;
     GetAbsPaths(bundlePaths, pathVec);
@@ -1934,6 +1938,7 @@ int32_t BundleManagerShellCommand::InstallOperation(const std::vector<std::strin
     ErrCode res = bundleInstallerProxy_->StreamInstall(pathVec, installParam, statusReceiver);
     APP_LOGD("StreamInstall result is %{public}d", res);
     if (res == ERR_OK) {
+        resultMsg = statusReceiver->GetResultMsg();
         return statusReceiver->GetResultCode();
     }
     if (res == ERR_APPEXECFWK_INSTALL_PARAM_ERROR) {
