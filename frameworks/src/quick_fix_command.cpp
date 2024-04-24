@@ -123,8 +123,7 @@ int32_t QuickFixCommand::GetApplyedQuickFixInfo(const std::string &bundleName, s
 
 std::string QuickFixCommand::GetQuickFixInfoString(const AAFwk::ApplicationQuickFixInfo &quickFixInfo)
 {
-    std::string info;
-    info = "ApplicationQuickFixInfo:\n";
+    std::string info = "ApplicationQuickFixInfo:\n";
     info.append("  bundle name: " + quickFixInfo.bundleName + "\n");
     info.append("  bundle version code: " + std::to_string(quickFixInfo.bundleVersionCode) + "\n");
     info.append("  bundle version name: " + quickFixInfo.bundleVersionName + "\n");
