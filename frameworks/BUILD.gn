@@ -18,9 +18,6 @@ config("tools_bm_config") {
   include_dirs = [
     "include",
     "include/bundle_tool_callback",
-    "${common_path}/log/include",
-    "${kits_path}/js/bundlemgr",
-    "//third_party/json/include",
   ]
 
   defines = [
