@@ -1537,8 +1537,10 @@ ErrCode BundleTestTool::StringToInt(
 {
     try {
         temp = std::stoi(optarg);
-        APP_LOGD("bundle_test_tool %{public}s -u user-id:%{public}d, %{public}s",
-            commandName.c_str(), temp, argv_[optind - 1]);
+        if (optind > 0 && optind <= argc_) {
+            APP_LOGD("bundle_test_tool %{public}s -u user-id:%{public}d, %{public}s",
+                commandName.c_str(), temp, argv_[optind - 1]);
+        }
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         result = false;
