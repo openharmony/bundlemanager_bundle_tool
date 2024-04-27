@@ -30,9 +30,11 @@ public:
     virtual void OnStatusNotify(const int progress) override;
     virtual void OnFinished(const int32_t resultCode, const std::string &resultMsg) override;
     int32_t GetResultCode() const;
+    std::string GetResultMsg() const;
 
 private:
-    mutable std::promise<int32_t> resultMsgSignal_;
+    mutable std::promise<int32_t> resultCodeSignal_;
+    mutable std::promise<std::string> resultMsgSignal_;
     int32_t waittingTime_;
     bool isSetValue = false;
     std::mutex setValueMutex_;

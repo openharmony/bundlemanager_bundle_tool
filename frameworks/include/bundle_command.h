@@ -259,7 +259,7 @@ private:
     std::string DumpSharedAll() const;
 
     int32_t InstallOperation(const std::vector<std::string> &bundlePaths, InstallParam &installParam,
-        int32_t waittingTime) const;
+        int32_t waittingTime, std::string &resultMsg) const;
     int32_t UninstallOperation(const std::string &bundleName, const std::string &moduleName,
                                InstallParam &installParam) const;
     int32_t UninstallSharedOperation(const UninstallParam &uninstallParam) const;
