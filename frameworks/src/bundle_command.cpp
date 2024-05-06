@@ -65,6 +65,14 @@ const struct option LONG_OPTIONS_COMPILE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_COPY_AP = "hn:a";
+const struct option LONG_OPTIONS_COPY_AP[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"all", no_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -200,6 +208,7 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"get", std::bind(&BundleManagerShellCommand::RunAsGetCommand, this)},
         {"quickfix", std::bind(&BundleManagerShellCommand::RunAsQuickFixCommand, this)},
         {"compile", std::bind(&BundleManagerShellCommand::RunAsCompileCommand, this)},
+        {"copy-ap", std::bind(&BundleManagerShellCommand::RunAsCopyApCommand, this)},
         {"dump-overlay", std::bind(&BundleManagerShellCommand::RunAsDumpOverlay, this)},
         {"dump-target-overlay", std::bind(&BundleManagerShellCommand::RunAsDumpTargetOverlay, this)},
         {"dump-dependencies", std::bind(&BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand, this)},
@@ -268,6 +277,102 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
         return true;
     }
     return false;
+}
+
+ErrCode BundleManagerShellCommand::RunAsCopyApCommand()
+{
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
+    bool isDeveloperMode = system::GetBoolParameter(IS_DEVELOPER_MODE_PARAM, false);
+    if (mode != ROOT_MODE && !isDeveloperMode) {
+        APP_LOGD("in user mode but not in developer mode");
+        return ERR_OK;
+    }
+    APP_LOGI("begin to RunAsCopyApCommand");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string bundleName = "";
+    bool isAllBundle = false;
+    int32_t option;
+    while ((option = getopt_long(argc_, argv_, SHORT_OPTIONS_COPY_AP.c_str(),
+        LONG_OPTIONS_COPY_AP, nullptr)) != -1) {
+        counter++;
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseCopyApCommand(option, bundleName, isAllBundle);
+        if (option == '?') {
+            break;
+        }
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_COPY_AP);
+    } else {
+        std::string copyApResult = "";
+        copyApResult = CopyAp(bundleName, isAllBundle);
+        if (copyApResult.empty() || (copyApResult == "")) {
+            copyApResult = "parameters may be wrong\n";
+        }
+        resultReceiver_.append(copyApResult);
+    }
+    APP_LOGI("end to RunAsCopyApCommand");
+    return result;
+}
+
+ErrCode BundleManagerShellCommand::ParseCopyApCommand(int32_t option, std::string &bundleName, bool &isAllBundle)
+{
+    int32_t result = OHOS::ERR_OK;
+    if (option == '?') {
+        switch (optopt) {
+            case 'n': {
+                // 'bm copy-ap -n' with no argument: bm copy-ap -n
+                // 'bm copy-ap --bundle-name' with no argument: bm copy-ap --bundle-name
+                APP_LOGD("'bm copy-ap -n' with no argument.");
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            default: {
+                // 'bm copy-ap' with an unknown option: bm copy-ap -x
+                // 'bm copy-ap' with an unknown option: bm copy-ap -xxx
+                std::string unknownOption = "";
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                APP_LOGE("'bm copy-ap' with an unknown option.");
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    } else {
+        switch (option) {
+            case 'h': {
+                // 'bm copy-ap -h'
+                // 'bm copy-ap --help'
+                APP_LOGD("'bm copy-ap %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'a': {
+                // 'bm copy-ap -a'
+                // 'bm copy-ap --all'
+                APP_LOGD("'bm copy-ap %{public}s'", argv_[optind - 1]);
+                isAllBundle = true;
+                break;
+            }
+            case 'n': {
+                // 'bm copy-ap -n xxx'
+                // 'bm copy-ap --bundle-name xxx'
+                APP_LOGD("'bm copy-ap %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
+                bundleName = optarg;
+                break;
+            }
+            default: {
+                APP_LOGD("'bm copy-ap %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    return result;
 }
 
 ErrCode BundleManagerShellCommand::RunAsCompileCommand()
@@ -1781,6 +1886,23 @@ std::string BundleManagerShellCommand::GetUdid() const
     }
     std::string udid = innerUdid;
     return udid;
+}
+
+std::string BundleManagerShellCommand::CopyAp(const std::string &bundleName, bool isAllBundle) const
+{
+    std::string result = "";
+    std::vector<std::string> copyApResults;
+    ErrCode ret = bundleMgrProxy_->CopyAp(bundleName, isAllBundle, copyApResults);
+    if (ret != ERR_OK) {
+        APP_LOGE("failed to copy ap! ret = = %{public}d.", ret);
+        return "";
+    }
+    for (const auto &copyApResult : copyApResults) {
+        result.append("\t");
+        result.append(copyApResult);
+        result.append("\n");
+    }
+    return result;
 }
 
 std::string BundleManagerShellCommand::CompileProcessAot(
