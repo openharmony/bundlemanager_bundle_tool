@@ -484,11 +484,11 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_DISALLOWED,
-        "error: disallowed install.",
+        "error: Failed to install the HAP because enterprise device management disallow install.",
     },
     {
         IStatusReceiver::ERR_UNINSTALL_DISALLOWED,
-        "error: disallowed uninstall.",
+        "error: Failed to uninstall the HAP because enterprise device management disallow uninstall.",
     },
     {
         IStatusReceiver::ERR_INSTALL_DEVICE_TYPE_NOT_SUPPORTED,
@@ -500,11 +500,11 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_DEPENDENT_MODULE_NOT_EXIST,
-        "error: dependent module does not exist.",
+        "error: Failed to install the HAP or HSP because the dependent module does not exist.",
     },
     {
         IStatusReceiver::ERR_INSTALL_SHARE_APP_LIBRARY_NOT_ALLOWED,
-        "error: disallowed to share library without AllowAppShareLibrary.",
+        "error: Failed to install the HSP due to the lack of required permission.",
     },
     {
         IStatusReceiver::ERR_INSTALL_COMPATIBLE_POLICY_NOT_SAME,
@@ -512,7 +512,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_FILE_IS_SHARED_LIBRARY,
-        "error: disallowed to install cross-app shared library.",
+        "error: Failed to install the HSP because disallow install a shared bundle by hapFilePaths.",
     },
     {
         IStatusReceiver::ERR_OVERLAY_INSTALLATION_FAILED_INTERNAL_ERROR,
@@ -612,7 +612,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_APPEXECFWK_UNINSTALL_SHARE_APP_LIBRARY_IS_RELIED,
-        "error: shared bundle is relied",
+        "error: The version of the shared bundle is dependent on other applications.",
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_URI_FAILED,
@@ -640,7 +640,8 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_ENTERPRISE_BUNDLE_NOT_ALLOWED,
-        "error: enterprise normal/mdm bundle cannot be installed on non-enterprise device",
+        "error: Failed to install the HAP because an enterprise normal/MDM bundle cannot be installed on \
+        non-enterprise device.",
     },
     {
         IStatusReceiver::ERR_INSTALLD_COPY_FILE_FAILED,
