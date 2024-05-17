@@ -484,11 +484,11 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_DISALLOWED,
-        "error: Failed to install the HAP because enterprise device management disallow install.",
+        "error: Failed to install the HAP because the installation is forbidden by enterprise device management.",
     },
     {
         IStatusReceiver::ERR_UNINSTALL_DISALLOWED,
-        "error: Failed to uninstall the HAP because enterprise device management disallow uninstall.",
+        "error: Failed to uninstall the HAP because the uninstall is forbidden by enterprise device management.",
     },
     {
         IStatusReceiver::ERR_INSTALL_DEVICE_TYPE_NOT_SUPPORTED,
@@ -512,7 +512,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_FILE_IS_SHARED_LIBRARY,
-        "error: Failed to install the HSP because disallow install a shared bundle by hapFilePaths.",
+        "error: Failed to install the HSP because installing a shared bundle specified by hapFilePaths is not allowed.",
     },
     {
         IStatusReceiver::ERR_OVERLAY_INSTALLATION_FAILED_INTERNAL_ERROR,
