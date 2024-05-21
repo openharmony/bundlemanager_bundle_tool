@@ -34,6 +34,7 @@ ohos_source_set("tools_bm_source_set") {
     "src/bundle_command_common.cpp",
     "src/main.cpp",
     "src/quick_fix_command.cpp",
+    "src/quick_fix_status_callback_host_impl.cpp",
     "src/shell_command.cpp",
     "src/status_receiver_impl.cpp",
   ]

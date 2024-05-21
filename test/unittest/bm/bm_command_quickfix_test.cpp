@@ -296,6 +296,56 @@ HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Apply_0700, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Bm_Command_QuickFix_Apply_0800
+ * @tc.desc: "bm quickfix --apply --file-path <bundle-direction> --target" test.
+ * @tc.type: FUNC
+ * @tc.require: issueI9R2WQ
+ */
+HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Apply_0800, TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("--apply"),
+        const_cast<char*>("--file-path"),
+        const_cast<char*>("/data/storage/el1/aa.hqf"),
+        const_cast<char*>("--target"),
+        const_cast<char*>("../mydir"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "apply quickfix failed with errno: 8520706.\n");
+}
+
+/**
+ * @tc.name: Bm_Command_QuickFix_Apply_0900
+ * @tc.desc: "bm quickfix --apply --file-path <bundle-direction>  --target" test.
+ * @tc.type: FUNC
+ * @tc.require: issueI9R2WQ
+ */
+HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Apply_0900, TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("--apply"),
+        const_cast<char*>("--file-path"),
+        const_cast<char*>("/data/storage/el1/aa.hqf"),
+        const_cast<char*>("--target"),
+        const_cast<char*>("mydir/subdir"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "apply quickfix failed with errno: 8520706.\n");
+}
+
+/**
  * @tc.name: Bm_Command_QuickFix_Query_0100
  * @tc.desc: "bm quickfix -q" test.
  * @tc.type: FUNC
@@ -537,6 +587,72 @@ HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Query_1200, TestSize.Level1)
         "cpu abi: \n  native library path: \n  type: hotreload\n  ModuelQuickFixInfo:\n    "
         "module name: step1\n    module sha256: step2\n    "
         "file path: step3\n");
+}
+
+/**
+ * @tc.name: Bm_Command_QuickFix_Remove_0001
+ * @tc.desc: "bm quickfix -r" test.
+ * @tc.type: FUNC
+ * @tc.require: issueI9R2WQ
+ */
+HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Remove_0001, TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("-r"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "error: option [--remove] is incorrect.\n" + HELP_MSG_QUICK_FIX);
+}
+
+/**
+ * @tc.name: Bm_Command_QuickFix_Remove_0002
+ * @tc.desc: "bm quickfix -r" test.
+ * @tc.type: FUNC
+ * @tc.require: issueI9R2WQ
+ */
+HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Remove_0002, TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("-r"),
+        const_cast<char*>("-b"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "error: option [--remove] is incorrect.\n" + HELP_MSG_QUICK_FIX);
+}
+
+/**
+ * @tc.name: Bm_Command_QuickFix_Remove_0003
+ * @tc.desc: "bm quickfix -r" test.
+ * @tc.type: FUNC
+ * @tc.require: issueI9R2WQ
+ */
+HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_Remove_0003, TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("-r"),
+        const_cast<char*>("-b"),
+        const_cast<char*>("com.test.bundle"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "delete quick fix successfully\n");
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -139,9 +139,11 @@ const std::string HELP_MSG_QUICK_FIX =
     "options list:\n"
     "-h, --help                                   list available commands\n"
     "-q, --query                                  indicates query quickfix, used with -b or --bundle-name\n"
+    "-r, --remove                                 indicates remove quickfix, used with -b or --bundle-name\n"
     "-b, --bundle-name <bundle-name>              query quickfix status and information by a specified bundle name\n"
     "-d, --debug                                  apply a quickfix debug mode\n"
     "-a, --apply                                  indicates apply quickfix, used with -f or --file-path\n"
+    "-t, --target <target-path>                   indicates a target path to apply quickfix\n"
     "-f, --file-path <file-path>                  apply a quickfix file by a specified path\n"
     "-f, --file-path <file-path> <file-path> ...  apply some quickfix files of one bundle\n"
     "-f, --file-path <bundle-direction>           apply quickfix files by direction, under which are quickfix files\n";
@@ -290,6 +292,9 @@ private:
     ErrCode ParseSharedDependenciesCommand(int32_t option, std::string &bundleName, std::string &moduleName);
     ErrCode ParseSharedCommand(int32_t option, std::string &bundleName, bool &dumpSharedAll);
     ErrCode ParseCopyApCommand(int32_t option, std::string &bundleName, bool &isAllBundle);
+    ErrCode DeployQuickFixDisable(const std::vector<std::string> &quickFixFiles,
+        std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug, const std::string &targetPath) const;
+    ErrCode DeleteQuickFix(const std::string &bundleName, std::shared_ptr<QuickFixResult> &quickFixRes) const;
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
