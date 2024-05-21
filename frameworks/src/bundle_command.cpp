@@ -1908,14 +1908,18 @@ std::string BundleManagerShellCommand::CopyAp(const std::string &bundleName, boo
 std::string BundleManagerShellCommand::CompileProcessAot(
     const std::string &bundleName, const std::string &compileMode, bool isAllBundle) const
 {
-    std::string CompileResults;
-    ErrCode CompileRet = bundleMgrProxy_->CompileProcessAOT(bundleName, compileMode, isAllBundle);
-    if (CompileRet == ERR_APPEXECFWK_PARCEL_ERROR) {
-        APP_LOGE("failed to compile AOT.");
-        return CompileResults;
+    std::vector<std::string> compileResults;
+    ErrCode CompileRet = bundleMgrProxy_->CompileProcessAOT(bundleName, compileMode, isAllBundle, compileResults);
+    if (CompileRet != ERR_OK) {
+        std::string result = "error: compile AOT:\n";
+        for (const auto &compileResult : compileResults) {
+            result.append("\t");
+            result.append(compileResult);
+            result.append("\n");
+        }
+        return result;
     }
-    CompileResults = COMPILE_SUCCESS_OK;
-    return CompileResults;
+    return COMPILE_SUCCESS_OK;
 }
 
 std::string BundleManagerShellCommand::CompileReset(const std::string &bundleName, bool isAllBundle) const
