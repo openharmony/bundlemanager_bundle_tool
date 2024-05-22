@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "app_log_wrapper.h"
 #include "bundle_command.h"
 
 int main(int argc, char *argv[])
 {
+    APP_LOGI("bm exec start");
     OHOS::AppExecFwk::BundleManagerShellCommand cmd(argc, argv);
     std::cout << cmd.ExecCommand();
+    APP_LOGI("bm exec end");
     quick_exit(0);
 }
