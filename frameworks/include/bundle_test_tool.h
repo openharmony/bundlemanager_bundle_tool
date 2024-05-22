@@ -94,6 +94,7 @@ private:
         const std::string &type, std::string &msg);
     ErrCode RunAsImplicitQuerySkillUriInfo();
     ErrCode RunAsQueryAbilityInfoByContinueType();
+    ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -139,6 +140,8 @@ private:
     ErrCode DumpSandboxBundleInfo(const std::string &bundleName, const int32_t appIndex, const int32_t userId,
         std::string &dumpResults);
     ErrCode StringToInt(std::string option, const std::string &commandName, int &temp, bool &result);
+    ErrCode StringToUnsignedLongLong(std::string optarg, const std::string &commandName,
+        uint64_t &temp, bool &result);
     ErrCode DeployQuickFix(const std::vector<std::string> &quickFixPaths,
         std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug);
     ErrCode SwitchQuickFix(const std::string &bundleName, int32_t enable,
@@ -162,6 +165,8 @@ private:
     ErrCode CheckGetGroupIdCorrectOption(int32_t option, std::string &dataGroupId);
     bool GetGroupDir(const std::string &dataGroupId, std::string& msg);
     ErrCode CheckGetBundleNameOption(int32_t option, std::string &bundleName);
+    ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
+        uint64_t &cacheSize);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
