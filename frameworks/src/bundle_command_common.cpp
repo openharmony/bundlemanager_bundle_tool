@@ -668,6 +668,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: remove sign profile failed",
     },
     {
+        IStatusReceiver::ERR_INSTALL_CODE_APP_CONTROLLED_FAILED,
+        "error: failed to install because the device be controlled",
+    },
+    {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
     }
