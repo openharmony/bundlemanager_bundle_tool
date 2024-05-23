@@ -88,6 +88,7 @@ private:
     ErrCode RunAsGetJsonProfile();
     ErrCode RunAsGetUninstalledBundleInfo();
     ErrCode RunAsGetOdid();
+    ErrCode RunGetUidByBundleName();
     ErrCode CheckImplicitQueryWantOption(int option, std::string &value);
     ErrCode ImplicitQuerySkillUriInfo(const std::string &bundleName,
         const std::string &action, const std::string &entity, const std::string &uri,
@@ -160,6 +161,7 @@ private:
     bool ParseResetAOTCompileStatusOptions(std::string &bundleName, std::string &moduleName,
         int32_t &triggerMode, int32_t &uid);
     void Sleep(int32_t seconds);
+    bool HandleUnknownOption(const std::string &commandName, bool &ret);
     ErrCode CallRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CallUnRegisterBundleEventCallback(sptr<BundleEventCallbackImpl> bundleEventCallback);
     ErrCode CheckGetGroupIdCorrectOption(int32_t option, std::string &dataGroupId);

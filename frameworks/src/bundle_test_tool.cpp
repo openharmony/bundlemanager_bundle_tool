@@ -165,6 +165,7 @@ static const std::string HELP_MSG =
     "  getGroupDir                      obtain the data group dir path by data group id\n"
     "  getJsonProfile                   obtain the json string of the specified module\n"
     "  getOdid                          obtain the odid of the application\n"
+    "  getUidByBundleName               obtain the uid string of the specified bundle\n"
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n";
@@ -506,6 +507,11 @@ const std::string HELP_MSG_GET_GROUP_DIR =
     "  -h, --help                             list available commands\n"
     "  -d, --data-group-id  <data-group-id>       specify bundle name of the application\n";
 
+const std::string HELP_MSG_NO_GET_UID_BY_BUNDLENAME =
+    "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
+    "and a userId with '-u' or '--user-id' \n"
+    "and a appIndex with '-a' or '--app-index' \n";
+
 const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
     "and a module name with '-m' or '--module-name' \n"
@@ -585,6 +591,8 @@ const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleI
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
+
+const std::string STRING_GET_UID_BY_BUNDLENAME_NG = "getUidByBundleName failed\n";
 
 const std::string STRING_IMPLICIT_QUERY_SKILL_URI_INFO_NG =
     "implicitQuerySkillUriInfo failed\n";
@@ -736,6 +744,15 @@ const struct option LONG_OPTIONS_ALL_PROXY_DATA[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_UID_BY_BUNDLENAME = "hn:u:a:";
+const struct option LONG_OPTIONS_GET_UID_BY_BUNDLENAME[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_MIME = "ha:e:m:n:t:";
 const struct option LONG_OPTIONS_MIME[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -863,6 +880,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getJsonProfile", std::bind(&BundleTestTool::RunAsGetJsonProfile, this)},
         {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)},
         {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)},
+        {"getUidByBundleName", std::bind(&BundleTestTool::RunGetUidByBundleName, this)},
         {"implicitQuerySkillUriInfo",
             std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
         {"queryAbilityInfoByContinueType",
@@ -1587,6 +1605,15 @@ ErrCode BundleTestTool::StringToUnsignedLongLong(
     return OHOS::ERR_OK;
 }
 
+bool BundleTestTool::HandleUnknownOption(const std::string &commandName, bool &ret)
+{
+    std::string unknownOption = "";
+    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+    APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+    resultReceiver_.append(unknownOptionMsg);
+    return ret = false;
+}
+
 bool BundleTestTool::CheckGetStringCorrectOption(
     int option, const std::string &commandName, int &temp, std::string &name)
 {
@@ -1618,6 +1645,10 @@ bool BundleTestTool::CheckGetStringCorrectOption(
             StringToInt(optarg, commandName, temp, ret);
             break;
         }
+        case 'a': {
+            StringToInt(optarg, commandName, temp, ret);
+            break;
+        }
         case 'p': {
             StringToInt(optarg, commandName, temp, ret);
             break;
@@ -1627,11 +1658,7 @@ bool BundleTestTool::CheckGetStringCorrectOption(
             break;
         }
         default: {
-            std::string unknownOption = "";
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
-            resultReceiver_.append(unknownOptionMsg);
-            ret = false;
+            HandleUnknownOption(commandName, ret);
             break;
         }
     }
@@ -3965,6 +3992,57 @@ ErrCode BundleTestTool::RunAsGetJsonProfile()
             return result;
         }
         resultReceiver_.append(results);
+        resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunGetUidByBundleName()
+{
+    APP_LOGI("RunGetUidByBundleName start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string name = "";
+    std::string commandName = "getUidByBundleName";
+    std::string bundleName = "";
+    int userId = 100;
+    int appIndex = 0;
+    APP_LOGD("RunGetIntCommand is start");
+    bool flag = true;
+    while (flag) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_UID_BY_BUNDLENAME.c_str(),
+            LONG_OPTIONS_GET_UID_BY_BUNDLENAME, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getUidByBundleName with no option.");
+                resultReceiver_.append(HELP_MSG_NO_GET_UID_BY_BUNDLENAME);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        bundleName = option == 'n' ? name : bundleName;
+        userId = option == 'u' ? temp : userId;
+        appIndex = option == 'a' ? temp : appIndex;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_NO_GET_UID_BY_BUNDLENAME);
+    } else {
+        int32_t res = bundleMgrProxy_->GetUidByBundleName(bundleName, userId, appIndex);
+        if (res == -1) {
+            resultReceiver_.append(STRING_GET_UID_BY_BUNDLENAME_NG);
+            return result;
+        }
+        resultReceiver_.append(std::to_string(res));
         resultReceiver_.append("\n");
     }
     return result;
