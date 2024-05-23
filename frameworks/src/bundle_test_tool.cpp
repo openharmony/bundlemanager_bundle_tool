@@ -166,7 +166,8 @@ static const std::string HELP_MSG =
     "  getJsonProfile                   obtain the json string of the specified module\n"
     "  getOdid                          obtain the odid of the application\n"
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
-    "  queryAbilityInfoByContinueType   get ability info by continue type\n";
+    "  queryAbilityInfoByContinueType   get ability info by continue type\n"
+    "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -328,6 +329,13 @@ const std::string HELP_MSG_GET_APP_RUNNING_RESULT_RULE =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_AUTO_CLEAN_CACHE_RULE =
+    "usage: bundle_test_tool <options>\n"
+    "eg:bundle_test_tool cleanBundleCacheFilesAutomatic -s <cache-size> \n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -s, --cache-size <cache-size>          specify the cache size that needs to be cleaned\n";
+
 const std::string HELP_MSG_NO_ADD_INSTALL_RULE_OPTION =
     "error: you must specify a app id with '-a' or '--app-id' \n"
     "and a control type with '-t' or '--control-rule-type' \n"
@@ -359,6 +367,9 @@ const std::string HELP_MSG_NO_GET_ALL_APP_RUNNING_RULE_OPTION =
 const std::string HELP_MSG_NO_GET_APP_RUNNING_RULE_OPTION =
     "error: you must specify a app running type with '-n' or '--bundle-name' \n"
     "and a userid with '-u' or '--user-id' \n";
+
+const std::string HELP_MSG_NO_AUTO_CLEAN_CACHE_OPTION =
+    "error: you must specify a cache size with '-s' or '--cache-size' \n";
 
 const std::string HELP_MSG_DEPLOY_QUICK_FIX =
     "usage: bundle_test_tool deploy quick fix <options>\n"
@@ -652,6 +663,13 @@ const struct option LONG_OPTIONS_RULE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_AUTO_CLEAN_CACHE = "hs:";
+const struct option LONG_OPTIONS_AUTO_CLEAN_CACHE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"cache-size", required_argument, nullptr, 's'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_QUICK_FIX = "hp:n:e:d:";
 const struct option LONG_OPTIONS_QUICK_FIX[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -848,7 +866,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"implicitQuerySkillUriInfo",
             std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
         {"queryAbilityInfoByContinueType",
-            std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)}
+            std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)},
+        {"cleanBundleCacheFilesAutomatic",
+            std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)}
     };
 
     return OHOS::ERR_OK;
@@ -1541,6 +1561,25 @@ ErrCode BundleTestTool::StringToInt(
             APP_LOGD("bundle_test_tool %{public}s -u user-id:%{public}d, %{public}s",
                 commandName.c_str(), temp, argv_[optind - 1]);
         }
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        result = false;
+    }
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::StringToUnsignedLongLong(
+    std::string optarg, const std::string &commandName, uint64_t &temp, bool &result)
+{
+    try {
+        APP_LOGI("StringToUnsignedLongLong start, optarg : %{public}s", optarg.c_str());
+        if ((optarg == "") || (optarg[0] == '0') || (!isdigit(optarg[0]))) {
+            resultReceiver_.append("error: parameter error, cache size must be greater than 0\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        temp = std::stoull(optarg);
+        APP_LOGI("bundle_test_tool %{public}s %{public}llu %{public}s",
+            commandName.c_str(), temp, argv_[optind - 1]);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         result = false;
@@ -2802,6 +2841,74 @@ ErrCode BundleTestTool::RunAsGetAppRunningControlRuleResultCommand()
         resultReceiver_.append("controlWant: nullptr \n");
     }
     return result;
+}
+
+ErrCode BundleTestTool::CheckCleanBundleCacheFilesAutomaticOption(
+    int option, const std::string &commandName, uint64_t &cacheSize)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGI("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        case 's': {
+            APP_LOGI("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            StringToUnsignedLongLong(optarg, commandName, cacheSize, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGE("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
+{
+    ErrCode result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "cleanBundleCacheFilesAutomatic";
+    uint64_t cacheSize;
+    APP_LOGE("RunAsCleanBundleCacheFilesAutomaticCommand is start");
+    while (true) {
+        counter++;
+        int option = getopt_long(argc_, argv_, SHORT_OPTIONS_AUTO_CLEAN_CACHE.c_str(),
+            LONG_OPTIONS_AUTO_CLEAN_CACHE, nullptr);
+        APP_LOGE("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGE("bundle_test_tool getRule with no option.");
+                resultReceiver_.append(HELP_MSG_NO_AUTO_CLEAN_CACHE_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckCleanBundleCacheFilesAutomaticOption(option, commandName, cacheSize);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(HELP_MSG_AUTO_CLEAN_CACHE_RULE);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    
+    APP_LOGI("CleanBundleCacheFilesAutomatic cache-size: %{public}llu", cacheSize);
+    ErrCode res = bundleMgrProxy_->CleanBundleCacheFilesAutomatic(cacheSize);
+    if (res == ERR_OK) {
+        resultReceiver_.append("clean fixed size cache successfully\n");
+    } else {
+        resultReceiver_.append("clean fixed size cache failed, errCode is "+ std::to_string(res) + "\n");
+        APP_LOGE("CleanBundleCacheFilesAutomatic failed, result: %{public}d", res);
+        return res;
+    }
+
+    return res;
 }
 
 ErrCode BundleTestTool::RunAsDeployQuickFix()
