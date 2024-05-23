@@ -670,6 +670,18 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_UNKNOWN,
         "error: unknown.",
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_NATIVE_FAILED,
+        "error: Failed to install the HAP because installing the native package failed.",
+    },
+    {
+        IStatusReceiver::ERR_UNINSTALL_NATIVE_FAILED,
+        "error: Failed to uninstall the HAP because uninstalling the native package failed.",
+    },
+    {
+        IStatusReceiver::ERR_NATIVE_HNP_EXTRACT_FAILED,
+        "error: Failed to install the HAP because the extract of the native package failed.",
     }
 };
 } // AppExecFwk
