@@ -71,19 +71,15 @@ sptr<IDistributedBms> BundleCommandCommon::GetDistributedBundleMgrService()
 int32_t BundleCommandCommon::GetCurrentUserId(int32_t userId)
 {
     if (userId == Constants::UNSPECIFIED_USERID) {
-        std::vector<int> activeIds;
 #ifdef ACCOUNT_ENABLE
-        int32_t ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeIds);
+        std::int32_t localId;
+        int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(localId);
         if (ret != 0) {
-            APP_LOGW("QueryActiveOsAccountIds failed! ret = %{public}d.", ret);
+            APP_LOGW("GetForegroundOsAccountLocalId failed! ret = %{public}d.", ret);
             return userId;
         }
+        return localId;
 #endif
-        if (activeIds.empty()) {
-            APP_LOGW("QueryActiveOsAccountIds activeIds empty");
-            return userId;
-        }
-        return activeIds[0];
     }
     return userId;
 }
