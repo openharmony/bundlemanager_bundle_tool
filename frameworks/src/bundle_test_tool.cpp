@@ -1596,8 +1596,6 @@ ErrCode BundleTestTool::StringToUnsignedLongLong(
             return OHOS::ERR_INVALID_VALUE;
         }
         temp = std::stoull(optarg);
-        APP_LOGI("bundle_test_tool %{public}s %{public}llu %{public}s",
-            commandName.c_str(), temp, argv_[optind - 1]);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         result = false;
@@ -2924,8 +2922,7 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
             return OHOS::ERR_INVALID_VALUE;
         }
     }
-    
-    APP_LOGI("CleanBundleCacheFilesAutomatic cache-size: %{public}llu", cacheSize);
+
     ErrCode res = bundleMgrProxy_->CleanBundleCacheFilesAutomatic(cacheSize);
     if (res == ERR_OK) {
         resultReceiver_.append("clean fixed size cache successfully\n");
