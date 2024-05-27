@@ -150,10 +150,10 @@ private:
     ErrCode DeleteQuickFix(const std::string &bundleName, std::shared_ptr<QuickFixResult> &quickFixRes);
     ErrCode GetQuickFixPath(int32_t index, std::vector<std::string> &quickFixPaths) const;
     ErrCode SetDebugMode(int32_t debugMode);
-    bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string &msg);
+    bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string &msg, int32_t appIndex);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string &msg);
     ErrCode GetDistributedBundleName(const std::string &networkId, int32_t accessTokenId, std::string &msg);
-    ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId);
+    ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex);
     ErrCode CheckGetDistributedBundleNameCorrectOption(int32_t option, const std::string &commandName,
         std::string &networkId, int32_t &accessTokenId);
     bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::string& msg);
