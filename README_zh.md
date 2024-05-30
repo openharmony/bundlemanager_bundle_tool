@@ -182,6 +182,8 @@ bm get -u
 | bm quickfix -a -f <file-path> | 执行补丁安装命令 |
 | bm quickfix -q -b <bundle-name> | 根据包名查询补丁包信息 |
 | bm quickfix -a -f <file-path> -d | 选择debug模式执行补丁安装命令 |
+| bm quickfix -a -f <file-path> -t <target-path> | 指定补丁安装目录，且不使能 |
+| bm quickfix -r -b <bundle-name> | 根据包名卸载未使能的补丁 |
 
 * 示例
 ```Bash

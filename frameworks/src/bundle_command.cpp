@@ -33,9 +33,11 @@
 #include "parameter.h"
 #include "parameters.h"
 #include "quick_fix_command.h"
+#include "quick_fix_status_callback_host_impl.h"
 #include "status_receiver_impl.h"
 #include "string_ex.h"
 #include "ability_manager_client.h"
+#include "directory_ex.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -1561,6 +1563,7 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
             if (argKey == "-f" || argKey == "--file-path") {
                 std::vector<std::string> quickFixFiles;
                 bool isDebug = false;
+                std::string targetPath;
                 // collect value of multi file-path.
                 for (; index < argc_ && index >= INDEX_OFFSET; ++index) {
                     if (argList_[index - INDEX_OFFSET] == "-q" || argList_[index - INDEX_OFFSET] == "--query" ||
@@ -1570,11 +1573,24 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                         break;
                     } else if (argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--debug") {
                         isDebug = true;
-                        break;
+                        continue;
+                    } else if ((argList_[index - INDEX_OFFSET] == "-t" || argList_[index - INDEX_OFFSET] == "--target")
+                        && (index + 1 - INDEX_OFFSET < argc_)) {
+                        targetPath = argList_[index + 1 - INDEX_OFFSET];
+                        index++;
+                        continue;
                     }
                     quickFixFiles.emplace_back(argList_[index - INDEX_OFFSET]);
                 }
                 APP_LOGI("end");
+                if (!targetPath.empty()) {
+                    std::shared_ptr<QuickFixResult> deployRes = nullptr;
+                    int32_t result = OHOS::ERR_OK;
+                    result = DeployQuickFixDisable(quickFixFiles, deployRes, isDebug, targetPath);
+                    resultReceiver_.append((result == OHOS::ERR_OK) ? "apply quickfix succeed.\n" :
+                        ("apply quickfix failed with errno: " + std::to_string(result) + ".\n"));
+                    return result;
+                }
                 return QuickFixCommand::ApplyQuickFix(quickFixFiles, resultReceiver_, isDebug);
             }
         } else if ((opt == "-q") || (opt == "--query")) {
@@ -1593,6 +1609,27 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
             }
             APP_LOGI("end");
             return QuickFixCommand::GetApplyedQuickFixInfo(bundleName, resultReceiver_);
+        } else if ((opt == "-r") || (opt == "--remove")) {
+            if (index >= argc_ - INDEX_OFFSET) {
+                resultReceiver_.append("error: option [--remove] is incorrect.\n");
+                resultReceiver_.append(HELP_MSG_QUICK_FIX);
+                APP_LOGI("end");
+                return ERR_INVALID_VALUE;
+            }
+
+            std::string bundleName;
+            std::string argKey = argv_[++index];
+            std::string argValue = argv_[++index];
+            if (argKey == "-b" || argKey == "--bundle-name") {
+                bundleName = argValue;
+            }
+            APP_LOGI("end");
+            std::shared_ptr<QuickFixResult> deleteRes = nullptr;
+            int32_t result = OHOS::ERR_OK;
+            result = DeleteQuickFix(bundleName, deleteRes);
+            resultReceiver_ = (result == OHOS::ERR_OK) ? "delete quick fix successfully\n" :
+                "delete quickfix failed with errno: " + std::to_string(result) + ".\n";
+            return result;
         } else {
             resultReceiver_.append("error: unknown option.\n");
             resultReceiver_.append(HELP_MSG_QUICK_FIX);
@@ -2530,6 +2567,79 @@ std::string BundleManagerShellCommand::DumpSharedAll() const
         dumpResults.append("\n");
     }
     return dumpResults;
+}
+
+ErrCode BundleManagerShellCommand::DeployQuickFixDisable(const std::vector<std::string> &quickFixFiles,
+    std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug, const std::string &targetPath) const
+{
+    std::set<std::string> realPathSet;
+    for (const auto &quickFixPath : quickFixFiles) {
+        std::string realPath;
+        if (!PathToRealPath(quickFixPath, realPath)) {
+            APP_LOGW("quickFixPath %{public}s is invalid", quickFixPath.c_str());
+            continue;
+        }
+        APP_LOGD("realPath is %{public}s", realPath.c_str());
+        realPathSet.insert(realPath);
+    }
+    std::vector<std::string> pathVec(realPathSet.begin(), realPathSet.end());
+
+    sptr<QuickFixStatusCallbackHostlmpl> callback(new (std::nothrow) QuickFixStatusCallbackHostlmpl());
+    if (callback == nullptr || bundleMgrProxy_ == nullptr) {
+        APP_LOGE("callback or bundleMgrProxy is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(nullptr, callback));
+    if (recipient == nullptr) {
+        APP_LOGE("recipient is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    bundleMgrProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto quickFixProxy = bundleMgrProxy_->GetQuickFixManagerProxy();
+    if (quickFixProxy == nullptr) {
+        APP_LOGE("quickFixProxy is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    std::vector<std::string> destFiles;
+    auto res = quickFixProxy->CopyFiles(pathVec, destFiles);
+    if (res != ERR_OK) {
+        APP_LOGE("Copy files failed with %{public}d.", res);
+        return res;
+    }
+    res = quickFixProxy->DeployQuickFix(destFiles, callback, isDebug, targetPath);
+    if (res != ERR_OK) {
+        APP_LOGE("DeployQuickFix failed");
+        return res;
+    }
+    return callback->GetResultCode(quickFixRes);
+}
+
+ErrCode BundleManagerShellCommand::DeleteQuickFix(const std::string &bundleName,
+    std::shared_ptr<QuickFixResult> &quickFixRes) const
+{
+    APP_LOGD("DeleteQuickFix bundleName: %{public}s", bundleName.c_str());
+    sptr<QuickFixStatusCallbackHostlmpl> callback(new (std::nothrow) QuickFixStatusCallbackHostlmpl());
+    if (callback == nullptr || bundleMgrProxy_ == nullptr) {
+        APP_LOGE("callback or bundleMgrProxy is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(nullptr, callback));
+    if (recipient == nullptr) {
+        APP_LOGE("recipient is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    bundleMgrProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto quickFixProxy = bundleMgrProxy_->GetQuickFixManagerProxy();
+    if (quickFixProxy == nullptr) {
+        APP_LOGE("quickFixProxy is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    auto res = quickFixProxy->DeleteQuickFix(bundleName, callback);
+    if (res != ERR_OK) {
+        APP_LOGE("DeleteQuickFix failed");
+        return res;
+    }
+    return callback->GetResultCode(quickFixRes);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
