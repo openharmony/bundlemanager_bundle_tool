@@ -56,6 +56,7 @@ constexpr int32_t SLEEP_SECONDS = 20;
 const int32_t INDEX_OFFSET = 2;
 // quick fix error code
 const int32_t ERR_BUNDLEMANAGER_FEATURE_IS_NOT_SUPPORTED = 801;
+const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 // quick fix error message
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR = "error: quick fix internal error.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_PARAM_ERROR = "error: param error.\n";
@@ -410,7 +411,8 @@ const std::string HELP_MSG_GET_BUNDLE_STATS =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
-    "  -u, --user-id <user-id>                specify a user id\n";
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify a app index\n";
 
 
 const std::string HELP_MSG_GET_APP_PROVISION_INFO =
@@ -695,13 +697,15 @@ const struct option LONG_OPTIONS_DEBUG_MODE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_GET_BUNDLE_STATS = "hn:u:";
+const std::string SHORT_OPTIONS_GET_BUNDLE_STATS = "hn:u:a:";
 const struct option LONG_OPTIONS_GET_BUNDLE_STATS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
     {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
     {nullptr, 0, nullptr, 0},
 };
+
 const std::string SHORT_OPTIONS_GET_DISTRIBUTED_BUNDLE_NAME = "hn:a:";
 const struct option LONG_OPTIONS_GET_DISTRIBUTED_BUNDLE_NAME[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -3320,7 +3324,7 @@ ErrCode BundleTestTool::SetDebugMode(int32_t debugMode)
     return bundleMgrProxy_->SetDebugMode(enable);
 }
 
-ErrCode BundleTestTool::BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId)
+ErrCode BundleTestTool::BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex)
 {
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
@@ -3356,6 +3360,11 @@ ErrCode BundleTestTool::BundleNameAndUserIdCommonFunc(std::string &bundleName, i
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
+                case 'a': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
                 default: {
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
@@ -3383,6 +3392,13 @@ ErrCode BundleTestTool::BundleNameAndUserIdCommonFunc(std::string &bundleName, i
                 }
                 break;
             }
+            case 'a': {
+                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
             default: {
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -3403,12 +3419,13 @@ ErrCode BundleTestTool::RunAsGetBundleStats()
 {
     std::string bundleName;
     int32_t userId;
-    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId);
+    int32_t appIndex = 0;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_GET_BUNDLE_STATS);
     } else {
         std::string msg;
-        bool ret = GetBundleStats(bundleName, userId, msg);
+        bool ret = GetBundleStats(bundleName, userId, msg, appIndex);
         if (ret) {
             resultReceiver_ = STRING_GET_BUNDLE_STATS_OK + msg;
         } else {
@@ -3420,7 +3437,7 @@ ErrCode BundleTestTool::RunAsGetBundleStats()
 }
 
 bool BundleTestTool::GetBundleStats(const std::string &bundleName, int32_t userId,
-    std::string& msg)
+    std::string& msg, int32_t appIndex)
 {
     if (bundleMgrProxy_ == nullptr) {
         APP_LOGE("bundleMgrProxy_ is nullptr");
@@ -3428,7 +3445,7 @@ bool BundleTestTool::GetBundleStats(const std::string &bundleName, int32_t userI
     }
     userId = BundleCommandCommon::GetCurrentUserId(userId);
     std::vector<std::int64_t> bundleStats;
-    bool ret = bundleMgrProxy_->GetBundleStats(bundleName, userId, bundleStats);
+    bool ret = bundleMgrProxy_->GetBundleStats(bundleName, userId, bundleStats, appIndex);
     if (ret) {
         for (size_t index = 0; index < bundleStats.size(); ++index) {
             msg += GET_BUNDLE_STATS_ARRAY[index] + std::to_string(bundleStats[index]) + "\n";
@@ -3441,7 +3458,8 @@ ErrCode BundleTestTool::RunAsGetAppProvisionInfo()
 {
     std::string bundleName;
     int32_t userId;
-    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId);
+    int32_t appIndex = 0;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_GET_APP_PROVISION_INFO);
     } else {
@@ -3796,7 +3814,8 @@ ErrCode BundleTestTool::RunAsQueryDataGroupInfos()
     APP_LOGI("RunAsQueryDataGroupInfos start");
     std::string bundleName;
     int32_t userId;
-    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId);
+    int32_t appIndex;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_QUERY_DATA_GROUP_INFOS);
     } else {
