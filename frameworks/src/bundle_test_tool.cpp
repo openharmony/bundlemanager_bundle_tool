@@ -2903,12 +2903,12 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
     int counter = 0;
     std::string commandName = "cleanBundleCacheFilesAutomatic";
     uint64_t cacheSize;
-    APP_LOGE("RunAsCleanBundleCacheFilesAutomaticCommand is start");
+    APP_LOGI("RunAsCleanBundleCacheFilesAutomaticCommand is start");
     while (true) {
         counter++;
         int option = getopt_long(argc_, argv_, SHORT_OPTIONS_AUTO_CLEAN_CACHE.c_str(),
             LONG_OPTIONS_AUTO_CLEAN_CACHE, nullptr);
-        APP_LOGE("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        APP_LOGI("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
         if (optind < 0 || optind > argc_) {
             return OHOS::ERR_INVALID_VALUE;
         }
