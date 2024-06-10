@@ -1574,8 +1574,10 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                     } else if (argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--debug") {
                         isDebug = true;
                         continue;
-                    } else if ((argList_[index - INDEX_OFFSET] == "-t" || argList_[index - INDEX_OFFSET] == "--target")
-                        && (index + 1 - INDEX_OFFSET < argc_)) {
+                    } else if (argList_[index - INDEX_OFFSET] == "-t" || argList_[index - INDEX_OFFSET] == "--target") {
+                        if (index + 1 - INDEX_OFFSET >= argList_.size()) {
+                            continue;
+                        }
                         targetPath = argList_[index + 1 - INDEX_OFFSET];
                         index++;
                         continue;
