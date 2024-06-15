@@ -1575,7 +1575,7 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                         isDebug = true;
                         continue;
                     } else if (argList_[index - INDEX_OFFSET] == "-t" || argList_[index - INDEX_OFFSET] == "--target") {
-                        if (index + 1 - INDEX_OFFSET >= argList_.size()) {
+                        if (index + 1 - INDEX_OFFSET >= static_cast<int32_t>(argList_.size())) {
                             continue;
                         }
                         targetPath = argList_[index + 1 - INDEX_OFFSET];
