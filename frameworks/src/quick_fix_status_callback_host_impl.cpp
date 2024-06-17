@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-const int32_t WAITTING_TIME = 5;
+const int32_t WAITTING_TIME = 600; // Same with MAXIMUM_WAITTING_TIME, which means bundle install maximum waiting time.
 } // namespace
 
 QuickFixStatusCallbackHostlmpl::QuickFixStatusCallbackHostlmpl()
