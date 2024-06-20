@@ -37,7 +37,7 @@ bool MockBundleMgrHost::DumpInfos(
 }
 
 ErrCode MockBundleMgrHost::CleanBundleCacheFiles(const std::string &bundleName,
-    const sptr<ICleanCacheCallback> cleanCacheCallback, int32_t userId)
+    const sptr<ICleanCacheCallback> cleanCacheCallback, int32_t userId, int32_t appIndex)
 {
     APP_LOGD("enter");
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
@@ -45,7 +45,7 @@ ErrCode MockBundleMgrHost::CleanBundleCacheFiles(const std::string &bundleName,
     return ERR_OK;
 }
 
-bool MockBundleMgrHost::CleanBundleDataFiles(const std::string &bundleName, const int userId)
+bool MockBundleMgrHost::CleanBundleDataFiles(const std::string &bundleName, const int userId, const int appIndex)
 {
     APP_LOGD("enter");
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
