@@ -21,8 +21,8 @@ config("tools_bm_config") {
   ]
 
   defines = [
-    "APP_LOG_TAG = \"BundleTool\"",
-    "LOG_DOMAIN = 0xD001120",
+    "APP_LOG_TAG = \"BMSTool\"",
+    "LOG_DOMAIN = 0xD001123",
   ]
 }
 
