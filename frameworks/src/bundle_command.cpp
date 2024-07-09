@@ -202,21 +202,21 @@ BundleManagerShellCommand::BundleManagerShellCommand(int argc, char *argv[]) : S
 ErrCode BundleManagerShellCommand::CreateCommandMap()
 {
     commandMap_ = {
-        {"help", std::bind(&BundleManagerShellCommand::RunAsHelpCommand, this)},
-        {"install", std::bind(&BundleManagerShellCommand::RunAsInstallCommand, this)},
-        {"uninstall", std::bind(&BundleManagerShellCommand::RunAsUninstallCommand, this)},
-        {"dump", std::bind(&BundleManagerShellCommand::RunAsDumpCommand, this)},
-        {"clean", std::bind(&BundleManagerShellCommand::RunAsCleanCommand, this)},
-        {"enable", std::bind(&BundleManagerShellCommand::RunAsEnableCommand, this)},
-        {"disable", std::bind(&BundleManagerShellCommand::RunAsDisableCommand, this)},
-        {"get", std::bind(&BundleManagerShellCommand::RunAsGetCommand, this)},
-        {"quickfix", std::bind(&BundleManagerShellCommand::RunAsQuickFixCommand, this)},
-        {"compile", std::bind(&BundleManagerShellCommand::RunAsCompileCommand, this)},
-        {"copy-ap", std::bind(&BundleManagerShellCommand::RunAsCopyApCommand, this)},
-        {"dump-overlay", std::bind(&BundleManagerShellCommand::RunAsDumpOverlay, this)},
-        {"dump-target-overlay", std::bind(&BundleManagerShellCommand::RunAsDumpTargetOverlay, this)},
-        {"dump-dependencies", std::bind(&BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand, this)},
-        {"dump-shared", std::bind(&BundleManagerShellCommand::RunAsDumpSharedCommand, this)},
+        {"help", [this] { return this->RunAsHelpCommand(); } },
+        {"install", [this] { return this->RunAsInstallCommand(); } },
+        {"uninstall", [this] { return this->RunAsUninstallCommand(); } },
+        {"dump", [this] { return this->RunAsDumpCommand(); } },
+        {"clean", [this] { return this->RunAsCleanCommand(); } },
+        {"enable", [this] { return this->RunAsEnableCommand(); } },
+        {"disable", [this] { return this->RunAsDisableCommand(); } },
+        {"get", [this] { return this->RunAsGetCommand(); } },
+        {"quickfix", [this] { return this->RunAsQuickFixCommand(); } },
+        {"compile", [this] { return this->RunAsCompileCommand(); } },
+        {"copy-ap", [this] { return this->RunAsCopyApCommand(); } },
+        {"dump-overlay", [this] { return this->RunAsDumpOverlay(); } },
+        {"dump-target-overlay", [this] { return this->RunAsDumpTargetOverlay(); } },
+        {"dump-dependencies", [this] { return this->RunAsDumpSharedDependenciesCommand(); } },
+        {"dump-shared", [this] { return this->RunAsDumpSharedCommand(); } },
     };
 
     return OHOS::ERR_OK;
