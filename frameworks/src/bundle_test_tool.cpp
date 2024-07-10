@@ -169,7 +169,8 @@ static const std::string HELP_MSG =
     "  getUidByBundleName               obtain the uid string of the specified bundle\n"
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
-    "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n";
+    "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
+    "  installHmpBundle                 install a hmp bundle\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -520,6 +521,11 @@ const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
     "and a userId with '-u' or '--user-id' \n"
     "and a json profile type with '-p' or '--profile-type' \n";
 
+const std::string HELP_MSG_NO_INSTALL_HMP_BUNDLE_OPTION =
+    "error: you must specify a file path with '-d' or '--hmp-dir' \n"
+    "and a flag of rollback with '-r' or '--rollback' \n"
+    "and a uid with '-u' or '--uid' \n";
+
 const std::string HELP_MSG_NO_GET_UNINSTALLED_BUNDLE_INFO_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
 
@@ -612,6 +618,9 @@ const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_OK = "get distributedBundle
 const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_NG = "get distributedBundleName failed\n";
 
 const std::string STRING_GET_PROXY_DATA_NG = "get proxyData failed";
+
+const std::string STRING_INSTALL_HMP_BUNDLE_OK = "installHmpBundle successfully\n";
+const std::string STRING_INSTALL_HMP_BUNDLE_NG = "installHmpBundle failed with errno: ";
 
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
@@ -817,6 +826,15 @@ const struct option LONG_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE[] = {
     {"userId", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_INSTALL_HMP_BUNDLE = "hd:r:u:";
+const struct option LONG_OPTIONS_INSTALL_HMP_BUNDLE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"hmp-dir", required_argument, nullptr, 'd'},
+    {"rollback", required_argument, nullptr, 'r'},
+    {"uid", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -885,12 +903,11 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)},
         {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)},
         {"getUidByBundleName", std::bind(&BundleTestTool::RunGetUidByBundleName, this)},
-        {"implicitQuerySkillUriInfo",
-            std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
-        {"queryAbilityInfoByContinueType",
-            std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)},
+        {"implicitQuerySkillUriInfo", std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
+        {"queryAbilityInfoByContinueType", std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)},
         {"cleanBundleCacheFilesAutomatic",
-            std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)}
+            std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)},
+        {"installHmpBundle", std::bind(&BundleTestTool::RunAsInstallHmpBundle, this)},
     };
 
     return OHOS::ERR_OK;
@@ -1637,6 +1654,7 @@ bool BundleTestTool::CheckGetStringCorrectOption(
                 commandName.c_str(), name.c_str(), argv_[optind - 1]);
             break;
         }
+        case 'd':
         case 'c': {
             name = optarg;
             APP_LOGD("bundle_test_tool %{public}s -m continue-type:%{public}s, %{public}s",
@@ -1655,6 +1673,7 @@ bool BundleTestTool::CheckGetStringCorrectOption(
             StringToInt(optarg, commandName, temp, ret);
             break;
         }
+        case 'r':
         case 'i': {
             StringToInt(optarg, commandName, temp, ret);
             break;
@@ -4138,6 +4157,53 @@ ErrCode BundleTestTool::RunAsGetOdid()
         resultReceiver_.append(STRING_GET_ODID_NG + "Please enter a valid uid\n");
     } else {
         resultReceiver_.append(STRING_GET_ODID_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsInstallHmpBundle()
+{
+    APP_LOGI("RunAsInstallHmpBundle start");
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string commandName = "installHmpBundle";
+    std::string name = "";
+    std::string hmpDir = "";
+    bool isNeedRollback = false;
+    int32_t uid = Constants::INVALID_UID;
+    int32_t option;
+    while ((option = getopt_long(argc_, argv_, SHORT_OPTIONS_INSTALL_HMP_BUNDLE.c_str(),
+        LONG_OPTIONS_INSTALL_HMP_BUNDLE, nullptr)) != -1) {
+        counter++;
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        int32_t temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        hmpDir = option == 'd' ? name : hmpDir;
+        isNeedRollback = option == 'r' ? temp : isNeedRollback;
+        uid = option == 'u' ? temp : uid;
+    }
+
+    if (counter == 0 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+        APP_LOGD("bundle_test_tool getStr with no option.");
+        resultReceiver_.append(HELP_MSG_NO_INSTALL_HMP_BUNDLE_OPTION);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_NO_INSTALL_HMP_BUNDLE_OPTION);
+    } else {
+        setuid(uid);
+        auto res = bundleInstallerProxy_->InstallHmpBundle(hmpDir, isNeedRollback);
+        setuid(Constants::ROOT_UID);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_INSTALL_HMP_BUNDLE_NG + std::to_string(res) + "\n");
+            return result;
+        }
+        resultReceiver_.append(STRING_INSTALL_HMP_BUNDLE_OK);
     }
     return result;
 }
