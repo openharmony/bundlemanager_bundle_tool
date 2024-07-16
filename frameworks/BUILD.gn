@@ -77,6 +77,7 @@ ohos_source_set("tools_bm_source_set") {
     defines += [ "BUNDLE_FRAMEWORK_OVERLAY_INSTALLATION" ]
   }
 
+  subsystem_name = "bundlemanager"
   part_name = "bundle_tool"
 }
 
@@ -150,6 +151,7 @@ ohos_source_set("tools_test_bm_source_set") {
     defines += [ "DISTRIBUTED_BUNDLE_FRAMEWORK" ]
   }
 
+  subsystem_name = "bundlemanager"
   part_name = "bundle_tool"
 }
 
