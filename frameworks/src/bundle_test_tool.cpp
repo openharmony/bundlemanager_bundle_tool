@@ -4187,10 +4187,12 @@ ErrCode BundleTestTool::RunAsInstallHmpBundle()
         uid = option == 'u' ? temp : uid;
     }
 
-    if (counter == 0 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
-        APP_LOGD("bundle_test_tool getStr with no option.");
-        resultReceiver_.append(HELP_MSG_NO_INSTALL_HMP_BUNDLE_OPTION);
-        return OHOS::ERR_INVALID_VALUE;
+    if (counter == 0) {
+        if (optind < 0 || optind > argc_ || strcmp(argv_[optind], cmd_.c_str()) == 0) {
+            APP_LOGD("bundle_test_tool getStr with no option.");
+            resultReceiver_.append(HELP_MSG_NO_INSTALL_HMP_BUNDLE_OPTION);
+            return OHOS::ERR_INVALID_VALUE;
+        }
     }
 
     if (result != OHOS::ERR_OK) {
