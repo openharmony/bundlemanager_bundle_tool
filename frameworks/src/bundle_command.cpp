@@ -496,7 +496,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     std::vector<std::string> sharedBundleDirPaths;
     int index = 0;
     int hspIndex = 0;
-    int32_t userId = Constants::ALL_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     int32_t waittingTime = MINIMUM_WAITTING_TIME;
     while (true) {
         counter++;
@@ -712,7 +712,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
     int counter = 0;
     std::string bundleName = "";
     std::string moduleName = "";
-    int32_t userId = Constants::ALL_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     bool isKeepData = false;
     bool isShared = false;
     int32_t versionCode = Constants::ALL_VERSIONCODE;
