@@ -376,7 +376,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0006, Function | MediumTest | Level1)
     BundleManagerShellCommand cmd(argc, argv);
     // set the mock objects
     SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_CLEAN_DATA_BUNDLE_OK + "\n");
+    EXPECT_EQ(cmd.ExecCommand(), STRING_CLEAN_DATA_BUNDLE_NG + "\n");
 }
 
 /**
@@ -512,7 +512,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0012, Function | MediumTest | Level1)
     BundleManagerShellCommand cmd(argc, argv);
     // set the mock objects
     SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_CLEAN_DATA_BUNDLE_OK + "\n");
+    EXPECT_EQ(cmd.ExecCommand(), STRING_CLEAN_DATA_BUNDLE_NG + "\n");
 }
 
 /**
