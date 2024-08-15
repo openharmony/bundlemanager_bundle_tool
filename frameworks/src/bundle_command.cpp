@@ -2215,7 +2215,9 @@ bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string 
     userId = BundleCommandCommon::GetCurrentUserId(userId);
     APP_LOGD("bundleName: %{public}s, userId:%{public}d, appIndex:%{public}d", bundleName.c_str(), userId, appIndex);
     auto appMgrClient = std::make_unique<AppMgrClient>();
+    APP_LOGI("clear start");
     ErrCode cleanRetAms = appMgrClient->ClearUpApplicationData(bundleName, appIndex, userId);
+    APP_LOGI("clear end");
     bool cleanRetBms = bundleMgrProxy_->CleanBundleDataFiles(bundleName, userId, appIndex);
     APP_LOGD("cleanRetAms: %{public}d, cleanRetBms: %{public}d", cleanRetAms, cleanRetBms);
     if ((cleanRetAms == ERR_OK) && cleanRetBms) {
