@@ -169,7 +169,8 @@ static const std::string HELP_MSG =
     "  getUidByBundleName               obtain the uid string of the specified bundle\n"
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
-    "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n";
+    "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
+    "  getContinueBundleName            get continue bundle name list\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -890,7 +891,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"queryAbilityInfoByContinueType",
             std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)},
         {"cleanBundleCacheFilesAutomatic",
-            std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)}
+            std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)},
+        {"getContinueBundleName",
+            std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)}
     };
 
     return OHOS::ERR_OK;
@@ -2937,6 +2940,60 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
     }
 
     return res;
+}
+
+ErrCode BundleTestTool::RunAsGetContinueBundleName()
+{
+    APP_LOGD("RunAsGetContinueBundleName start");
+    std::string bundleName;
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t appIndex;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append("RunAsGetContinueBundleName erro!!");
+    } else {
+        if (userId == Constants::UNSPECIFIED_USERID) {
+            int32_t mockUid = 20010099;
+            // Mock the current tool uid, the current default user must be executed under 100.
+            int setResult = setuid(mockUid);
+            APP_LOGD("Set uid result: %{public}d", setResult);
+        }
+
+        std::string msg;
+        result = GetContinueBundleName(bundleName, userId, msg);
+        APP_LOGD("Get continue bundle result %{public}d", result);
+        if (result == OHOS::ERR_OK) {
+            resultReceiver_.append(msg);
+            return ERR_OK;
+        } else {
+            APP_LOGE("Get continue bundle name error: %{public}d", result);
+            std::string err("Get continue bundle name error!");
+            resultReceiver_.append(err);
+        }
+    }
+    return OHOS::ERR_INVALID_VALUE;
+}
+
+ErrCode BundleTestTool::GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("Bundle mgr proxy is nullptr");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> continueBundleName;
+    auto ret = bundleMgrProxy_->GetContinueBundleNames(bundleName, continueBundleName, userId);
+    APP_LOGD("Get continue bundle names result: %{public}d", ret);
+    if (ret == OHOS::ERR_OK) {
+        msg = "continueBundleNameList:\n{\n";
+        for (const auto &name : continueBundleName) {
+            msg +="     ";
+            msg += name;
+            msg += "\n";
+        }
+        msg += "}\n";
+        return ERR_OK;
+    }
+    return ret;
 }
 
 ErrCode BundleTestTool::RunAsDeployQuickFix()

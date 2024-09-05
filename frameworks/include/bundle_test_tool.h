@@ -75,6 +75,7 @@ private:
     ErrCode RunAsSetDebugMode();
     ErrCode RunAsGetBundleStats();
     ErrCode RunAsGetAppProvisionInfo();
+    ErrCode RunAsGetContinueBundleName();
     ErrCode RunAsGetDistributedBundleName();
     ErrCode HandleBundleEventCallback();
     ErrCode ResetAOTCompileStatus();
@@ -169,6 +170,7 @@ private:
     ErrCode CheckGetBundleNameOption(int32_t option, std::string &bundleName);
     ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
         uint64_t &cacheSize);
+    ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
