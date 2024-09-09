@@ -111,8 +111,7 @@ const std::string HELP_MSG_CLEAN =
     "  -n, --bundle-name  <bundle-name>                bundle name\n"
     "  -c, --cache                                     clean bundle cache files by bundle name\n"
     "  -d, --data                                      clean bundle data files by bundle name\n"
-    "  -u, --user-id <user-id>                         specify a user id\n"
-    "  -i, --app-index <app-index>                     specify a app index\n";
+    "  -u, --user-id <user-id>                         specify a user id\n";
 
 const std::string HELP_MSG_ENABLE =
     "usage: bm enable <options>\n"
@@ -283,8 +282,8 @@ private:
 
     ErrCode GetBundlePath(const std::string& param, std::vector<std::string>& bundlePaths) const;
 
-    bool CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
-    bool CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
+    bool CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId) const;
+    bool CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId) const;
 
     bool SetApplicationEnabledOperation(const AbilityInfo &abilityInfo, bool isEnable, int32_t userId) const;
     std::string DumpOverlayInfo(const std::string &bundleName, const std::string &moduleName,
