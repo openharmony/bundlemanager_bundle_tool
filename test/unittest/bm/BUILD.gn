@@ -22,6 +22,7 @@ config("tools_bm_config_mock") {
     "${inner_api_path}/appexecfwk_base/include/quick_fix",
     "${inner_api_path}/appexecfwk_core/include/bundlemgr",
     "${bundle_framework_path}/services/bundlemgr/include",
+    "${bundle_framework_path}/services/bundlemgr/include/navigation",
     "${bundle_framework_path}/services/bundlemgr/include/quick_fix",
     "${bundle_framework_path}/services/bundlemgr/include/sandbox_app",
     "${bundle_framework_path}/services/bundlemgr/include/shared",
