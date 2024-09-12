@@ -57,6 +57,7 @@ const int32_t INDEX_OFFSET = 2;
 // quick fix error code
 const int32_t ERR_BUNDLEMANAGER_FEATURE_IS_NOT_SUPPORTED = 801;
 const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
+const int32_t CODE_PROTECT_UID = 7666;
 // quick fix error message
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR = "error: quick fix internal error.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_PARAM_ERROR = "error: param error.\n";
@@ -170,7 +171,8 @@ static const std::string HELP_MSG =
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
-    "  getContinueBundleName            get continue bundle name list\n";
+    "  getContinueBundleName            get continue bundle name list\n"
+    "  updateAppEncryptedStatus         update app encrypted status\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -515,6 +517,11 @@ const std::string HELP_MSG_NO_GET_UID_BY_BUNDLENAME =
     "and a userId with '-u' or '--user-id' \n"
     "and a appIndex with '-a' or '--app-index' \n";
 
+const std::string HELP_MSG_UPDATE_APP_EXCRYPTED_STATUS =
+    "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
+    "and a isExisted with '-e' or '--existed' \n"
+    "and a appIndex with '-a' or '--app-index' \n";
+
 const std::string HELP_MSG_NO_GET_JSON_PROFILE_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
     "and a module name with '-m' or '--module-name' \n"
@@ -551,6 +558,9 @@ const std::string STRING_REQUIRE_CORRECT_VALUE =
 
 const std::string STRING_INSTALL_SANDBOX_SUCCESSFULLY = "install sandbox app successfully \n";
 const std::string STRING_INSTALL_SANDBOX_FAILED = "install sandbox app failed \n";
+
+const std::string STRING_UPDATE_APP_EXCRYPTED_STATUS_SUCCESSFULLY = "update app encrypted status successfully \n";
+const std::string STRING_UPDATE_APP_EXCRYPTED_STATUS_FAILED = "update app encrypted status failed \n";
 
 const std::string STRING_UNINSTALL_SANDBOX_SUCCESSFULLY = "uninstall sandbox app successfully\n";
 const std::string STRING_UNINSTALL_SANDBOX_FAILED = "uninstall sandbox app failed\n";
@@ -678,6 +688,15 @@ const std::string SHORT_OPTIONS_AUTO_CLEAN_CACHE = "hs:";
 const struct option LONG_OPTIONS_AUTO_CLEAN_CACHE[] = {
     {"help", no_argument, nullptr, 'h'},
     {"cache-size", required_argument, nullptr, 's'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_UPDATE_APP_EXCRYPTED_STATUS = "hn:e:a:";
+const struct option LONG_OPTIONS_UPDATE_APP_EXCRYPTED_STATUS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"existed", required_argument, nullptr, 'e'},
+    {"app-index", required_argument, nullptr, 'a'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -893,7 +912,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"cleanBundleCacheFilesAutomatic",
             std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)},
         {"getContinueBundleName",
-            std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)}
+            std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)},
+        {"updateAppEncryptedStatus",
+            std::bind(&BundleTestTool::RunAsUpdateAppEncryptedStatus, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4195,6 +4216,47 @@ ErrCode BundleTestTool::RunAsGetOdid()
         resultReceiver_.append(STRING_GET_ODID_NG + "Please enter a valid uid\n");
     } else {
         resultReceiver_.append(STRING_GET_ODID_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsUpdateAppEncryptedStatus()
+{
+    std::string commandName = "updateAppEncryptedStatus";
+    int appIndex = 0;
+    int appEcrypted = 0;
+    std::string bundleName;
+    int opt = 0;
+
+    const std::map<char, OptionHandler> optionHandlers = {
+        {'a', [&appIndex, &commandName, this](const std::string& value) {
+            bool ret;
+            StringToInt(value, commandName, appIndex, ret); }},
+        {'e', [&appEcrypted, &commandName, this](const std::string& value) {
+            bool ret;
+            StringToInt(value, commandName, appEcrypted, ret); }},
+        {'n', [&bundleName, &commandName, this](const std::string& value) {
+            bundleName = value; }},
+
+    };
+    while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_UPDATE_APP_EXCRYPTED_STATUS.c_str(),
+        LONG_OPTIONS_UPDATE_APP_EXCRYPTED_STATUS, nullptr)) != -1) {
+        auto it = optionHandlers.find(opt);
+        if (it != optionHandlers.end()) {
+            it->second(optarg);
+        } else {
+            resultReceiver_.append(HELP_MSG_UPDATE_APP_EXCRYPTED_STATUS);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    setuid(CODE_PROTECT_UID);
+    auto result = bundleMgrProxy_->UpdateAppEncryptedStatus(bundleName, static_cast<bool>(appEcrypted), appIndex);
+    setuid(Constants::ROOT_UID);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_UPDATE_APP_EXCRYPTED_STATUS_SUCCESSFULLY);
+    } else {
+        resultReceiver_.append(
+            STRING_UPDATE_APP_EXCRYPTED_STATUS_FAILED + "errCode is "+ std::to_string(result) + "\n");
     }
     return result;
 }
