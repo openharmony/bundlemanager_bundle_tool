@@ -34,7 +34,7 @@ bool MockBundleInstallerHost::Install(
     APP_LOGI("enter");
 
     APP_LOGI("bundleFilePath: %{private}s", bundleFilePath.c_str());
-    APP_LOGI("installParam.installFlag: %{public}hhd", installParam.installFlag);
+    APP_LOGI("installParam.installFlag: %{public}d", installParam.installFlag);
 
     statusReceiver->OnFinished(OHOS::ERR_OK, MSG_SUCCESS);
 
@@ -49,7 +49,7 @@ bool MockBundleInstallerHost::Install(const std::vector<std::string> &bundleFile
     for_each(bundleFilePath.begin(), bundleFilePath.end(), [](const auto &path)->decltype(auto) {
         APP_LOGI("bundleFilePath: %{private}s", path.c_str());
     });
-    APP_LOGI("installParam.installFlag: %{public}hhd", installParam.installFlag);
+    APP_LOGI("installParam.installFlag: %{public}d", installParam.installFlag);
 
     statusReceiver->OnFinished(OHOS::ERR_OK, MSG_SUCCESS);
 
@@ -62,7 +62,7 @@ bool MockBundleInstallerHost::Uninstall(
     APP_LOGI("enter");
 
     APP_LOGI("bundleName: %{public}s", bundleName.c_str());
-    APP_LOGI("installParam.installFlag: %{public}hhd", installParam.installFlag);
+    APP_LOGI("installParam.installFlag: %{public}d", installParam.installFlag);
 
     statusReceiver->OnFinished(OHOS::ERR_OK, MSG_SUCCESS);
 
@@ -76,7 +76,7 @@ bool MockBundleInstallerHost::Uninstall(const std::string &bundleName, const std
 
     APP_LOGI("bundleName: %{public}s", bundleName.c_str());
     APP_LOGI("modulePackage: %{public}s", modulePackage.c_str());
-    APP_LOGI("installParam.installFlag: %{public}hhd", installParam.installFlag);
+    APP_LOGI("installParam.installFlag: %{public}d", installParam.installFlag);
 
     statusReceiver->OnFinished(OHOS::ERR_OK, MSG_SUCCESS);
 
@@ -88,7 +88,7 @@ bool MockBundleInstallerHost::Recover(const std::string &bundleName, const Insta
 {
     APP_LOGD("enter");
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
-    APP_LOGD("installParam.installFlag: %{public}hhd", installParam.installFlag);
+    APP_LOGD("installParam.installFlag: %{public}d", installParam.installFlag);
     statusReceiver->OnFinished(OHOS::ERR_OK, MSG_SUCCESS);
     return true;
 }
