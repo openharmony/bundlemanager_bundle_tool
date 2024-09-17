@@ -306,6 +306,17 @@ ErrCode BundleManagerShellCommand::RunAsCopyApCommand()
             break;
         }
     }
+
+    if ((option == -1) && (counter == 0)) {
+        if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+            // 1.'bm copy-ap' with no option: bm copy-ap
+            // 2.'bm copy-ap' with a wrong argument: bm copy-ap -xxx
+            APP_LOGD("'bm copy-ap' %{public}s", HELP_MSG_NO_OPTION.c_str());
+            resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_COPY_AP);
     } else {
