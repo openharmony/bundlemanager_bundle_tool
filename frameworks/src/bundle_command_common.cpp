@@ -684,10 +684,6 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: Failed to install the HAP because the extract of the native package failed.",
     },
     {
-        IStatusReceiver::ERR_INSTALL_MULTI_APP_MAX_COUNT_DECREASE,
-        "error: Failed to install the HAP because the maximum count of multi-app cannot be reduced."
-    },
-    {
         IStatusReceiver::ERR_UNINSTALL_CONTROLLED,
         "error: The uninstall request is rejected by the application."
     }
