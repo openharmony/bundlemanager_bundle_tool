@@ -23,8 +23,10 @@ config("tools_bm_config_mock") {
     "${inner_api_path}/appexecfwk_core/include/bundlemgr",
     "${bundle_framework_path}/services/bundlemgr/include",
     "${bundle_framework_path}/services/bundlemgr/include/quick_fix",
+    "${bundle_framework_path}/services/bundlemgr/include/rdb",
     "${bundle_framework_path}/services/bundlemgr/include/sandbox_app",
     "${bundle_framework_path}/services/bundlemgr/include/shared",
+    "${bundle_framework_path}/services/bundlemgr/include/uninstall_data_mgr",
     "${bundletool_test_path}/mock",
     "//third_party/googletest/googlemock/include",
     "//third_party/json/single_include",
@@ -87,6 +89,7 @@ ohos_unittest("bm_command_dump_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
@@ -144,6 +147,7 @@ ohos_unittest("bm_command_dump_dependencies_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
@@ -201,6 +205,7 @@ ohos_unittest("bm_command_install_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
@@ -258,6 +263,7 @@ ohos_unittest("bm_command_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
@@ -320,6 +326,7 @@ ohos_unittest("bm_command_uninstall_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
@@ -377,6 +384,7 @@ ohos_unittest("bm_command_quickfix_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
@@ -434,6 +442,7 @@ ohos_unittest("bm_command_overlay_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
 
