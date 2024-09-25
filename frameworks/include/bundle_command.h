@@ -132,6 +132,7 @@ const std::string HELP_MSG_DISABLE =
 const std::string HELP_MSG_GET =
     "usage: bm get <options>\n"
     "options list:\n"
+    "  -h, --help                             list available commands\n"
     "  -u, --udid                             obtain udid of the current device\n";
 
 const std::string HELP_MSG_QUICK_FIX =
