@@ -310,6 +310,9 @@ ErrCode BundleManagerShellCommand::RunAsCopyApCommand()
     }
 
     if ((option == -1) && (counter == 0)) {
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
         if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
             // 1.'bm copy-ap' with no option: bm copy-ap
             // 2.'bm copy-ap' with a wrong argument: bm copy-ap -xxx
