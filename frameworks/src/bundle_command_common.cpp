@@ -690,6 +690,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_UNINSTALL_CONTROLLED,
         "error: The uninstall request is rejected by the application."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_DEBUG_ENCRYPTED_BUNDLE_FAILED,
+        "error: debug encrypted bundle is not allowed to install."
     }
 };
 } // AppExecFwk
