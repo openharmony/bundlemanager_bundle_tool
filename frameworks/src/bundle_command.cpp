@@ -36,7 +36,7 @@
 #include "quick_fix_status_callback_host_impl.h"
 #include "status_receiver_impl.h"
 #include "string_ex.h"
-#include "ability_manager_client.h"
+#include "app_mgr_client.h"
 #include "directory_ex.h"
 
 namespace OHOS {
@@ -58,6 +58,7 @@ const int32_t MAX_ARGUEMENTS_NUMBER = 3;
 const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
+const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 
 const std::string SHORT_OPTIONS_COMPILE = "hm:r:";
 const struct option LONG_OPTIONS_COMPILE[] = {
@@ -75,7 +76,7 @@ const struct option LONG_OPTIONS_COPY_AP[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:";
+const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:i:";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-path", required_argument, nullptr, 'p'},
@@ -91,6 +92,7 @@ const struct option LONG_OPTIONS[] = {
     {"waitting-time", required_argument, nullptr, 'w'},
     {"keep-data", no_argument, nullptr, 'k'},
     {"shared-bundle-dir-path", required_argument, nullptr, 's'},
+    {"app-index", required_argument, nullptr, 'i'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1082,6 +1084,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t appIndex = 0;
     bool cleanCache = false;
     bool cleanData = false;
     std::string bundleName = "";
@@ -1121,6 +1124,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                     // 'bm clean -u' with no argument: bm clean -u
                     // 'bm clean --user-id' with no argument: bm clean --user-id
                     APP_LOGD("'bm clean -u' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'i': {
+                    // 'bm clean -i' with no argument: bm clean -i
+                    // 'bm clean --app-index' with no argument: bm clean --app-index
+                    APP_LOGD("'bm clean -i' with no argument.");
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
@@ -1179,6 +1190,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 }
                 break;
             }
+            case 'i': {
+                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                    APP_LOGE("bm clean with error appIndex %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
             default: {
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -1205,7 +1224,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     } else {
         // bm clean -c
         if (cleanCache) {
-            if (CleanBundleCacheFilesOperation(bundleName, userId)) {
+            if (CleanBundleCacheFilesOperation(bundleName, userId, appIndex)) {
                 resultReceiver_ = STRING_CLEAN_CACHE_BUNDLE_OK + "\n";
             } else {
                 resultReceiver_ = STRING_CLEAN_CACHE_BUNDLE_NG + "\n";
@@ -1213,7 +1232,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
         }
         // bm clean -d
         if (cleanData) {
-            if (CleanBundleDataFilesOperation(bundleName, userId)) {
+            if (CleanBundleDataFilesOperation(bundleName, userId, appIndex)) {
                 resultReceiver_.append(STRING_CLEAN_DATA_BUNDLE_OK + "\n");
             } else {
                 resultReceiver_.append(STRING_CLEAN_DATA_BUNDLE_NG + "\n");
@@ -2183,28 +2202,32 @@ int32_t BundleManagerShellCommand::UninstallSharedOperation(const UninstallParam
     return statusReceiver->GetResultCode();
 }
 
-bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId) const
+bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId,
+    int32_t appIndex) const
 {
     userId = BundleCommandCommon::GetCurrentUserId(userId);
+    APP_LOGD("bundleName: %{public}s, userId:%{public}d, appIndex:%{public}d", bundleName.c_str(), userId, appIndex);
     sptr<CleanCacheCallbackImpl> cleanCacheCallBack(new (std::nothrow) CleanCacheCallbackImpl());
     if (cleanCacheCallBack == nullptr) {
         APP_LOGE("cleanCacheCallBack is null");
         return false;
     }
-    ErrCode cleanRet = bundleMgrProxy_->CleanBundleCacheFiles(bundleName, cleanCacheCallBack, userId);
+    ErrCode cleanRet = bundleMgrProxy_->CleanBundleCacheFiles(bundleName, cleanCacheCallBack, userId, appIndex);
     if (cleanRet == ERR_OK) {
         return cleanCacheCallBack->GetResultCode();
     }
-    APP_LOGE("clean bundle cache files operation failed");
+    APP_LOGE("clean bundle cache files operation failed, cleanRet = %{public}d", cleanRet);
     return false;
 }
 
-bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId) const
+bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId,
+    int32_t appIndex) const
 {
     userId = BundleCommandCommon::GetCurrentUserId(userId);
-    APP_LOGD("bundleName: %{public}s, userId:%{public}d", bundleName.c_str(), userId);
-    ErrCode cleanRetAms = AbilityManagerClient::GetInstance()->ClearUpApplicationData(bundleName, userId);
-    bool cleanRetBms = bundleMgrProxy_->CleanBundleDataFiles(bundleName, userId);
+    APP_LOGD("bundleName: %{public}s, userId:%{public}d, appIndex:%{public}d", bundleName.c_str(), userId, appIndex);
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ErrCode cleanRetAms = appMgrClient->ClearUpApplicationData(bundleName, appIndex, userId);
+    bool cleanRetBms = bundleMgrProxy_->CleanBundleDataFiles(bundleName, userId, appIndex);
     APP_LOGD("cleanRetAms: %{public}d, cleanRetBms: %{public}d", cleanRetAms, cleanRetBms);
     if ((cleanRetAms == ERR_OK) && cleanRetBms) {
         return true;
