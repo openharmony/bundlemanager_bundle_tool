@@ -172,7 +172,8 @@ static const std::string HELP_MSG =
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
     "  getContinueBundleName            get continue bundle name list\n"
-    "  updateAppEncryptedStatus         update app encrypted status\n";
+    "  updateAppEncryptedStatus         update app encrypted status\n"
+    "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -517,6 +518,14 @@ const std::string HELP_MSG_NO_GET_UID_BY_BUNDLENAME =
     "and a userId with '-u' or '--user-id' \n"
     "and a appIndex with '-a' or '--app-index' \n";
 
+const std::string HELP_MSG_GET_DIR_BY_BUNDLENAME_AND_APP_INDEX =
+    "usage: bundle_test_tool getDirByBundleNameAndAppIndex <options>\n"
+    "eg:bundle_test_tool getDirByBundleNameAndAppIndex -n <bundle-name> -a <app-index>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -a, --app-index <app-index>            specify a app index\n";
+
 const std::string HELP_MSG_UPDATE_APP_EXCRYPTED_STATUS =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
     "and a isExisted with '-e' or '--existed' \n"
@@ -604,6 +613,9 @@ const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleI
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
+
+const std::string STRING_GET_DIR_OK = "getDirByBundleNameAndAppIndex successfully\n";
+const std::string STRING_GET_DIR_NG = "getDirByBundleNameAndAppIndex failed\n";
 
 const std::string STRING_GET_UID_BY_BUNDLENAME_NG = "getUidByBundleName failed\n";
 
@@ -837,6 +849,15 @@ const struct option LONG_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE[] = {
     {"userId", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
+
+const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
+const struct option LONG_OPTIONS_GET_DIR[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"app-index", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -914,7 +935,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getContinueBundleName",
             std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)},
         {"updateAppEncryptedStatus",
-            std::bind(&BundleTestTool::RunAsUpdateAppEncryptedStatus, this)}
+            std::bind(&BundleTestTool::RunAsUpdateAppEncryptedStatus, this)},
+        {"getDirByBundleNameAndAppIndex",
+            std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4438,6 +4461,57 @@ ErrCode BundleTestTool::RunAsQueryAbilityInfoByContinueType()
             resultReceiver_.append(results);
         }
         resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetDirByBundleNameAndAppIndex()
+{
+    APP_LOGI("RunAsGetDirByBundleNameAndAppIndex start");
+    std::string commandName = "getDirByBundleNameAndAppIndex";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    std::string bundleName = "";
+    int32_t appIndex = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_DIR.c_str(),
+            LONG_OPTIONS_GET_DIR, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getDirByBundleNameAndAppIndex with no option.");
+                resultReceiver_.append(HELP_MSG_GET_DIR_BY_BUNDLENAME_AND_APP_INDEX);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        bundleName = option == 'n' ? name : bundleName;
+        appIndex = option == 'a' ? temp : appIndex;
+    }
+    APP_LOGI("bundleName: %{public}s, appIndex: %{public}d", bundleName.c_str(), appIndex);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_DIR_BY_BUNDLENAME_AND_APP_INDEX);
+    } else {
+        std::string dataDir = "";
+        BundleMgrClient client;
+        result = client.GetDirByBundleNameAndAppIndex(bundleName, appIndex, dataDir);
+        if (result == ERR_OK) {
+            resultReceiver_.append(STRING_GET_DIR_OK);
+            resultReceiver_.append(dataDir + "\n");
+        } else if (result == ERR_BUNDLE_MANAGER_GET_DIR_INVALID_APP_INDEX) {
+            resultReceiver_.append(STRING_GET_DIR_NG + "Please enter a valid appIndex\n");
+        } else {
+            resultReceiver_.append(STRING_GET_DIR_NG + "errCode is "+ std::to_string(result) + "\n");
+        }
     }
     return result;
 }
