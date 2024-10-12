@@ -98,6 +98,7 @@ private:
     ErrCode RunAsQueryAbilityInfoByContinueType();
     ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
     ErrCode RunAsUpdateAppEncryptedStatus();
+    ErrCode RunAsGetDirByBundleNameAndAppIndex();
 
     std::condition_variable cv_;
     std::mutex mutex_;
