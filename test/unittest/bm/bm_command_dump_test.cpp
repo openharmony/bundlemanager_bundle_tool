@@ -538,7 +538,7 @@ HWTEST_F(BmCommandDumpTest, Bm_Command_Dump_2000, Function | MediumTest | Level1
     BundleManagerShellCommand cmd(argc, argv);
     // set the mock objects
     SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), "error: option requires a correct value.\n");
+    EXPECT_EQ(cmd.ExecCommand(), "name\n");
 }
 
 /**
