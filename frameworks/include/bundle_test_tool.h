@@ -99,6 +99,7 @@ private:
     ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
     ErrCode RunAsUpdateAppEncryptedStatus();
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
+    ErrCode RunAsIsBundleInstalled();
 
     std::condition_variable cv_;
     std::mutex mutex_;

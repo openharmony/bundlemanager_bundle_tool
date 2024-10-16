@@ -173,7 +173,9 @@ static const std::string HELP_MSG =
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
     "  getContinueBundleName            get continue bundle name list\n"
     "  updateAppEncryptedStatus         update app encrypted status\n"
-    "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n";
+    "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
+    "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
+    "and appIndex\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -557,6 +559,18 @@ const std::string HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE =
     "and a continueType with '-c' or '--continue-type' \n"
     "and a userId with '-u' or '--user-id' \n";
 
+const std::string HELP_MSG_IS_BUNDLE_INSTALLED =
+    "usage: bundle_test_tool getrm <options>\n"
+    "eg:bundle_test_tool getrm -m <module-name> -n <bundle-name> \n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify a app index\n";
+
+const std::string STRING_IS_BUNDLE_INSTALLED_OK = "IsBundleInstalled is ok \n";
+const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInstalled \n";
+
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -659,6 +673,15 @@ const struct option LONG_OPTIONS[] = {
     {"device-id", required_argument, nullptr, 'd'},
     {"user-id", required_argument, nullptr, 'u'},
     {"is-removable", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_IS_BUNDLE_INSTALLED = "hn:u:a:";
+const struct option LONG_OPTIONS_IS_BUNDLE_INSTALLED[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -937,7 +960,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"updateAppEncryptedStatus",
             std::bind(&BundleTestTool::RunAsUpdateAppEncryptedStatus, this)},
         {"getDirByBundleNameAndAppIndex",
-            std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)}
+            std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)},
+        {"isBundleInstalled",
+            std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4511,6 +4536,57 @@ ErrCode BundleTestTool::RunAsGetDirByBundleNameAndAppIndex()
             resultReceiver_.append(STRING_GET_DIR_NG + "Please enter a valid appIndex\n");
         } else {
             resultReceiver_.append(STRING_GET_DIR_NG + "errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsIsBundleInstalled()
+{
+    APP_LOGI("RunAsIsBundleInstalled start");
+    std::string commandName = "isBundleInstalled";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    std::string bundleName = "";
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t appIndex = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_IS_BUNDLE_INSTALLED.c_str(),
+            LONG_OPTIONS_IS_BUNDLE_INSTALLED, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool isBundleInstalled with no option.");
+                resultReceiver_.append(HELP_MSG_IS_BUNDLE_INSTALLED);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        bundleName = option == 'n' ? name : bundleName;
+        userId = option == 'u' ? temp : userId;
+        appIndex = option == 'a' ? temp : appIndex;
+    }
+    APP_LOGI("bundleName: %{public}s, appIndex: %{public}d, userId: %{public}d", bundleName.c_str(), appIndex, userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_IS_BUNDLE_INSTALLED);
+    } else {
+        bool isBundleInstalled = false;
+        result = bundleMgrProxy_->IsBundleInstalled(bundleName, userId, appIndex, isBundleInstalled);
+        if (result == ERR_OK) {
+            resultReceiver_.append(STRING_IS_BUNDLE_INSTALLED_OK);
+            resultReceiver_.append("isBundleInstalled: ");
+            resultReceiver_.append(isBundleInstalled ? "true\n" : "false\n");
+        } else {
+            resultReceiver_.append(STRING_IS_BUNDLE_INSTALLED_NG + "errCode is "+ std::to_string(result) + "\n");
         }
     }
     return result;
