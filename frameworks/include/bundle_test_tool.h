@@ -100,6 +100,7 @@ private:
     ErrCode RunAsUpdateAppEncryptedStatus();
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsIsBundleInstalled();
+    ErrCode RunAsGetCompatibleDeviceType();
     ErrCode RunAsGetBundleNameByAppIdOrAppIdentifier();
 
     std::condition_variable cv_;
