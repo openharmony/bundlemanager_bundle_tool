@@ -176,6 +176,7 @@ static const std::string HELP_MSG =
     "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
     "and appIndex\n";
+    "  getBundleNameByAppIdOrAppIdentifier  get bundlename by appid or appIdentifier\n"
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -568,8 +569,18 @@ const std::string HELP_MSG_IS_BUNDLE_INSTALLED =
     "  -u, --user-id <user-id>                specify a user id\n"
     "  -a, --app-index <app-index>            specify a app index\n";
 
+const std::string HELP_MSG_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER =
+    "usage: bundle_test_tool getBundleNameByAppIdOrAppIdentifier <options>\n"
+    "eg:bundle_test_tool getBundleNameByAppIdOrAppIdentifier -a <app-id>\n"
+    "options list:\n"
+    "  -a, --app-id <app-id>            specify a app index or app identifier\n";
+
 const std::string STRING_IS_BUNDLE_INSTALLED_OK = "IsBundleInstalled is ok \n";
 const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInstalled \n";
+
+const std::string STRING_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER_OK = "getBundleNameByAppIdOrAppIdentifier is ok \n";
+const std::string STRING_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER_NG =
+    "error: failed to getBundleNameByAppIdOrAppIdentifier \n";
 
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
@@ -682,6 +693,13 @@ const struct option LONG_OPTIONS_IS_BUNDLE_INSTALLED[] = {
     {"bundle-name", required_argument, nullptr, 'n'},
     {"user-id", required_argument, nullptr, 'u'},
     {"app-index", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER = "ha:";
+const struct option LONG_OPTIONS_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"app-id", required_argument, nullptr, 'a'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -962,7 +980,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getDirByBundleNameAndAppIndex",
             std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)},
         {"isBundleInstalled",
-            std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)}
+            std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)},
+        {"getBundleNameByAppIdOrAppIdentifier",
+            std::bind(&BundleTestTool::RunAsGetBundleNameByAppIdOrAppIdentifier, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4590,6 +4610,50 @@ ErrCode BundleTestTool::RunAsIsBundleInstalled()
         }
     }
     return result;
+}
+
+ErrCode BundleTestTool::RunAsGetBundleNameByAppIdOrAppIdentifier()
+{
+    APP_LOGI("RunAsGetBundleNameByAppIdOrAppIdentifier start");
+    std::string appId;
+    std::string bundleName;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER.c_str(),
+            LONG_OPTIONS_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool isBundleInstalled with no option.");
+                resultReceiver_.append(HELP_MSG_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        switch (option) {
+            case 'a': {
+                appId = optarg;
+                break;
+            }
+            default: {
+                resultReceiver_.append(HELP_MSG_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+        }
+    }
+    auto result = bundleMgrProxy_->GetBundleNameByAppIdOrAppIdentifier(appId, bundleName);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER_OK);
+        resultReceiver_.append(bundleName + "\n");
+    } else {
+        resultReceiver_.append(STRING_GET_BUNDLENAME_BY_APPID_OR_IDENTIFIER_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    APP_LOGI("RunAsGetBundleNameByAppIdOrAppIdentifier end");
 }
 } // AppExecFwk
 } // OHOS

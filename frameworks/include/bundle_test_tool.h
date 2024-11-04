@@ -100,6 +100,7 @@ private:
     ErrCode RunAsUpdateAppEncryptedStatus();
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsIsBundleInstalled();
+    ErrCode RunAsGetBundleNameByAppIdOrAppIdentifier();
 
     std::condition_variable cv_;
     std::mutex mutex_;
