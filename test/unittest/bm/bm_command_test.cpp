@@ -108,7 +108,7 @@ HWTEST_F(BmCommandTest, Bm_Command_0001, Function | MediumTest | Level1)
 
     // set the mock objects
     SetMockObjects(cmd);
-    
+
     std::string message;
     message += HELP_MSG;
     int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, ROOT_MODE);
@@ -487,7 +487,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0011, Function | MediumTest | Level1)
     BundleManagerShellCommand cmd(argc, argv);
     // set the mock objects
     SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
+    EXPECT_EQ(cmd.ExecCommand(), STRING_CLEAN_DATA_BUNDLE_NG + "\n");
 }
 
 /**
@@ -788,7 +788,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0008, Function | MediumTest | Level1)
     BundleManagerShellCommand cmd(argc, argv);
     // set the mock objects
     SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
+    EXPECT_EQ(cmd.ExecCommand(), STRING_ENABLE_BUNDLE_OK + "\n");
 }
 
 /**
@@ -1065,7 +1065,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0010, Function | MediumTest | Level1)
     BundleManagerShellCommand cmd(argc, argv);
     // set the mock objects
     SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
+    EXPECT_EQ(cmd.ExecCommand(), HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n" + HELP_MSG_DISABLE);
 }
 
 /**
