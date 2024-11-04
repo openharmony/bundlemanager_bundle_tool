@@ -175,7 +175,8 @@ static const std::string HELP_MSG =
     "  updateAppEncryptedStatus         update app encrypted status\n"
     "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
-    "and appIndex\n";
+    "and appIndex\n"
+    "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -554,6 +555,13 @@ const std::string HELP_MSG_GET_ODID =
     "  -h, --help               list available commands\n"
     "  -u, --uid  <uid>         specify uid of the application\n";
 
+const std::string HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE =
+    "usage: bundle_test_tool getCompatibleDeviceType <option>\n"
+    "eg: bundle_test_tool getCompatibleDeviceType -n <bundle-name>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
+
 const std::string HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
     "and a continueType with '-c' or '--continue-type' \n"
@@ -624,6 +632,9 @@ const std::string STRING_GET_GROUP_DIR_NG = "getGroupDir failed\n";
 const std::string STRING_GET_JSON_PROFILE_NG = "getJsonProfile failed\n";
 
 const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleInfo failed\n";
+
+const std::string STRING_GET_COMPATIBLE_DEVICE_TYPE_OK = "getCompatibleDeviceType successfully\n";
+const std::string STRING_GET_COMPATIBLE_DEVICE_TYPE_NG = "getCompatibleDeviceType failed\n";
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
@@ -873,6 +884,13 @@ const struct option LONG_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_COMPATIBLE_DEVICE_TYPE = "hn:";
+const struct option LONG_OPTIONS_GET_COMPATIBLE_DEVICE_TYPE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -962,7 +980,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getDirByBundleNameAndAppIndex",
             std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)},
         {"isBundleInstalled",
-            std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)}
+            std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)},
+        {"getCompatibleDeviceType",
+            std::bind(&BundleTestTool::RunAsGetCompatibleDeviceType, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4587,6 +4607,53 @@ ErrCode BundleTestTool::RunAsIsBundleInstalled()
             resultReceiver_.append(isBundleInstalled ? "true\n" : "false\n");
         } else {
             resultReceiver_.append(STRING_IS_BUNDLE_INSTALLED_NG + "errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetCompatibleDeviceType()
+{
+    APP_LOGI("RunAsGetCompatibleDeviceType start");
+    std::string commandName = "getCompatibleDeviceType";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    std::string bundleName = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_COMPATIBLE_DEVICE_TYPE.c_str(),
+            LONG_OPTIONS_GET_COMPATIBLE_DEVICE_TYPE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getCompatibleDeviceType with no option.");
+                resultReceiver_.append(HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        bundleName = option == 'n' ? name : bundleName;
+    }
+    APP_LOGI("bundleName: %{public}s", bundleName.c_str());
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE);
+    } else {
+        std::string deviceType;
+        result = bundleMgrProxy_->GetCompatibleDeviceType(bundleName, deviceType);
+        if (result == ERR_OK) {
+            resultReceiver_.append(STRING_GET_COMPATIBLE_DEVICE_TYPE_OK);
+            resultReceiver_.append("deviceType: ");
+            resultReceiver_.append(deviceType + "\n");
+        } else {
+            resultReceiver_.append(STRING_GET_COMPATIBLE_DEVICE_TYPE_NG + "errCode is "+ std::to_string(result) + "\n");
         }
     }
     return result;
