@@ -338,7 +338,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0011, Function | MediumTest | 
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
+    EXPECT_EQ(cmd.ExecCommand(), STRING_DUMP_OVERLAY_NG + "\n");
 }
 
 /**
@@ -386,7 +386,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0013, Function | MediumTest | 
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
+    EXPECT_EQ(cmd.ExecCommand(), STRING_DUMP_OVERLAY_NG + "\n");
 }
 
 /**
@@ -712,7 +712,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0009, Function | Medium
     // set the mock objects
     SetMockObjects(cmd);
 
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
+    EXPECT_EQ(cmd.ExecCommand(), STRING_DUMP_TARGET_OVERLAY_NG + "\n");
 }
 
 /**
@@ -737,31 +737,6 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0010, Function | Medium
     SetMockObjects(cmd);
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_DUMP_TARGET_OVERLAY_NG + "\n");
-}
-
-
-/**
- * @tc.number: Bm_Command_Target_Overlay_0011
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "bm dump-overlay -u <user-id>" command.
- */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0011, Function | MediumTest | Level1)
-{
-    char *argv[] = {
-        const_cast<char*>(TOOL_NAME.c_str()),
-        const_cast<char*>(tOverlay_.c_str()),
-        const_cast<char*>("-u"),
-        const_cast<char*>(ERR_USER_ID.c_str()),
-        const_cast<char*>(""),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-
-    BundleManagerShellCommand cmd(argc, argv);
-
-    // set the mock objects
-    SetMockObjects(cmd);
-
-    EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
 }
 
 /**

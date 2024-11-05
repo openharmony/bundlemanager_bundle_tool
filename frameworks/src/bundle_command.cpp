@@ -603,11 +603,14 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
             case 'u': {
                 // 'bm install -p <bundle-file-path> -u userId'
                 // 'bm install --bundle-path <bundle-file-path> --user-id userId'
-                APP_LOGD("'bm install %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
+                APP_LOGW("'bm install -u only support user 0'");
                 if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
                     APP_LOGE("bm install with error userId %{private}s", optarg);
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != Constants::DEFAULT_USERID) {
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
                 break;
             }
@@ -835,11 +838,14 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
             case 'u': {
                 // 'bm uninstall -n <bundleName> -u userId'
                 // 'bm uninstall --bundle-name <bundleName> --user-id userId'
-                APP_LOGD("'bm uninstall %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
+                APP_LOGW("'bm uninstall -u only support user 0'");
                 if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
                     APP_LOGE("bm uninstall with error userId %{private}s", optarg);
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != Constants::DEFAULT_USERID) {
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
                 break;
             }
@@ -923,7 +929,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     bool bundleDumpShortcut = false;
     bool bundleDumpDistributedBundleInfo = false;
     std::string deviceId = "";
-    int32_t userId = Constants::ALL_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_DUMP.c_str(), LONG_OPTIONS_DUMP, nullptr);
@@ -1016,12 +1022,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             case 'u': {
                 // 'bm dump -n <bundleName> -u userId'
                 // 'bm dump --bundle-name <bundleName> --user-id userId'
-                APP_LOGD("'bm dump %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
-                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
-                    APP_LOGE("bm dump with error userId %{private}s", optarg);
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
+                APP_LOGW("'bm dump -u is not supported'");
                 break;
             }
             case 'd': {
@@ -1087,7 +1088,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     APP_LOGI("begin to RunAsCleanCommand");
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
-    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     int32_t appIndex = 0;
     bool cleanCache = false;
     bool cleanData = false;
@@ -1186,12 +1187,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             case 'u': {
                 // 'bm clean -u userId'
                 // 'bm clean --user-id userId'
-                APP_LOGD("'bm clean %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
-                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
-                    APP_LOGE("bm clean with error userId %{private}s", optarg);
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
+                APP_LOGW("'bm clean -u is not supported'");
                 break;
             }
             case 'i': {
@@ -1259,7 +1255,7 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
     int counter = 0;
     std::string bundleName = "";
     std::string abilityName = "";
-    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -1345,12 +1341,7 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
             case 'u': {
                 // 'bm enable -u userId'
                 // 'bm enable --user-id userId'
-                APP_LOGD("'bm enable %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
-                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
-                    APP_LOGE("bm enable with error userId %{private}s", optarg);
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
+                APP_LOGW("'bm enable -u is not supported'");
                 break;
             }
             default: {
@@ -1399,7 +1390,7 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
     int counter = 0;
     std::string bundleName = "";
     std::string abilityName = "";
-    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -1482,12 +1473,7 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
             case 'u': {
                 // 'bm disable -u userId'
                 // 'bm disable --user-id userId'
-                APP_LOGD("'bm disable %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
-                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
-                    APP_LOGE("bm disable with error userId %{private}s", optarg);
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
+                APP_LOGW("'bm disable -u is not supported'");
                 break;
             }
             default: {
@@ -1685,7 +1671,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
     APP_LOGI("begin to RunAsDumpOverlay");
     int result = OHOS::ERR_OK;
     int counter = 0;
-    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     std::string bundleName = "";
     std::string moduleName = "";
     std::string targetModuleName = "";
@@ -1788,12 +1774,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
                 break;
             }
             case 'u': {
-                APP_LOGD("'bm dump-overlay %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg);
-                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
-                    APP_LOGE("bm dump-overlay with error userId %{private}s", optarg);
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
+                APP_LOGW("'bm dump-overlay -u is not supported'");
                 break;
             }
             default: {
@@ -1826,7 +1807,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
     APP_LOGI("begin to RunAsDumpTargetOverlay");
     int result = OHOS::ERR_OK;
     int counter = 0;
-    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     std::string bundleName = "";
     std::string moduleName = "";
     while (true) {
@@ -1914,13 +1895,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
                 break;
             }
             case 'u': {
-                APP_LOGD("'bm dump-target-overlay %{public}s %{public}s'", argv_[optind - OFFSET_REQUIRED_ARGUMENT],
-                    optarg);
-                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
-                    APP_LOGE("bm dump-target-overlay with error userId %{private}s", optarg);
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    return OHOS::ERR_INVALID_VALUE;
-                }
+                APP_LOGW("'bm dump-target-overlay -u is not supported'");
                 break;
             }
             default: {
