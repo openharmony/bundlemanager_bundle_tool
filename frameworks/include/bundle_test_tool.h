@@ -101,6 +101,7 @@ private:
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsIsBundleInstalled();
     ErrCode RunAsGetCompatibleDeviceType();
+    ErrCode RunAsGetBundleNameByAppId();
 
     std::condition_variable cv_;
     std::mutex mutex_;
