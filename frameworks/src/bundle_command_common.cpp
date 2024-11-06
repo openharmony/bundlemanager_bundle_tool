@@ -694,7 +694,11 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_DEBUG_ENCRYPTED_BUNDLE_FAILED,
         "error: debug encrypted bundle is not allowed to install."
-    }
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_RELEASE_BUNDLE_NOT_ALLOWED_FOR_SHELL,
+        "error: Release bundle cannot be installed by shell without root."
+    },
 };
 } // AppExecFwk
 } // OHOS
