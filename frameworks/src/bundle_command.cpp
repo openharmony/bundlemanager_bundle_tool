@@ -2757,7 +2757,6 @@ ErrCode BundleManagerShellCommand::DeleteQuickFix(const std::string &bundleName,
 
 std::string BundleManagerShellCommand::GetWaringString(int32_t currentUserId, int32_t specifedUserId) const
 {
-    APP_LOGE("zhaogan 1");
     std::string res = WARNING_USER;
     size_t pos = res.find('%');
     while (pos!= std::string::npos) {
@@ -2769,7 +2768,6 @@ std::string BundleManagerShellCommand::GetWaringString(int32_t currentUserId, in
         res.replace(pos, 1, std::to_string(specifedUserId));
         pos = res.find('$');
     }
-    APP_LOGE("zhaogan res: %{public}s", res.c_str());
     return res;
 }
 }  // namespace AppExecFwk
