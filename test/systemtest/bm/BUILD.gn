@@ -16,6 +16,10 @@ import("../../../bundletool.gni")
 
 module_output_path = "bundle_tool/tools"
 
+config("tools_bm_config_systemtest") {
+  include_dirs = [ "${bundletool_test_path}/mock/" ]
+}
+
 ohos_systemtest("bm_command_install_system_test") {
   module_out_path = module_output_path
 
@@ -24,9 +28,15 @@ ohos_systemtest("bm_command_install_system_test") {
     "tool_system_test.cpp",
   ]
 
+  deps = [
+    "${bundletool_test_path}/systemtest/bm/ohos_test:copy_ohos_test",
+    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
+    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
+  ]
+
   configs = [
     "${bundletool_path}:tools_bm_config",
-    "${bundletool_test_path}/unittest/bm:tools_bm_config_mock",
+    ":tools_bm_config_systemtest",
   ]
 
   cflags = []
@@ -34,19 +44,14 @@ ohos_systemtest("bm_command_install_system_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${bundle_framework_path}/test/sceneProject/tools/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "${bundle_framework_path}/test/sceneProject/tools/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
-    "${bundle_framework_path}/test/sceneProject/tools/ohos_test:copy_ohos_test",
-    "//third_party/googletest:gtest_main",
-  ]
-
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
     "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
@@ -65,7 +70,7 @@ ohos_systemtest("bm_command_uninstall_system_test") {
 
   configs = [
     "${bundletool_path}:tools_bm_config",
-    "${bundletool_test_path}/unittest/bm:tools_bm_config_mock",
+    ":tools_bm_config_systemtest",
   ]
 
   cflags = []
@@ -74,18 +79,19 @@ ohos_systemtest("bm_command_uninstall_system_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/test/sceneProject/tools/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "${bundle_framework_path}/test/sceneProject/tools/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
-    "${bundle_framework_path}/test/sceneProject/tools/ohos_test:copy_ohos_test",
-    "//third_party/googletest:gtest_main",
+    "${bundletool_test_path}/systemtest/bm/ohos_test:copy_ohos_test",
+    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
+    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
     "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
@@ -104,7 +110,7 @@ ohos_systemtest("bm_command_dump_system_test") {
 
   configs = [
     "${bundletool_path}:tools_bm_config",
-    "${bundletool_test_path}/unittest/bm:tools_bm_config_mock",
+    ":tools_bm_config_systemtest",
   ]
 
   cflags = []
@@ -113,18 +119,19 @@ ohos_systemtest("bm_command_dump_system_test") {
   }
 
   deps = [
-    "${bundle_framework_path}/test/sceneProject/tools/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "${bundle_framework_path}/test/sceneProject/tools/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
-    "${bundle_framework_path}/test/sceneProject/tools/ohos_test:copy_ohos_test",
-    "//third_party/googletest:gtest_main",
+    "${bundletool_test_path}/systemtest/bm/ohos_test:copy_ohos_test",
+    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
+    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
     "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",

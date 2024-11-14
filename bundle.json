@@ -30,7 +30,11 @@
                 "os_account",
                 "samgr",
                 "json",
-                "jsoncpp"
+                "jsoncpp",
+                "access_token",
+                "appverify",
+                "ffrt",
+                "kv_store"
             ],
             "third_party": []
         },
