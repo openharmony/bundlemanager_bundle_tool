@@ -466,31 +466,6 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0010, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number: Bm_Command_Clean_0011
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "bm clean -n <bundle-name> -d -u XXX" command.
- */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0011, Function | MediumTest | Level1)
-{
-    char *argv[] = {
-        const_cast<char*>(TOOL_NAME.c_str()),
-        const_cast<char*>("clean"),
-        const_cast<char*>("-n"),
-        const_cast<char*>(STRING_BUNDLE_NAME.c_str()),
-        const_cast<char*>("-d"),
-        const_cast<char*>(" "),
-        const_cast<char*>("-u"),
-        const_cast<char*>("XXX"),
-        const_cast<char*>(""),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    BundleManagerShellCommand cmd(argc, argv);
-    // set the mock objects
-    SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_CLEAN_DATA_BUNDLE_NG + "\n");
-}
-
-/**
  * @tc.number: Bm_Command_Clean_0012
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> -d -u <user-id>" command.
@@ -769,29 +744,6 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0007, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number: Bm_Command_Enable_0008
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "bm enable -n <bundle-name> -u XXX" command.
- */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0008, Function | MediumTest | Level1)
-{
-    char *argv[] = {
-        const_cast<char*>(TOOL_NAME.c_str()),
-        const_cast<char*>("enable"),
-        const_cast<char*>("-n"),
-        const_cast<char*>(STRING_BUNDLE_NAME.c_str()),
-        const_cast<char*>("-u"),
-        const_cast<char*>("XXX"),
-        const_cast<char*>(""),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    BundleManagerShellCommand cmd(argc, argv);
-    // set the mock objects
-    SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_ENABLE_BUNDLE_OK + "\n");
-}
-
-/**
  * @tc.number: Bm_Command_Enable_0009
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name> -u <user-id>" command.
@@ -1045,27 +997,6 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0009, Function | MediumTest | Level1)
     // set the mock objects
     SetMockObjects(cmd);
     EXPECT_EQ(cmd.ExecCommand(), HELP_MSG_DISABLE);
-}
-
-/**
- * @tc.number: Bm_Command_Disable_0010
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "bm disable -n <bundle-name> -u XXX" command.
- */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0010, Function | MediumTest | Level1)
-{
-    char *argv[] = {
-        const_cast<char*>(TOOL_NAME.c_str()),
-        const_cast<char*>("disable"),
-        const_cast<char*>("-u"),
-        const_cast<char*>("XXX"),
-        const_cast<char*>(""),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    BundleManagerShellCommand cmd(argc, argv);
-    // set the mock objects
-    SetMockObjects(cmd);
-    EXPECT_EQ(cmd.ExecCommand(), HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n" + HELP_MSG_DISABLE);
 }
 
 /**

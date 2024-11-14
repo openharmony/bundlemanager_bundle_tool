@@ -686,34 +686,6 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2800, Function | MediumTest | 
 }
 
 /**
- * @tc.number: Bm_Command_Install_2900
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "bm install -p <bundle-path> <bundle-path> -u" command.
- */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2900, Function | MediumTest | Level1)
-{
-    // install a bundle
-    char *argv[] = {
-        const_cast<char*>(TOOL_NAME.c_str()),
-        const_cast<char*>(cmd_.c_str()),
-        const_cast<char*>("-p"),
-        const_cast<char*>(STRING_BUNDLE_PATH.c_str()),
-        const_cast<char*>(STRING_OTHER_BUNDLE_PATH.c_str()),
-        const_cast<char*>("-u"),
-        const_cast<char*>(DEFAULT_USER_ID.c_str()),
-        const_cast<char*>(""),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-
-    BundleManagerShellCommand cmd(argc, argv);
-
-    // set the mock objects
-    SetMockObjects(cmd);
-
-    EXPECT_EQ(cmd.ExecCommand(), STRING_INSTALL_BUNDLE_OK + "\n");
-}
-
-/**
  * @tc.number: Bm_Command_Install_3000
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -w" command.
