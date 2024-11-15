@@ -511,8 +511,10 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     std::vector<std::string> sharedBundleDirPaths;
     int index = 0;
     int hspIndex = 0;
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
     int32_t waittingTime = MINIMUM_WAITTING_TIME;
+    std::string warning;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -609,7 +611,8 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != Constants::DEFAULT_USERID) {
+                if (userId != Constants::DEFAULT_USERID && userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
                 break;
@@ -703,6 +706,9 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 resultReceiver_.append(resultMsg + "\n");
             }
         }
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
+        }
     }
     APP_LOGI("end");
     return result;
@@ -730,7 +736,9 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
     int counter = 0;
     std::string bundleName = "";
     std::string moduleName = "";
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    std::string warning;
+    int32_t userId = currentUser;
     bool isKeepData = false;
     bool isShared = false;
     int32_t versionCode = Constants::ALL_VERSIONCODE;
@@ -844,8 +852,9 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != Constants::DEFAULT_USERID) {
-                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                if (userId != Constants::DEFAULT_USERID && userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = currentUser;
                 }
                 break;
             }
@@ -913,6 +922,9 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
             resultReceiver_ = STRING_UNINSTALL_BUNDLE_NG + "\n";
             resultReceiver_.append(GetMessageFromCode(uninstallResult));
         }
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
+        }
     }
     APP_LOGI("end");
     return result;
@@ -929,7 +941,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     bool bundleDumpShortcut = false;
     bool bundleDumpDistributedBundleInfo = false;
     std::string deviceId = "";
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    std::string warning;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_DUMP.c_str(), LONG_OPTIONS_DUMP, nullptr);
@@ -1023,6 +1037,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                 // 'bm dump -n <bundleName> -u userId'
                 // 'bm dump --bundle-name <bundleName> --user-id userId'
                 APP_LOGW("'bm dump -u is not supported'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bm dump with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != Constants::DEFAULT_USERID && userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
                 break;
             }
             case 'd': {
@@ -1071,6 +1094,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             dumpResults = HELP_MSG_DUMP_FAILED + "\n";
         }
         resultReceiver_.append(dumpResults);
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
+        }
     }
     APP_LOGI("end");
     return result;
@@ -1088,7 +1114,9 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     APP_LOGI("begin to RunAsCleanCommand");
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    std::string warning;
     int32_t appIndex = 0;
     bool cleanCache = false;
     bool cleanData = false;
@@ -1188,6 +1216,15 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 // 'bm clean -u userId'
                 // 'bm clean --user-id userId'
                 APP_LOGW("'bm clean -u is not supported'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bm clean with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
                 break;
             }
             case 'i': {
@@ -1238,6 +1275,9 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 resultReceiver_.append(STRING_CLEAN_DATA_BUNDLE_NG + "\n");
             }
         }
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
+        }
     }
     APP_LOGI("end");
     return result;
@@ -1255,7 +1295,9 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
     int counter = 0;
     std::string bundleName = "";
     std::string abilityName = "";
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    std::string warning;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -1342,6 +1384,15 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
                 // 'bm enable -u userId'
                 // 'bm enable --user-id userId'
                 APP_LOGW("'bm enable -u is not supported'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bm enable with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
                 break;
             }
             default: {
@@ -1373,6 +1424,9 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
         } else {
             resultReceiver_ = STRING_ENABLE_BUNDLE_NG + "\n";
         }
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
+        }
     }
     APP_LOGI("end");
     return result;
@@ -1390,7 +1444,9 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
     int counter = 0;
     std::string bundleName = "";
     std::string abilityName = "";
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    std::string warning;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -1474,6 +1530,15 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
                 // 'bm disable -u userId'
                 // 'bm disable --user-id userId'
                 APP_LOGW("'bm disable -u is not supported'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bm disable with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
                 break;
             }
             default: {
@@ -1501,6 +1566,9 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
             resultReceiver_ = STRING_DISABLE_BUNDLE_OK + "\n";
         } else {
             resultReceiver_ = STRING_DISABLE_BUNDLE_NG + "\n";
+        }
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
         }
     }
     APP_LOGI("end");
@@ -1671,7 +1739,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
     APP_LOGI("begin to RunAsDumpOverlay");
     int result = OHOS::ERR_OK;
     int counter = 0;
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    std::string warning;
     std::string bundleName = "";
     std::string moduleName = "";
     std::string targetModuleName = "";
@@ -1775,6 +1845,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
             }
             case 'u': {
                 APP_LOGW("'bm dump-overlay -u is not supported'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bm dump-overlay with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
                 break;
             }
             default: {
@@ -1798,6 +1877,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
 #else
     resultReceiver_.append(MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED);
 #endif
+    if (!warning.empty()) {
+        resultReceiver_ = warning + resultReceiver_;
+    }
     APP_LOGI("end");
     return result;
 }
@@ -1807,7 +1889,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
     APP_LOGI("begin to RunAsDumpTargetOverlay");
     int result = OHOS::ERR_OK;
     int counter = 0;
-    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    std::string warning;
     std::string bundleName = "";
     std::string moduleName = "";
     while (true) {
@@ -1896,6 +1980,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
             }
             case 'u': {
                 APP_LOGW("'bm dump-target-overlay -u is not supported'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bm dump-target-overlay with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != currentUser) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
                 break;
             }
             default: {
@@ -1919,6 +2012,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
 #else
     resultReceiver_.append(MSG_ERR_BUNDLEMANAGER_OVERLAY_FEATURE_IS_NOT_SUPPORTED);
 #endif
+    if (!warning.empty()) {
+        resultReceiver_ = warning + resultReceiver_;
+    }
     APP_LOGI("end");
     return result;
 }
@@ -2655,6 +2751,22 @@ ErrCode BundleManagerShellCommand::DeleteQuickFix(const std::string &bundleName,
         return res;
     }
     return callback->GetResultCode(quickFixRes);
+}
+
+std::string BundleManagerShellCommand::GetWaringString(int32_t currentUserId, int32_t specifedUserId) const
+{
+    std::string res = WARNING_USER;
+    size_t pos = res.find('%');
+    while (pos!= std::string::npos) {
+        res.replace(pos, 1, std::to_string(currentUserId));
+        pos = res.find('%');
+    }
+    pos = res.find('$');
+    while (pos!= std::string::npos) {
+        res.replace(pos, 1, std::to_string(specifedUserId));
+        pos = res.find('$');
+    }
+    return res;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
