@@ -109,7 +109,7 @@ const struct option UNINSTALL_LONG_OPTIONS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_DUMP = "hn:aisu:d:";
+const std::string SHORT_OPTIONS_DUMP = "hn:aisu:d:g";
 const struct option LONG_OPTIONS_DUMP[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
@@ -118,6 +118,7 @@ const struct option LONG_OPTIONS_DUMP[] = {
     {"shortcut-info", no_argument, nullptr, 's'},
     {"user-id", required_argument, nullptr, 'u'},
     {"device-id", required_argument, nullptr, 'd'},
+    {"debug-bundle", no_argument, nullptr, 'g'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -937,6 +938,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     int counter = 0;
     std::string bundleName = "";
     bool bundleDumpAll = false;
+    bool bundleDumpDebug = false;
     bool bundleDumpInfo = false;
     bool bundleDumpShortcut = false;
     bool bundleDumpDistributedBundleInfo = false;
@@ -1018,6 +1020,13 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                 bundleDumpAll = true;
                 break;
             }
+            case 'g': {
+                // 'bm dump -g'
+                // 'bm dump --debug-bundle'
+                APP_LOGD("'bm dump %{public}s'", argv_[optind - 1]);
+                bundleDumpDebug = true;
+                break;
+            }
             case 'n': {
                 // 'bm dump -n xxx'
                 // 'bm dump --bundle-name xxx'
@@ -1087,6 +1096,8 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             dumpResults = DumpDistributedBundleInfo(deviceId, bundleName);
         } else if (bundleDumpAll) {
             dumpResults = DumpBundleList(userId);
+        } else if (bundleDumpDebug) {
+            dumpResults = DumpDebugBundleList(userId);
         } else if (bundleDumpInfo) {
             dumpResults = DumpBundleInfo(bundleName, userId);
         }
@@ -2085,6 +2096,17 @@ std::string BundleManagerShellCommand::DumpBundleList(int32_t userId) const
         DumpFlag::DUMP_BUNDLE_LIST, BUNDLE_NAME_EMPTY, userId, dumpResults);
     if (!dumpRet) {
         APP_LOGE("failed to dump bundle list.");
+    }
+    return dumpResults;
+}
+
+std::string BundleManagerShellCommand::DumpDebugBundleList(int32_t userId) const
+{
+    std::string dumpResults;
+    bool dumpRet = bundleMgrProxy_->DumpInfos(
+        DumpFlag::DUMP_DEBUG_BUNDLE_LIST, BUNDLE_NAME_EMPTY, userId, dumpResults);
+    if (!dumpRet) {
+        APP_LOGE("failed to dump debug bundle list.");
     }
     return dumpResults;
 }
