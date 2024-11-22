@@ -703,6 +703,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         IStatusReceiver::ERR_INSTALL_ENCRYPTED_BUNDLE_NOT_ALLOWED_FOR_SHELL,
         "error: Encrypted bundle cannot be installed by shell without root."
     },
+    {
+        IStatusReceiver::ERR_INSTALL_APPID_NOT_SAME_WITH_PREINSTALLED,
+        "error: Bundle cannot be installed because the appId is not same with preinstalled bundle."
+    },
 };
 } // AppExecFwk
 } // OHOS
