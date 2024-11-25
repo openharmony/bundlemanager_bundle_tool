@@ -113,7 +113,7 @@ ErrCode MockBundleInstallerHost::UninstallSandboxApp(const std::string &bundleNa
 }
 
 sptr<IBundleStreamInstaller> MockBundleInstallerHost::CreateStreamInstaller(const InstallParam &installParam,
-    const sptr<IStatusReceiver> &statusReceiver)
+    const sptr<IStatusReceiver> &statusReceiver, const std::vector<std::string> &originHapPaths)
 {
     return nullptr;
 }
