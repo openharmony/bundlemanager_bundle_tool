@@ -697,11 +697,11 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_RELEASE_BUNDLE_NOT_ALLOWED_FOR_SHELL,
-        "error: Release bundle cannot be installed by shell without root."
+        "error: Release bundle cannot be installed."
     },
     {
         IStatusReceiver::ERR_INSTALL_ENCRYPTED_BUNDLE_NOT_ALLOWED_FOR_SHELL,
-        "error: Encrypted bundle cannot be installed by shell without root."
+        "error: Encrypted bundle cannot be installed."
     },
     {
         IStatusReceiver::ERR_INSTALL_APPID_NOT_SAME_WITH_PREINSTALLED,
