@@ -16,22 +16,8 @@ import("../../../bundletool.gni")
 
 module_output_path = "bundle_tool/tools"
 
-config("tools_bm_config_mock") {
-  include_dirs = [
-    "${inner_api_path}/appexecfwk_base/include",
-    "${inner_api_path}/appexecfwk_base/include/quick_fix",
-    "${inner_api_path}/appexecfwk_core/include/bundlemgr",
-    "${bundle_framework_path}/services/bundlemgr/include",
-    "${bundle_framework_path}/services/bundlemgr/include/navigation",
-    "${bundle_framework_path}/services/bundlemgr/include/quick_fix",
-    "${bundle_framework_path}/services/bundlemgr/include/rdb",
-    "${bundle_framework_path}/services/bundlemgr/include/sandbox_app",
-    "${bundle_framework_path}/services/bundlemgr/include/shared",
-    "${bundle_framework_path}/services/bundlemgr/include/uninstall_data_mgr",
-    "${bundletool_test_path}/mock",
-    "//third_party/googletest/googlemock/include",
-    "//third_party/json/single_include",
-  ]
+config("tools_bm_config_unittest") {
+  include_dirs = [ "${bundletool_test_path}/mock/" ]
 }
 
 tools_bm_mock_sources = [
@@ -51,14 +37,13 @@ ohos_unittest("bm_command_dump_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_dump_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
   configs = [
     "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
+    ":tools_bm_config_unittest",
   ]
 
   cflags = []
@@ -66,11 +51,7 @@ ohos_unittest("bm_command_dump_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
@@ -81,13 +62,17 @@ ohos_unittest("bm_command_dump_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -100,7 +85,7 @@ ohos_unittest("bm_command_dump_test") {
 ohos_unittest("bm_command_dump_dependencies_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${bundletool_test_path}/mock" ]
 
   sources = [
     "${bundletool_path}/src/bundle_command.cpp",
@@ -109,26 +94,16 @@ ohos_unittest("bm_command_dump_dependencies_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_dump_dependencies_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
-  configs = [
-    "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
-  ]
+  configs = [ "${bundletool_path}:tools_bm_config" ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
 
   external_deps = [
     "ability_base:want",
@@ -139,13 +114,17 @@ ohos_unittest("bm_command_dump_dependencies_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -158,7 +137,7 @@ ohos_unittest("bm_command_dump_dependencies_test") {
 ohos_unittest("bm_command_install_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${bundletool_test_path}/mock" ]
 
   sources = [
     "${bundletool_path}/src/bundle_command.cpp",
@@ -167,26 +146,18 @@ ohos_unittest("bm_command_install_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_install_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
-  configs = [
-    "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
-  ]
+  configs = [ "${bundletool_path}:tools_bm_config" ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
@@ -197,13 +168,17 @@ ohos_unittest("bm_command_install_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -216,7 +191,7 @@ ohos_unittest("bm_command_install_test") {
 ohos_unittest("bm_command_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${bundletool_test_path}/mock" ]
 
   sources = [
     "${bundletool_path}/src/bundle_command.cpp",
@@ -225,26 +200,18 @@ ohos_unittest("bm_command_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
-  configs = [
-    "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
-  ]
+  configs = [ "${bundletool_path}:tools_bm_config" ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
@@ -255,13 +222,17 @@ ohos_unittest("bm_command_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -279,7 +250,7 @@ ohos_unittest("bm_command_test") {
 ohos_unittest("bm_command_uninstall_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${bundletool_test_path}/mock" ]
 
   sources = [
     "${bundletool_path}/src/bundle_command.cpp",
@@ -288,26 +259,18 @@ ohos_unittest("bm_command_uninstall_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_uninstall_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
-  configs = [
-    "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
-  ]
+  configs = [ "${bundletool_path}:tools_bm_config" ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
@@ -318,13 +281,17 @@ ohos_unittest("bm_command_uninstall_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -337,7 +304,7 @@ ohos_unittest("bm_command_uninstall_test") {
 ohos_unittest("bm_command_quickfix_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${bundletool_test_path}/mock" ]
 
   sources = [
     "${bundletool_path}/src/bundle_command.cpp",
@@ -346,26 +313,16 @@ ohos_unittest("bm_command_quickfix_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_quickfix_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
-  configs = [
-    "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
-  ]
+  configs = [ "${bundletool_path}:tools_bm_config" ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
 
   external_deps = [
     "ability_base:want",
@@ -376,13 +333,17 @@ ohos_unittest("bm_command_quickfix_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -395,7 +356,7 @@ ohos_unittest("bm_command_quickfix_test") {
 ohos_unittest("bm_command_overlay_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${bundletool_test_path}/mock" ]
 
   sources = [
     "${bundletool_path}/src/bundle_command.cpp",
@@ -404,26 +365,18 @@ ohos_unittest("bm_command_overlay_test") {
     "${bundletool_path}/src/quick_fix_status_callback_host_impl.cpp",
     "${bundletool_path}/src/shell_command.cpp",
     "${bundletool_path}/src/status_receiver_impl.cpp",
-    "${kits_path}/js/bundlemgr/bundle_death_recipient.cpp",
     "bm_command_overlay_test.cpp",
   ]
   sources += tools_bm_mock_sources
 
-  configs = [
-    "${bundletool_path}:tools_bm_config",
-    ":tools_bm_config_mock",
-  ]
+  configs = [ "${bundletool_path}:tools_bm_config" ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${bundle_framework_path}/services/bundlemgr:libbms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
@@ -434,13 +387,17 @@ ohos_unittest("bm_command_overlay_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
+    "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",

@@ -52,32 +52,33 @@ public:
     MockBundleInstallerHost();
     ~MockBundleInstallerHost() override;
     bool Install(const std::string &bundleFilePath, const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver);
+        const sptr<IStatusReceiver> &statusReceiver) override;
     bool Install(const std::vector<std::string> &bundleFilePath, const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver);
-    bool Uninstall(
-        const std::string &bundleName, const InstallParam &installParam, const sptr<IStatusReceiver> &statusReceiver);
+        const sptr<IStatusReceiver> &statusReceiver) override;
+    bool Uninstall(const std::string &bundleName, const InstallParam &installParam,
+        const sptr<IStatusReceiver> &statusReceiver) override;
 
     bool Uninstall(const std::string &bundleName, const std::string &modulePackage, const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver);
+        const sptr<IStatusReceiver> &statusReceiver) override;
 
-    bool Uninstall(const UninstallParam &uninstallParam, const sptr<IStatusReceiver> &statusReceiver);
+    bool Uninstall(const UninstallParam &uninstallParam, const sptr<IStatusReceiver> &statusReceiver) override;
 
     bool Recover(const std::string &bundleName, const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver);
+        const sptr<IStatusReceiver> &statusReceiver) override;
 
     ErrCode StreamInstall(const std::vector<std::string> &bundleFilePaths, const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver);
+        const sptr<IStatusReceiver> &statusReceiver) override;
 
-    ErrCode InstallSandboxApp(const std::string &bundleName, int32_t dplType, int32_t userId,
-        int32_t &appIndex);
+    ErrCode InstallSandboxApp(
+        const std::string &bundleName, int32_t dplType, int32_t userId, int32_t &appIndex) override;
 
-    ErrCode UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId);
+    ErrCode UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId) override;
 
     sptr<IBundleStreamInstaller> CreateStreamInstaller(const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver, const std::vector<std::string> &originHapPaths);
+        const sptr<IStatusReceiver> &statusReceiver, const std::vector<std::string> &originHapPaths) override;
 
-    bool DestoryBundleStreamInstaller(uint32_t streamInstallerId);
+    bool DestoryBundleStreamInstaller(uint32_t streamInstallerId) override;
+
 private:
     DISALLOW_COPY_AND_MOVE(MockBundleInstallerHost);
 };

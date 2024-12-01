@@ -27,14 +27,14 @@ class MockBundleMgrHost : public BundleMgrHost {
 public:
     ErrCode CleanBundleCacheFiles(const std::string &bundleName, const sptr<ICleanCacheCallback> cleanCacheCallback,
         int32_t userId = Constants::UNSPECIFIED_USERID, int32_t appIndex = 0) override;
-    bool CleanBundleDataFiles(const std::string &bundleName, const int userId = 0, const int appIndex = 0);
+    bool CleanBundleDataFiles(const std::string &bundleName, const int userId = 0, const int appIndex = 0) override;
     bool DumpInfos(
-        const DumpFlag flag, const std::string &bundleName, int32_t userId, std::string &result);
+        const DumpFlag flag, const std::string &bundleName, int32_t userId, std::string &result) override;
     ErrCode SetApplicationEnabled(const std::string &bundleName, bool isEnable,
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
     ErrCode SetAbilityEnabled(const AbilityInfo &abilityInfo, bool isEnable,
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
-    bool GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag, BundleInfo &bundleInfo);
+    bool GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag, BundleInfo &bundleInfo) override;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
