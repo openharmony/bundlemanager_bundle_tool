@@ -38,10 +38,7 @@ declare_args() {
   }
 }
 
-bm_install_external_deps = [
-  "appspawn:appspawn_client",
-  "ffrt:libffrt",
-]
+bm_install_external_deps = [ "ffrt:libffrt" ]
 
 print("account_enable_bm = " + "$account_enable_bm")
 print("overlay_install_bm = " + "$overlay_install_bm")
