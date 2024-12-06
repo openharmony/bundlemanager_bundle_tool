@@ -74,7 +74,7 @@ public:
     ErrCode UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId);
 
     sptr<IBundleStreamInstaller> CreateStreamInstaller(const InstallParam &installParam,
-        const sptr<IStatusReceiver> &statusReceiver);
+        const sptr<IStatusReceiver> &statusReceiver, const std::vector<std::string> &originHapPaths);
 
     bool DestoryBundleStreamInstaller(uint32_t streamInstallerId);
 private:
