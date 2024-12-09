@@ -41,7 +41,8 @@ ohos_source_set("tools_bm_source_set") {
 
   public_configs = [ ":tools_bm_config" ]
 
-  cflags = []
+  cflags = [ "-fstack-protector-strong" ]
+
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -82,6 +83,16 @@ ohos_source_set("tools_bm_source_set") {
 }
 
 ohos_executable("bm") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [ ":tools_bm_source_set" ]
 
   external_deps = [ "hilog:libhilog" ]
@@ -106,7 +117,8 @@ ohos_source_set("tools_test_bm_source_set") {
 
   public_configs = [ ":tools_bm_config" ]
 
-  cflags = []
+  cflags = [ "-fstack-protector-strong" ]
+
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -156,6 +168,18 @@ ohos_source_set("tools_test_bm_source_set") {
 }
 
 ohos_executable("bundle_test_tool") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
+  cflags = [ "-fstack-protector-strong" ]
+
   deps = [ ":tools_test_bm_source_set" ]
 
   install_enable = false
