@@ -707,6 +707,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         IStatusReceiver::ERR_INSTALL_APPID_NOT_SAME_WITH_PREINSTALLED,
         "error: Bundle cannot be installed because the appId is not same with preinstalled bundle."
     },
+    {
+        IStatusReceiver::ERR_INSTALL_BUNDLE_NOT_ALLOWED_FOR_SHELL_IN_OOBE,
+        "error: Bundle cannot be installed in oobe phase."
+    },
 };
 } // AppExecFwk
 } // OHOS
