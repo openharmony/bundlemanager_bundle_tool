@@ -179,7 +179,8 @@ static const std::string HELP_MSG =
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
     "and appIndex\n"
     "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n"
-    "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n";
+    "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
+    "  getAssetAccessGroups             get asset access groups by bundlename\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -592,6 +593,13 @@ const std::string HELP_MSG_GET_BUNDLENAME_BY_APPID =
     "options list:\n"
     "  -a, --app-id <app-id>            specify a app index or app identifier\n";
 
+const std::string HELP_MSG_GET_ASSET_ACCESS_GROUPS =
+    "usage: bundle_test_tool getAssetAccessGroups <options>\n"
+    "eg:bundle_test_tool getAssetAccessGroups -n <bundle-name>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
+
 const std::string STRING_IS_BUNDLE_INSTALLED_OK = "IsBundleInstalled is ok \n";
 const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInstalled \n";
 
@@ -683,6 +691,9 @@ const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_OK = "get distributedBundle
 const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_NG = "get distributedBundleName failed\n";
 
 const std::string STRING_GET_PROXY_DATA_NG = "get proxyData failed";
+
+const std::string STRING_GET_ASSET_ACCESS_GROUPS_OK = "getAssetAccessGroups successfully\n";
+const std::string STRING_GET_ASSET_ACCESS_GROUPS_NG = "getAssetAccessGroups failed\n";
 
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
@@ -936,6 +947,13 @@ const struct option LONG_OPTIONS_GET_DIR[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_ASSET_ACCESS_GROUPS = "hn:";
+const struct option LONG_OPTIONS_GET_ASSET_ACCESS_GROUPS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {nullptr, 0, nullptr, 0},
+};
+
 }  // namespace
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -1023,7 +1041,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getCompatibleDeviceType",
             std::bind(&BundleTestTool::RunAsGetCompatibleDeviceType, this)},
         {"getBundleNameByAppId",
-            std::bind(&BundleTestTool::RunAsGetBundleNameByAppId, this)}
+            std::bind(&BundleTestTool::RunAsGetBundleNameByAppId, this)},
+        {"getAssetAccessGroups",
+            std::bind(&BundleTestTool::RunAsGetAssetAccessGroups, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4139,6 +4159,82 @@ ErrCode BundleTestTool::CheckGetBundleNameOption(int32_t option, std::string &bu
         default: {
             result = OHOS::ERR_INVALID_VALUE;
             break;
+        }
+    }
+    return result;
+}
+
+bool BundleTestTool::CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
+    std::string &bundleName)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'n': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            bundleName = optarg;
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetAssetAccessGroups()
+{
+    APP_LOGI("RunAsGetAssetAccessGroups start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getAssetAccessGroups";
+    std::string bundleName = "";
+    auto baseFlag = static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_JSON_PROFILE.c_str(),
+            LONG_OPTIONS_GET_ASSET_ACCESS_GROUPS, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_NO_GET_JSON_PROFILE_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = !CheckGetAssetAccessGroupsOption(option, commandName, bundleName)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        APP_LOGE("bundleName = %{public}s", bundleName.c_str());
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_ASSET_ACCESS_GROUPS);
+    } else {
+        std::string results = "";
+        BundleInfo bundleinfo;
+        auto res = bundleMgrProxy_->GetBundleInfoV9(bundleName, baseFlag, bundleinfo, userId);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_GET_ASSET_ACCESS_GROUPS_NG);
+            return result;
+        } else {
+            resultReceiver_.append(STRING_GET_ASSET_ACCESS_GROUPS_OK);
+            for (auto group : bundleinfo.applicationInfo.assetAccessGroups) {
+                results = group;
+                resultReceiver_.append(results);
+                resultReceiver_.append("\n");
+            }
         }
     }
     return result;
