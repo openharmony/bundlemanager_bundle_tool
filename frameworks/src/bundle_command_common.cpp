@@ -704,6 +704,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: Encrypted bundle cannot be installed."
     },
     {
+        IStatusReceiver::ERR_UNINSTALL_DISPOSED_RULE_DENIED,
+        "error: Failed to uninstall the app because the app is locked."
+    },
+    {
         IStatusReceiver::ERR_INSTALL_APPID_NOT_SAME_WITH_PREINSTALLED,
         "error: Bundle cannot be installed because the appId is not same with preinstalled bundle."
     },
