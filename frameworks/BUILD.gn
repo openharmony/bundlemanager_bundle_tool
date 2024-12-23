@@ -27,6 +27,17 @@ config("tools_bm_config") {
 }
 
 ohos_source_set("tools_bm_source_set") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   sources = [
     "src/bundle_command.cpp",
     "src/bundle_command_common.cpp",
@@ -39,7 +50,9 @@ ohos_source_set("tools_bm_source_set") {
 
   public_configs = [ ":tools_bm_config" ]
 
-  cflags = []
+  cflags = [ "-fstack-protector-strong" ]
+  cflags_cc = cflags
+
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -92,6 +105,17 @@ ohos_executable("bm") {
 }
 
 ohos_source_set("tools_test_bm_source_set") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   sources = [
     "src/bundle_command_common.cpp",
     "src/bundle_test_tool.cpp",
@@ -103,7 +127,9 @@ ohos_source_set("tools_test_bm_source_set") {
 
   public_configs = [ ":tools_bm_config" ]
 
-  cflags = []
+  cflags = [ "-fstack-protector-strong" ]
+  cflags_cc = cflags
+
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
