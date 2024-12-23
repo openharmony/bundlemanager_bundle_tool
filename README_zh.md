@@ -133,7 +133,7 @@ bm uninstall -n com.ohos.app -k
 #### 查询应用信息命令
 
 ```bash
-bm dump [-h] [-a] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceId]
+bm dump [-h] [-a] [-g] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceId]
 ```
 命令可以组合，下面列出部分命令。
 
@@ -144,6 +144,7 @@ bm dump [-h] [-a] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceId]
 | ---------- | -------------------------- |
 | bm dump -h | 显示dump支持的命令信息。-h为非必选字段。 |
 | bm dump -a | 查询系统已经安装的所有应用包名。-a为非必选字段。 |
+| bm dump -g | 查询系统中签名为调试类型的应用包名。-g为非必选字段。 |
 | bm dump -n \<bundleName\> | 查询指定包名的详细信息。-n为非必选字段。 |
 | bm dump -n \<bundleName\> -s | 查询指定包名下的快捷方式信息。-s为非必选字段。 |
 | bm dump -n \<bundleName\> -d \<deviceId\> | 跨设备查询包信息。-d为非必选字段。 |
@@ -155,6 +156,8 @@ bm dump [-h] [-a] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceId]
 ```bash
 # 显示所有已安装的Bundle名称
 bm dump -a
+# 查询系统中签名为调试类型的应用包名
+bm dump -g
 # 查询该应用的详细信息
 bm dump -n com.ohos.app -u 100
 # 查询该应用的快捷方式信息
