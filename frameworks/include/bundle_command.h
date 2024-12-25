@@ -141,6 +141,7 @@ const std::string HELP_MSG_QUICK_FIX =
     "-d, --debug                                  apply a quickfix debug mode\n"
     "-a, --apply                                  indicates apply quickfix, used with -f or --file-path\n"
     "-t, --target <target-path>                   indicates a target path to apply quickfix\n"
+    "-o, --overwrite                              apply a quickfix in overwrite mode\n"
     "-f, --file-path <file-path>                  apply a quickfix file by a specified path\n"
     "-f, --file-path <file-path> <file-path> ...  apply some quickfix files of one bundle\n"
     "-f, --file-path <bundle-direction>           apply quickfix files by direction, under which are quickfix files\n";

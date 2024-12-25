@@ -1674,6 +1674,7 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                 std::vector<std::string> quickFixFiles;
                 bool isDebug = false;
                 std::string targetPath;
+                bool isReplace = false;
                 // collect value of multi file-path.
                 for (; index < argc_ && index >= INDEX_OFFSET; ++index) {
                     if (argList_[index - INDEX_OFFSET] == "-q" || argList_[index - INDEX_OFFSET] == "--query" ||
@@ -1691,6 +1692,10 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                         targetPath = argList_[index + 1 - INDEX_OFFSET];
                         index++;
                         continue;
+                    } else if (argList_[index - INDEX_OFFSET] == "-o" ||
+                        argList_[index - INDEX_OFFSET] == "--overwrite") {
+                        isReplace = true;
+                        continue;
                     }
                     quickFixFiles.emplace_back(argList_[index - INDEX_OFFSET]);
                 }
@@ -1703,7 +1708,7 @@ ErrCode BundleManagerShellCommand::RunAsQuickFixCommand()
                         ("apply quickfix failed with errno: " + std::to_string(result) + ".\n"));
                     return result;
                 }
-                return QuickFixCommand::ApplyQuickFix(quickFixFiles, resultReceiver_, isDebug);
+                return QuickFixCommand::ApplyQuickFix(quickFixFiles, resultReceiver_, isDebug, isReplace);
             }
         } else if ((opt == "-q") || (opt == "--query")) {
             if (index >= argc_ - INDEX_OFFSET) {
