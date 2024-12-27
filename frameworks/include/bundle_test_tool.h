@@ -104,6 +104,7 @@ private:
     ErrCode RunAsIsBundleInstalled();
     ErrCode RunAsGetCompatibleDeviceType();
     ErrCode RunAsGetBundleNameByAppId();
+    ErrCode RunAsGetAssetAccessGroups();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -178,6 +179,8 @@ private:
     ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
         uint64_t &cacheSize);
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
+    bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
+        std::string &bundleName);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
