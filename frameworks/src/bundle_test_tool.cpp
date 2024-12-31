@@ -170,7 +170,8 @@ static const std::string HELP_MSG =
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
-    "  getContinueBundleName            get continue bundle name list\n";
+    "  getContinueBundleName            get continue bundle name list\n"
+    "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -541,6 +542,15 @@ const std::string HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE =
     "and a continueType with '-c' or '--continue-type' \n"
     "and a userId with '-u' or '--user-id' \n";
 
+const std::string HELP_MSG_GET_BUNDLENAME_BY_APPID =
+    "usage: bundle_test_tool getBundleNameByAppId <options>\n"
+    "eg:bundle_test_tool getBundleNameByAppId -a <app-id>\n"
+    "options list:\n"
+    "  -a, --app-id <app-id>            specify a app index or app identifier\n";
+
+const std::string STRING_GET_BUNDLENAME_BY_APPID_OK = "getBundleNameByAppId is ok \n";
+const std::string STRING_GET_BUNDLENAME_BY_APPID_NG =
+    "error: failed to getBundleNameByAppId \n";
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
 const std::string STRING_GET_REMOVABLE_OK = "get removable is ok \n";
@@ -637,6 +647,13 @@ const struct option LONG_OPTIONS[] = {
     {"device-id", required_argument, nullptr, 'd'},
     {"user-id", required_argument, nullptr, 'u'},
     {"is-removable", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_BUNDLENAME_BY_APPID = "ha:";
+const struct option LONG_OPTIONS_GET_BUNDLENAME_BY_APPID[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"app-id", required_argument, nullptr, 'a'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -893,7 +910,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"cleanBundleCacheFilesAutomatic",
             std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)},
         {"getContinueBundleName",
-            std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)}
+            std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)},
+        {"getBundleNameByAppId",
+            std::bind(&BundleTestTool::RunAsGetBundleNameByAppId, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4377,6 +4396,51 @@ ErrCode BundleTestTool::RunAsQueryAbilityInfoByContinueType()
         }
         resultReceiver_.append("\n");
     }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetBundleNameByAppId()
+{
+    APP_LOGI("RunAsGetBundleNameByAppId start");
+    std::string appId;
+    std::string bundleName;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_BUNDLENAME_BY_APPID.c_str(),
+            LONG_OPTIONS_GET_BUNDLENAME_BY_APPID, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool isBundleInstalled with no option.");
+                resultReceiver_.append(HELP_MSG_GET_BUNDLENAME_BY_APPID);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        switch (option) {
+            case 'a': {
+                appId = optarg;
+                break;
+            }
+            default: {
+                resultReceiver_.append(HELP_MSG_GET_BUNDLENAME_BY_APPID);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+        }
+    }
+    auto result = bundleMgrProxy_->GetBundleNameByAppId(appId, bundleName);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_GET_BUNDLENAME_BY_APPID_OK);
+        resultReceiver_.append(bundleName + "\n");
+    } else {
+        resultReceiver_.append(STRING_GET_BUNDLENAME_BY_APPID_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    APP_LOGI("RunAsGetBundleNameByAppId end");
     return result;
 }
 } // AppExecFwk

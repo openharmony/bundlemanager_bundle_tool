@@ -97,6 +97,7 @@ private:
     ErrCode RunAsImplicitQuerySkillUriInfo();
     ErrCode RunAsQueryAbilityInfoByContinueType();
     ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
+    ErrCode RunAsGetBundleNameByAppId();
 
     std::condition_variable cv_;
     std::mutex mutex_;
