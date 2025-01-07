@@ -179,6 +179,7 @@ static const std::string HELP_MSG =
     "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
     "  getAllBundleDirs                 obtain all bundle dirs \n"
     "  getAllBundleCacheStat            obtain all bundle cache size \n"
+    "  CleanAllBundleCache                del all bundle cache \n"
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
     "and appIndex\n"
     "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n"
@@ -550,6 +551,13 @@ const std::string HELP_MSG_GET_ALL_BUNDLE_CACHE_STAT =
     "  -h, --help                             list available commands\n"
     "  -u, --uid <uid>                specify a uid\n";
 
+const std::string HELP_MSG_CLEAN_ALL_BUNDLE_CACHE =
+    "usage: bundle_test_tool CleanAllBundleCache <options>\n"
+    "eg:bundle_test_tool CleanAllBundleCache\n"
+    "options list:\n"
+    "  -h, --help                     list available commands\n"
+    "  -u, --uid <uid>                specify a uid\n";
+
 const std::string HELP_MSG_UPDATE_APP_EXCRYPTED_STATUS =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
     "and a isExisted with '-e' or '--existed' \n"
@@ -685,6 +693,9 @@ const std::string STRING_GET_ALL_BUNDLE_DIRS_NG = "getAllBundleDirs failed\n";
 
 const std::string STRING_GET_ALL_BUNDLE_CACHE_STAT_OK = "getAllBundleCacheStat successfully\n";
 const std::string STRING_GET_ALL_BUNDLE_CACHE_STAT_NG = "getAllBundleCacheStat failed\n";
+
+const std::string STRING_CLEAN_ALL_BUNDLE_CACHE_OK = "CleanAllBundleCache successfully\n";
+const std::string STRING_CLEAN_ALL_BUNDLE_CACHE_NG = "CleanAllBundleCache failed\n";
 
 const std::string STRING_GET_UID_BY_BUNDLENAME_NG = "getUidByBundleName failed\n";
 
@@ -959,6 +970,13 @@ const struct option LONG_OPTIONS_GET_ALL_BUNDLE_CACHE_STAT[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_CLEAN_ALL_BUNDLE_CACHE = "hu:";
+const struct option LONG_OPTIONS_CLEAN_ALL_BUNDLE_CACHE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"userId", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -978,14 +996,17 @@ const struct option LONG_OPTIONS_GET_ASSET_ACCESS_GROUPS[] = {
 
 class ProcessCacheCallbackImpl : public ProcessCacheCallbackHost {
 public:
-    ProcessCacheCallbackImpl() : cacheStat_(std::make_shared<std::promise<uint64_t>>())
-    {}
+    ProcessCacheCallbackImpl() : cacheStat_(std::make_shared<std::promise<uint64_t>>()),
+        succeed_(std::make_shared<std::promise<bool>>()) {}
     ~ProcessCacheCallbackImpl() override
     {}
     void OnGetAllBundleCacheFinished(uint64_t cacheStat) override;
+    void OnCleanAllBundleCacheFinished(bool succeed) override;
     uint64_t GetCacheStat();
+    bool GetDelRet();
 private:
     std::shared_ptr<std::promise<uint64_t>> cacheStat_;
+    std::shared_ptr<std::promise<bool>> succeed_;
     DISALLOW_COPY_AND_MOVE(ProcessCacheCallbackImpl);
 };
  
@@ -993,6 +1014,13 @@ void ProcessCacheCallbackImpl::OnGetAllBundleCacheFinished(uint64_t cacheStat)
 {
     if (cacheStat_ != nullptr) {
         cacheStat_->set_value(cacheStat);
+    }
+}
+
+void ProcessCacheCallbackImpl::OnCleanAllBundleCacheFinished(bool succeed)
+{
+    if (succeed_ != nullptr) {
+        succeed_->set_value(succeed);
     }
 }
  
@@ -1007,6 +1035,19 @@ uint64_t ProcessCacheCallbackImpl::GetCacheStat()
         return future.get();
     }
     return 0;
+};
+
+bool ProcessCacheCallbackImpl::GetDelRet()
+{
+    if (succeed_ != nullptr) {
+        auto future = succeed_->get_future();
+        std::chrono::milliseconds span(MAX_WAITING_TIME);
+        if (future.wait_for(span) == std::future_status::timeout) {
+            return false;
+        }
+        return future.get();
+    }
+    return false;
 };
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
@@ -1091,6 +1132,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetAllBundleDirs, this)},
         {"getAllBundleCacheStat",
             std::bind(&BundleTestTool::RunAsGetAllBundleCacheStat, this)},
+        {"CleanAllBundleCache",
+            std::bind(&BundleTestTool::RunAsCleanAllBundleCache, this)},
         {"isBundleInstalled",
             std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)},
         {"getCompatibleDeviceType",
@@ -4822,6 +4865,7 @@ ErrCode BundleTestTool::RunAsGetAllBundleCacheStat()
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     std::string name = "";
+    std::string msg;
     int uid = 0;
     while (counter <= 1) {
         counter++;
@@ -4833,11 +4877,16 @@ ErrCode BundleTestTool::RunAsGetAllBundleCacheStat()
         }
         if (option == -1) {
             // When scanning the first argument
-            if ((counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) || uid > 0) {
+            if ((counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                msg = "with no option, set uid: 0";
+                resultReceiver_.append(msg + "\n");
+                setuid(uid);
                 break;
-            } else {
-                resultReceiver_.append(HELP_MSG_GET_ALL_BUNDLE_CACHE_STAT);
-                return OHOS::ERR_INVALID_VALUE;
+            }
+            if (counter > 1) {
+                msg = "get uid: " + std::to_string(uid);
+                resultReceiver_.append(msg + "\n");
+                break;
             }
         }
         int temp = 0;
@@ -4849,7 +4898,7 @@ ErrCode BundleTestTool::RunAsGetAllBundleCacheStat()
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_GET_ALL_BUNDLE_CACHE_STAT);
     } else {
-        std::string msg;
+        msg = "";
         result = GetAllBundleCacheStat(msg);
         if (ERR_OK == result) {
             resultReceiver_.append(STRING_GET_ALL_BUNDLE_CACHE_STAT_OK + msg);
@@ -4875,6 +4924,78 @@ ErrCode BundleTestTool::GetAllBundleCacheStat(std::string& msg)
     ErrCode ret = bundleMgrProxy_->GetAllBundleCacheStat(processCacheCallBack);
     if (ret == ERR_OK) {
         msg += "AllBundleCacheStat:" + std::to_string(processCacheCallBack->GetCacheStat()) + "\n";
+    } else {
+        msg += "error code:" + std::to_string(ret) + "\n";
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsCleanAllBundleCache()
+{
+    APP_LOGI("RunAsCleanAllBundleCache start");
+    std::string commandName = "CleanAllBundleCache";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    std::string msg;
+    int uid = 0;
+    while (counter <= 1) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_CLEAN_ALL_BUNDLE_CACHE.c_str(),
+            LONG_OPTIONS_CLEAN_ALL_BUNDLE_CACHE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                msg = "with no option, set uid: 0";
+                resultReceiver_.append(msg + "\n");
+                setuid(uid);
+                break;
+            }
+            if (counter > 1) {
+                msg = "get uid: " + std::to_string(uid);
+                resultReceiver_.append(msg + "\n");
+                break;
+            }
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        uid = option == 'u' ? temp : uid;
+        setuid(uid);
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_CLEAN_ALL_BUNDLE_CACHE);
+    } else {
+        msg = "";
+        result = CleanAllBundleCache(msg);
+        if (ERR_OK == result) {
+            resultReceiver_.append(STRING_CLEAN_ALL_BUNDLE_CACHE_OK + msg);
+        } else {
+            resultReceiver_.append(STRING_CLEAN_ALL_BUNDLE_CACHE_NG + msg + "\n");
+        }
+    }
+    APP_LOGI("RunAsCleanAllBundleCache end");
+    return result;
+}
+
+ErrCode BundleTestTool::CleanAllBundleCache(std::string& msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return false;
+    }
+    sptr<ProcessCacheCallbackImpl> processCacheCallBack(new (std::nothrow) ProcessCacheCallbackImpl());
+    if (processCacheCallBack == nullptr) {
+        APP_LOGE("processCacheCallBack is null");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    ErrCode ret = bundleMgrProxy_->CleanAllBundleCache(processCacheCallBack);
+    if (ret == ERR_OK) {
+        msg += "CleanBundleCache:" + std::to_string(processCacheCallBack->GetDelRet()) + "\n";
     } else {
         msg += "error code:" + std::to_string(ret) + "\n";
     }

@@ -103,6 +103,8 @@ private:
     ErrCode GetAllBundleDirs(int32_t userId, std::string& msg);
     ErrCode RunAsGetAllBundleCacheStat();
     ErrCode GetAllBundleCacheStat(std::string& msg);
+    ErrCode RunAsCleanAllBundleCache();
+    ErrCode CleanAllBundleCache(std::string& msg);
     ErrCode RunAsIsBundleInstalled();
     ErrCode RunAsGetCompatibleDeviceType();
     ErrCode RunAsGetBundleNameByAppId();
