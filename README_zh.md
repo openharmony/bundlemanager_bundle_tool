@@ -288,6 +288,7 @@ bm quickfix [-h] [-a -f filePath [-t targetPath] [-d]] [-q -b bundleName] [-r -b
 | bm quickfix -a -f \<filePath\> | 执行补丁安装命令。-a非必选字段，指定后，-f为必选字段，未指定-a，则-f为非必选字段。 |
 | bm quickfix -q -b \<bundleName\> | 根据包名查询补丁包信息。-q为非必选字段，指定后，-b为必选字段，未指定-q，则-b为非必选字段。 |
 | bm quickfix -a -f \<filePath\> -d | 选择debug模式执行补丁安装命令。-d为非必选字段。 |
+| bm quickfix -a -f \<filePath\> -o | 选择覆盖模式执行补丁安装命令。-o为非必选字段。 |
 | bm quickfix -a -f \<filePath\> -t \<target-path\> | 指定补丁安装目录，且不使能。-t为非必选字段。 |
 | bm quickfix -r -b \<bundleName\> | 根据包名卸载未使能的补丁。-r为非必选字段，指定后，-b为必选字段，未指定-r，则-b为非必选字段。 |
 
