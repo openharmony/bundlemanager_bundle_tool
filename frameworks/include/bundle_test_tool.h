@@ -107,6 +107,7 @@ private:
     ErrCode CleanAllBundleCache(std::string& msg);
     ErrCode RunAsIsBundleInstalled();
     ErrCode RunAsGetCompatibleDeviceType();
+    ErrCode RunAsGetSimpleAppInfoForUid();
     ErrCode RunAsGetBundleNameByAppId();
     ErrCode RunAsGetAssetAccessGroups();
 
@@ -185,6 +186,7 @@ private:
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
     bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
         std::string &bundleName);
+    ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

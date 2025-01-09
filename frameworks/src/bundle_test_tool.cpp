@@ -183,6 +183,7 @@ static const std::string HELP_MSG =
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
     "and appIndex\n"
     "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n"
+    "  getSimpleAppInfoForUid           get bundlename list and appIndex list by uid list\n"
     "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
     "  getAssetAccessGroups             get asset access groups by bundlename\n";
 
@@ -611,6 +612,12 @@ const std::string HELP_MSG_GET_BUNDLENAME_BY_APPID =
     "options list:\n"
     "  -a, --app-id <app-id>            specify a app index or app identifier\n";
 
+const std::string HELP_MSG_GET_SIMPLE_APP_INFO_FOR_UID =
+    "usage: bundle_test_tool GetSimpleAppInfoForUid <options>\n"
+    "eg:bundle_test_tool getSimpleAppInfoForUid -u <uid>,<uid>,<uid>...\n"
+    "options list:\n"
+    "  -u, --uid  <uid>         specify uid of the application\n";
+
 const std::string HELP_MSG_GET_ASSET_ACCESS_GROUPS =
     "usage: bundle_test_tool getAssetAccessGroups <options>\n"
     "eg:bundle_test_tool getAssetAccessGroups -n <bundle-name>\n"
@@ -624,6 +631,10 @@ const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInst
 const std::string STRING_GET_BUNDLENAME_BY_APPID_OK = "getBundleNameByAppId is ok \n";
 const std::string STRING_GET_BUNDLENAME_BY_APPID_NG =
     "error: failed to getBundleNameByAppId \n";
+
+const std::string STRING_GET_SIMPLE_APP_INFO_FOR_UID_OK = "getSimpleAppInfoForUid is ok \n";
+const std::string STRING_GET_SIMPLE_APP_INFO_FOR_UID_NG =
+    "error: failed to getSimpleAppInfoForUid \n";
 
 const std::string STRING_SET_REMOVABLE_OK = "set removable is ok \n";
 const std::string STRING_SET_REMOVABLE_NG = "error: failed to set removable \n";
@@ -758,6 +769,13 @@ const std::string SHORT_OPTIONS_GET_BUNDLENAME_BY_APPID = "ha:";
 const struct option LONG_OPTIONS_GET_BUNDLENAME_BY_APPID[] = {
     {"help", no_argument, nullptr, 'h'},
     {"app-id", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_SIMPLE_APP_INFO_FOR_UID = "hu:";
+const struct option LONG_OPTIONS_GET_SIMPLE_APP_INFO_FOR_UID[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"uid", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1138,6 +1156,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)},
         {"getCompatibleDeviceType",
             std::bind(&BundleTestTool::RunAsGetCompatibleDeviceType, this)},
+        {"getSimpleAppInfoForUid",
+            std::bind(&BundleTestTool::RunAsGetSimpleAppInfoForUid, this)},
         {"getBundleNameByAppId",
             std::bind(&BundleTestTool::RunAsGetBundleNameByAppId, this)},
         {"getAssetAccessGroups",
@@ -5097,6 +5117,76 @@ ErrCode BundleTestTool::RunAsGetCompatibleDeviceType()
             resultReceiver_.append(STRING_GET_COMPATIBLE_DEVICE_TYPE_NG + "errCode is "+ std::to_string(result) + "\n");
         }
     }
+    return result;
+}
+
+ErrCode BundleTestTool::InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids)
+{
+    std::string commandName = "getSimpleAppInfoForUid";
+    int32_t uid = Constants::FOUNDATION_UID;
+    switch (option) {
+        case 'u': {
+            std::string arrayUId = optarg;
+            std::stringstream array(arrayUId);
+            std::string object;
+            bool ret = true;
+            while (getline(array, object, ',')) {
+                StringToInt(object, commandName, uid, ret);
+                if (!ret) {
+                    resultReceiver_.append(HELP_MSG_GET_SIMPLE_APP_INFO_FOR_UID);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                uids.emplace_back(uid);
+            }
+            APP_LOGD("bundle_test_tool %{public}s -u %{public}s", commandName.c_str(), argv_[optind - 1]);
+            break;
+        }
+        default: {
+            resultReceiver_.append(HELP_MSG_GET_SIMPLE_APP_INFO_FOR_UID);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsGetSimpleAppInfoForUid()
+{
+    APP_LOGI("RunAsGetSimpleAppInfoForUid start");
+    std::vector<std::int32_t> uids;
+    int32_t counter = 0;
+    while (counter <= 1) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_SIMPLE_APP_INFO_FOR_UID.c_str(),
+            LONG_OPTIONS_GET_SIMPLE_APP_INFO_FOR_UID, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getSimpleAppInfoForUid with no option.");
+                resultReceiver_.append(HELP_MSG_GET_SIMPLE_APP_INFO_FOR_UID);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        auto ret = InnerGetSimpleAppInfoForUid(option, uids);
+        if (ret != OHOS::ERR_OK) {
+            return ret;
+        }
+    }
+    std::vector<SimpleAppInfo> simpleAppInfo;
+    auto result = bundleMgrProxy_->GetSimpleAppInfoForUid(uids, simpleAppInfo);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_GET_SIMPLE_APP_INFO_FOR_UID_OK);
+        for (size_t i = 0; i < simpleAppInfo.size(); i++) {
+            resultReceiver_.append(simpleAppInfo[i].ToString() + "\n");
+        }
+    } else {
+        resultReceiver_.append(STRING_GET_SIMPLE_APP_INFO_FOR_UID_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    APP_LOGI("RunAsGetSimpleAppInfoForUid end");
     return result;
 }
 
