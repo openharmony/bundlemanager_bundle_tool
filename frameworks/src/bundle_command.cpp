@@ -457,6 +457,16 @@ ErrCode BundleManagerShellCommand::RunAsCompileCommand()
             case 'm': {
                 // 'bm compile -m xxx'
                 // 'bm compile --mode xxx'
+                if (optind + 1 > argc_) {
+                    APP_LOGE("out of index");
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                if (argv_[optind + 1] == nullptr) {
+                    APP_LOGE("'bm compile' with necessarily parameter missing.");
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
                 APP_LOGD("'bm compile %{public}s %{public}s %{public}s'",
                     argv_[optind - OFFSET_REQUIRED_ARGUMENT], optarg, argv_[optind + 1]);
                 bundleCompile = true;
