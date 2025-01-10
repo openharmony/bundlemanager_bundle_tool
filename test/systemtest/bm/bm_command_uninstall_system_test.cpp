@@ -69,7 +69,9 @@ HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Fun
     ToolSystemTest::InstallBundle(STRING_BUNDLE_PATH, true);
 
     // uninstall the bundle
-    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+    std::string command = "bm uninstall -n " + STRING_BUNDLE_NAME;
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+    EXPECT_PRED2(ToolSystemTest::IsSubSequence, commandResult, STRING_UNINSTALL_BUNDLE_OK + "\n");
 }
 
 /**
