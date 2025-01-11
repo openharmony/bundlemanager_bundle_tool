@@ -1014,59 +1014,67 @@ const struct option LONG_OPTIONS_GET_ASSET_ACCESS_GROUPS[] = {
 
 class ProcessCacheCallbackImpl : public ProcessCacheCallbackHost {
 public:
-    ProcessCacheCallbackImpl() : cacheStat_(std::make_shared<std::promise<uint64_t>>()),
-        cleanResult_(std::make_shared<std::promise<int32_t>>()) {}
-    ~ProcessCacheCallbackImpl() override
-    {}
+    ProcessCacheCallbackImpl() {}
+    ~ProcessCacheCallbackImpl() {}
+    bool WaitForCleanCompletion();
+    bool WaitForStatCompletion();
     void OnGetAllBundleCacheFinished(uint64_t cacheStat) override;
     void OnCleanAllBundleCacheFinished(int32_t result) override;
-    uint64_t GetCacheStat();
-    int32_t GetDelRet();
+    uint64_t GetCacheStat()
+    {
+        return cacheSize_;
+    }
+    int32_t GetDelRet()
+    {
+        return cleanRet_;
+    }
 private:
-    std::shared_ptr<std::promise<uint64_t>> cacheStat_;
-    std::shared_ptr<std::promise<int32_t>> cleanResult_;
+    std::mutex mutex_;
+    bool complete_ = false;
+    int32_t cleanRet_ = 0;
+    uint64_t cacheSize_ = 0;
+    std::promise<void> clean_;
+    std::future<void> cleanFuture_ = clean_.get_future();
+    std::promise<void> stat_;
+    std::future<void> statFuture_ = stat_.get_future();
     DISALLOW_COPY_AND_MOVE(ProcessCacheCallbackImpl);
 };
  
 void ProcessCacheCallbackImpl::OnGetAllBundleCacheFinished(uint64_t cacheStat)
 {
-    if (cacheStat_ != nullptr) {
-        cacheStat_->set_value(cacheStat);
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!complete_) {
+        complete_ = true;
+        cacheSize_ = cacheStat;
+        stat_.set_value();
     }
 }
 
 void ProcessCacheCallbackImpl::OnCleanAllBundleCacheFinished(int32_t result)
 {
-    if (cleanResult_ != nullptr) {
-        cleanResult_->set_value(result);
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!complete_) {
+        complete_ = true;
+        cleanRet_ = result;
+        clean_.set_value();
     }
 }
- 
-uint64_t ProcessCacheCallbackImpl::GetCacheStat()
-{
-    if (cacheStat_ != nullptr) {
-        auto future = cacheStat_->get_future();
-        std::chrono::milliseconds span(MAX_WAITING_TIME);
-        if (future.wait_for(span) == std::future_status::timeout) {
-            return 0;
-        }
-        return future.get();
-    }
-    return 0;
-};
 
-int32_t ProcessCacheCallbackImpl::GetDelRet()
+bool ProcessCacheCallbackImpl::WaitForCleanCompletion()
 {
-    if (cleanResult_ != nullptr) {
-        auto future = cleanResult_->get_future();
-        std::chrono::milliseconds span(MAX_WAITING_TIME);
-        if (future.wait_for(span) == std::future_status::timeout) {
-            return OHOS::ERR_INVALID_VALUE;
-        }
-        return future.get();
+    if (cleanFuture_.wait_for(std::chrono::seconds(MAX_WAITING_TIME)) == std::future_status::ready) {
+        return true;
     }
-    return OHOS::ERR_INVALID_VALUE;
-};
+    return false;
+}
+
+bool ProcessCacheCallbackImpl::WaitForStatCompletion()
+{
+    if (statFuture_.wait_for(std::chrono::seconds(MAX_WAITING_TIME)) == std::future_status::ready) {
+        return true;
+    }
+    return false;
+}
 
 BundleEventCallbackImpl::BundleEventCallbackImpl()
 {
@@ -4942,8 +4950,18 @@ ErrCode BundleTestTool::GetAllBundleCacheStat(std::string& msg)
         return OHOS::ERR_INVALID_VALUE;
     }
     ErrCode ret = bundleMgrProxy_->GetAllBundleCacheStat(processCacheCallBack);
+    uint64_t cacheSize = 0;
+    if (ret ==ERR_OK) {
+        msg += "clean exec wait \n";
+        if (processCacheCallBack->WaitForStatCompletion()) {
+            cacheSize = processCacheCallBack->GetCacheStat();
+        } else {
+            msg += "clean exec timeout \n";
+        }
+    }
+    msg += "clean exec end \n";
     if (ret == ERR_OK) {
-        msg += "AllBundleCacheStat:" + std::to_string(processCacheCallBack->GetCacheStat()) + "\n";
+        msg += "AllBundleCacheStat:" + std::to_string(cacheSize) + "\n";
     } else {
         msg += "error code:" + std::to_string(ret) + "\n";
     }
@@ -5006,17 +5024,30 @@ ErrCode BundleTestTool::CleanAllBundleCache(std::string& msg)
 {
     if (bundleMgrProxy_ == nullptr) {
         APP_LOGE("bundleMgrProxy_ is nullptr");
-        return OHOS::ERR_INVALID_VALUE;
+        return false;
     }
     sptr<ProcessCacheCallbackImpl> processCacheCallBack(new (std::nothrow) ProcessCacheCallbackImpl());
     if (processCacheCallBack == nullptr) {
         APP_LOGE("processCacheCallBack is null");
         return OHOS::ERR_INVALID_VALUE;
     }
+
     ErrCode ret = bundleMgrProxy_->CleanAllBundleCache(processCacheCallBack);
-    ErrCode result = processCacheCallBack->GetDelRet();
-    if (ret != ERR_OK || result != ERR_OK) {
-        msg += "return code:" + std::to_string(ret) + "result:" + std::to_string(result) + "\n";
+    int32_t cleanRet = 0;
+    std::string callbackMsg = "";
+    if (ret ==ERR_OK) {
+        callbackMsg += "clean exec wait \n";
+        if (processCacheCallBack->WaitForCleanCompletion()) {
+            cleanRet = processCacheCallBack->GetDelRet();
+        } else {
+            callbackMsg += "clean exec timeout \n";
+            cleanRet = -1;
+        }
+    }
+    callbackMsg += "clean exec end \n";
+    if (ret != ERR_OK || cleanRet != ERR_OK) {
+        callbackMsg += "return code:" + std::to_string(ret) + " cleanRet code:" + std::to_string(cleanRet) + "\n";
+        msg = callbackMsg;
         return OHOS::ERR_INVALID_VALUE;
     }
     return ERR_OK;
