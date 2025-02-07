@@ -98,6 +98,7 @@ private:
     ErrCode RunAsQueryAbilityInfoByContinueType();
     ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
     ErrCode RunAsGetBundleNameByAppId();
+    ErrCode RunAsGetSimpleAppInfoForUid();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -172,6 +173,7 @@ private:
     ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
         uint64_t &cacheSize);
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
+    ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
