@@ -99,6 +99,10 @@ private:
     ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
     ErrCode RunAsGetBundleNameByAppId();
     ErrCode RunAsGetSimpleAppInfoForUid();
+    ErrCode RunAsGetAllBundleCacheStat();
+    ErrCode GetAllBundleCacheStat(std::string& msg);
+    ErrCode RunAsCleanAllBundleCache();
+    ErrCode CleanAllBundleCache(std::string& msg);
 
     std::condition_variable cv_;
     std::mutex mutex_;
