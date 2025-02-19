@@ -926,7 +926,6 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
         InstallParam installParam;
         installParam.userId = userId;
         installParam.isKeepData = isKeepData;
-        installParam.parameters.emplace(Constants::VERIFY_UNINSTALL_RULE_KEY, Constants::VERIFY_UNINSTALL_RULE_VALUE);
         int32_t uninstallResult = UninstallOperation(bundleName, moduleName, installParam);
         if (uninstallResult == OHOS::ERR_OK) {
             resultReceiver_ = STRING_UNINSTALL_BUNDLE_OK + "\n";
