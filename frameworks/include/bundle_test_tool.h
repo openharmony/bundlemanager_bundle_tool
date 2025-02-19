@@ -110,6 +110,7 @@ private:
     ErrCode RunAsGetSimpleAppInfoForUid();
     ErrCode RunAsGetBundleNameByAppId();
     ErrCode RunAsGetAssetAccessGroups();
+    ErrCode RunAsSetAppDistributionTypes();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -186,6 +187,11 @@ private:
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
     bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
         std::string &bundleName);
+    bool CheckSetAppDistributionTypesOption(int32_t option, const std::string &commandName,
+        std::string &appDistributionTypes);
+    bool ProcessAppDistributionTypeEnums(std::vector<std::string> appDistributionTypeStrings,
+        std::set<AppDistributionTypeEnum> &appDistributionTypeEnums);
+    void ReloadNativeTokenInfo();
     ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
 };
 }  // namespace AppExecFwk

@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <vector>
 
+#include "accesstoken_kit.h"
 #include "app_log_wrapper.h"
 #include "appexecfwk_errors.h"
 #include "bundle_command_common.h"
@@ -36,10 +37,15 @@
 #include "bundle_tool_callback_stub.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "permission_define.h"
+#include "iservice_registry.h"
 #include "data_group_info.h"
 #include "directory_ex.h"
 #include "parameter.h"
 #include "process_cache_callback_host.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+#include "system_ability_definition.h"
 #ifdef BUNDLE_FRAMEWORK_QUICK_FIX
 #include "quick_fix_status_callback_host_impl.h"
 #endif
@@ -185,7 +191,8 @@ static const std::string HELP_MSG =
     "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n"
     "  getSimpleAppInfoForUid           get bundlename list and appIndex list by uid list\n"
     "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
-    "  getAssetAccessGroups             get asset access groups by bundlename\n";
+    "  getAssetAccessGroups             get asset access groups by bundlename\n"
+    "  setAppDistributionTypes          set white list of appDistributionType\n";
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -625,6 +632,13 @@ const std::string HELP_MSG_GET_ASSET_ACCESS_GROUPS =
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
 
+const std::string HELP_MSG_SET_APP_DISTRIBUTION_TYPES =
+    "usage: bundle_test_tool setAppDistributionTypes <options>\n"
+    "eg:bundle_test_tool setAppDistributionTypes -a <appDistributionTypes>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -a, --app_distribution_types <appDistributionTypes>      specify app distribution type list\n";
+
 const std::string STRING_IS_BUNDLE_INSTALLED_OK = "IsBundleInstalled is ok \n";
 const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInstalled \n";
 
@@ -729,6 +743,9 @@ const std::string STRING_GET_PROXY_DATA_NG = "get proxyData failed";
 
 const std::string STRING_GET_ASSET_ACCESS_GROUPS_OK = "getAssetAccessGroups successfully\n";
 const std::string STRING_GET_ASSET_ACCESS_GROUPS_NG = "getAssetAccessGroups failed\n";
+
+const std::string STRING_SET_APP_DISTRIBUTION_TYPES_OK = "setAppDistributionTypes successfully\n";
+const std::string STRING_SET_APP_DISTRIBUTION_TYPES_NG = "setAppDistributionTypes failed\n";
 
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
@@ -1010,6 +1027,13 @@ const struct option LONG_OPTIONS_GET_ASSET_ACCESS_GROUPS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_SET_APP_DISTRIBUTION_TYPES = "ha:";
+const struct option LONG_OPTIONS_SET_APP_DISTRIBUTION_TYPES[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"app-distribution-types", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
 }  // namespace
 
 class ProcessCacheCallbackImpl : public ProcessCacheCallbackHost {
@@ -1169,7 +1193,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getBundleNameByAppId",
             std::bind(&BundleTestTool::RunAsGetBundleNameByAppId, this)},
         {"getAssetAccessGroups",
-            std::bind(&BundleTestTool::RunAsGetAssetAccessGroups, this)}
+            std::bind(&BundleTestTool::RunAsGetAssetAccessGroups, this)},
+        {"setAppDistributionTypes",
+                std::bind(&BundleTestTool::RunAsSetAppDistributionTypes, this)}
     };
 
     return OHOS::ERR_OK;
@@ -4361,6 +4387,142 @@ ErrCode BundleTestTool::RunAsGetAssetAccessGroups()
                 resultReceiver_.append(results);
                 resultReceiver_.append("\n");
             }
+        }
+    }
+    return result;
+}
+
+bool BundleTestTool::CheckSetAppDistributionTypesOption(int32_t option, const std::string &commandName,
+    std::string &appDistributionTypes)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'a': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            appDistributionTypes = optarg;
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> appDistributionTypeStrings,
+    std::set<AppDistributionTypeEnum> &appDistributionTypeEnums)
+{
+    for (const std::string& item : appDistributionTypeStrings) {
+        if (item ==
+            std::to_string(static_cast<int32_t>(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_APP_GALLERY))) {
+            appDistributionTypeEnums.insert(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_APP_GALLERY);
+            continue;
+        }
+        if (item ==
+            std::to_string(static_cast<int32_t>(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_ENTERPRISE))) {
+            appDistributionTypeEnums.insert(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_ENTERPRISE);
+            continue;
+        }
+        if (item ==
+            std::to_string(static_cast<int32_t>(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_ENTERPRISE_NORMAL))) {
+            appDistributionTypeEnums.insert(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_ENTERPRISE_NORMAL);
+            continue;
+        }
+        if (item ==
+            std::to_string(static_cast<int32_t>(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_ENTERPRISE_MDM))) {
+            appDistributionTypeEnums.insert(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_ENTERPRISE_MDM);
+            continue;
+        }
+        if (item ==
+            std::to_string(static_cast<int32_t>(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_INTERNALTESTING))) {
+            appDistributionTypeEnums.insert(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_INTERNALTESTING);
+            continue;
+        }
+        if (item ==
+            std::to_string(static_cast<int32_t>(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_CROWDTESTING))) {
+            appDistributionTypeEnums.insert(AppDistributionTypeEnum::APP_DISTRIBUTION_TYPE_CROWDTESTING);
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+void BundleTestTool::ReloadNativeTokenInfo()
+{
+    const int32_t permsNum = 1;
+    uint64_t tokenId;
+    const char *perms[permsNum];
+    perms[0] = "ohos.permission.GET_DEFAULT_APPLICATION";
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = permsNum,
+        .aclsNum = 0,
+        .dcaps = NULL,
+        .perms = perms,
+        .acls = NULL,
+        .processName = "kit_system_test",
+        .aplStr = "system_core",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
+
+ErrCode BundleTestTool::RunAsSetAppDistributionTypes()
+{
+    APP_LOGI("RunAsSetAppDistributionTypes start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "setAppDistributionTypes";
+    std::string appDistributionTypes = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_SET_APP_DISTRIBUTION_TYPES.c_str(),
+            LONG_OPTIONS_SET_APP_DISTRIBUTION_TYPES, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_SET_APP_DISTRIBUTION_TYPES);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = !CheckSetAppDistributionTypesOption(option, commandName, appDistributionTypes)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        APP_LOGE("appDistributionTypes = %{public}s", appDistributionTypes.c_str());
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_SET_APP_DISTRIBUTION_TYPES);
+    } else {
+        std::string results = "";
+        std::vector<std::string> appDistributionTypeStrings;
+        OHOS::SplitStr(appDistributionTypes, ",", appDistributionTypeStrings);
+        std::set<AppDistributionTypeEnum> appDistributionTypeEnums;
+        if (!ProcessAppDistributionTypeEnums(appDistributionTypeStrings, appDistributionTypeEnums)) {
+            APP_LOGE("appDistributionTypes param %{public}d failed", appDistributionTypes.c_str());
+            resultReceiver_.append(STRING_SET_APP_DISTRIBUTION_TYPES_NG);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        auto res = bundleMgrProxy_->SetAppDistributionTypes(appDistributionTypeEnums);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_SET_APP_DISTRIBUTION_TYPES_NG);
+            return result;
+        } else {
+            resultReceiver_.append(STRING_SET_APP_DISTRIBUTION_TYPES_OK);
         }
     }
     return result;

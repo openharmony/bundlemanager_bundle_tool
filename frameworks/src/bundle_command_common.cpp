@@ -719,6 +719,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         IStatusReceiver::ERR_APPEXECFWK_INSTALL_OS_INTEGRATION_BUNDLE_NOT_ALLOWED_FOR_SHELL,
         "error: os_integration Bundle is not allowed to install for shell."
     },
+    {
+        IStatusReceiver::ERR_APP_DISTRIBUTION_TYPE_NOT_ALLOW_INSTALL_ISR,
+        "error: Failed to install the HAP or HSP because the app distribution type is not allowed."
+    },
 };
 } // AppExecFwk
 } // OHOS
