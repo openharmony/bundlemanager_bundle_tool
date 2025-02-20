@@ -4463,7 +4463,7 @@ void BundleTestTool::ReloadNativeTokenInfo()
     const int32_t permsNum = 1;
     uint64_t tokenId;
     const char *perms[permsNum];
-    perms[0] = "ohos.permission.GET_DEFAULT_APPLICATION";
+    perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
@@ -4471,7 +4471,7 @@ void BundleTestTool::ReloadNativeTokenInfo()
         .dcaps = NULL,
         .perms = perms,
         .acls = NULL,
-        .processName = "kit_system_test",
+        .processName = "bundleTestToolProcess",
         .aplStr = "system_core",
     };
     tokenId = GetAccessTokenId(&infoInstance);
