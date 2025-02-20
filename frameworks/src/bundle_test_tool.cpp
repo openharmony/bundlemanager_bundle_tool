@@ -4476,12 +4476,14 @@ void BundleTestTool::ReloadNativeTokenInfo()
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+    APP_LOGI("RunAsSetAppDistributionTypes ReloadNativeTokenInfo");
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 
 ErrCode BundleTestTool::RunAsSetAppDistributionTypes()
 {
     APP_LOGI("RunAsSetAppDistributionTypes start");
+    ReloadNativeTokenInfo();
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "setAppDistributionTypes";
