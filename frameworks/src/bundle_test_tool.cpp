@@ -4515,7 +4515,7 @@ ErrCode BundleTestTool::RunAsSetAppDistributionTypes()
         OHOS::SplitStr(appDistributionTypes, ",", appDistributionTypeStrings);
         std::set<AppDistributionTypeEnum> appDistributionTypeEnums;
         if (!ProcessAppDistributionTypeEnums(appDistributionTypeStrings, appDistributionTypeEnums)) {
-            APP_LOGE("appDistributionTypes param %{public}d failed", appDistributionTypes.c_str());
+            APP_LOGE("appDistributionTypes param %{public}s failed", appDistributionTypes.c_str());
             resultReceiver_.append(STRING_SET_APP_DISTRIBUTION_TYPES_NG);
             return OHOS::ERR_INVALID_VALUE;
         }
