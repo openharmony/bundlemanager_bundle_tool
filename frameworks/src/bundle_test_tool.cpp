@@ -42,6 +42,7 @@
 #include "data_group_info.h"
 #include "directory_ex.h"
 #include "parameter.h"
+#include "parameters.h"
 #include "process_cache_callback_host.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -67,6 +68,9 @@ const int32_t ERR_BUNDLEMANAGER_FEATURE_IS_NOT_SUPPORTED = 801;
 const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 const int32_t CODE_PROTECT_UID = 7666;
 const int32_t MAX_WAITING_TIME = 600;
+const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
+// system param
+constexpr const char* IS_ENTERPRISE_DEVICE = "const.edm.is_enterprise_device";
 // quick fix error message
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR = "error: quick fix internal error.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_PARAM_ERROR = "error: param error.\n";
@@ -140,6 +144,7 @@ static const std::string HELP_MSG =
     "  getrm                            obtain the value of isRemovable by given bundle name and module name\n"
     "  installSandbox                   indicates install sandbox\n"
     "  uninstallSandbox                 indicates uninstall sandbox\n"
+    "  uninstallPreInstallBundle        indicates uninstall preinstall bundle\n"
     "  dumpSandbox                      indicates dump sandbox info\n"
     "  getStr                           obtain the value of label by given bundle name, module name and label id\n"
     "  getIcon                          obtain the value of icon by given bundle name, module name, "
@@ -193,6 +198,7 @@ static const std::string HELP_MSG =
     "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
     "  getAssetAccessGroups             get asset access groups by bundlename\n"
     "  setAppDistributionTypes          set white list of appDistributionType\n";
+
 
 const std::string HELP_MSG_GET_REMOVABLE =
     "usage: bundle_test_tool getrm <options>\n"
@@ -625,6 +631,15 @@ const std::string HELP_MSG_GET_SIMPLE_APP_INFO_FOR_UID =
     "options list:\n"
     "  -u, --uid  <uid>         specify uid of the application\n";
 
+const std::string HELP_MSG_UNINSTALL_PREINSTALL_BUNDLE =
+    "usage: bundle_test_tool uninstallPreInstallBundle <options>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -n, --bundle-name <bundle-name>        install a sandbox of a bundle\n"
+    "  -m, --module-name <module-name>        specify module name of the application\n"
+    "  -f, --forced <user-id>                 force uninstall\n";
+
 const std::string HELP_MSG_GET_ASSET_ACCESS_GROUPS =
     "usage: bundle_test_tool getAssetAccessGroups <options>\n"
     "eg:bundle_test_tool getAssetAccessGroups -n <bundle-name>\n"
@@ -741,6 +756,9 @@ const std::string STRING_GET_DISTRIBUTED_BUNDLE_NAME_NG = "get distributedBundle
 
 const std::string STRING_GET_PROXY_DATA_NG = "get proxyData failed";
 
+const std::string STRING_UNINSTALL_PREINSTALL_BUNDLE_SUCCESSFULLY = "uninstall preinstall app successfully\n";
+const std::string STRING_UNINSTALL_PREINSTALL_BUNDLE_FAILED = "uninstall preinstall app failed\n";
+
 const std::string STRING_GET_ASSET_ACCESS_GROUPS_OK = "getAssetAccessGroups successfully\n";
 const std::string STRING_GET_ASSET_ACCESS_GROUPS_NG = "getAssetAccessGroups failed\n";
 
@@ -760,6 +778,7 @@ const std::string SET_RM = "setrm";
 const std::string INSTALL_SANDBOX = "installSandbox";
 const std::string UNINSTALL_SANDBOX = "uninstallSandbox";
 const std::string DUMP_SANDBOX = "dumpSandbox";
+const std::string UNINSTALL_PREINSTALL_BUNDLE = "uninstallPreInstallBundle";
 
 const std::string SHORT_OPTIONS = "hn:m:a:d:u:i:";
 const struct option LONG_OPTIONS[] = {
@@ -1020,6 +1039,16 @@ const struct option LONG_OPTIONS_GET_DIR[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_PREINSTALL = "hn:m:u:f:";
+const struct option LONG_OPTIONS_PREINSTALL[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"forced", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_ASSET_ACCESS_GROUPS = "hn:";
 const struct option LONG_OPTIONS_GET_ASSET_ACCESS_GROUPS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1192,6 +1221,7 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetSimpleAppInfoForUid, this)},
         {"getBundleNameByAppId",
             std::bind(&BundleTestTool::RunAsGetBundleNameByAppId, this)},
+        {"uninstallPreInstallBundle", std::bind(&BundleTestTool::RunAsUninstallPreInstallBundleCommand, this)},
         {"getAssetAccessGroups",
             std::bind(&BundleTestTool::RunAsGetAssetAccessGroups, this)},
         {"setAppDistributionTypes",
@@ -5427,6 +5457,119 @@ ErrCode BundleTestTool::RunAsGetBundleNameByAppId()
         resultReceiver_.append(STRING_GET_BUNDLENAME_BY_APPID_NG + "errCode is "+ std::to_string(result) + "\n");
     }
     APP_LOGI("RunAsGetBundleNameByAppId end");
+    return result;
+}
+
+ErrCode BundleTestTool::UninstallPreInstallBundleOperation(
+    const std::string &bundleName, InstallParam &installParam) const
+{
+    sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
+    if (statusReceiver == nullptr) {
+        APP_LOGE("statusReceiver is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+ 
+    sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
+    if (recipient == nullptr) {
+        APP_LOGE("recipient is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
+    bundleInstallerProxy_->Uninstall(bundleName, installParam, statusReceiver);
+    return statusReceiver->GetResultCode();
+}
+ 
+bool BundleTestTool::CheckUnisntallCorrectOption(
+    int option, const std::string &commandName, int &temp, std::string &name)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            ret = false;
+            break;
+        }
+        case 'n': {
+            name = optarg;
+            APP_LOGD("bundle_test_tool %{public}s -n %{public}s", commandName.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'u':{
+            if (!OHOS::StrToInt(optarg, temp)) {
+                APP_LOGE("bundle_test_tool %{public}s with error -u %{private}s", commandName.c_str(), optarg);
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                ret = false;
+            }
+            break;
+        }
+        case 'f':{
+            if (!OHOS::StrToInt(optarg, temp)) {
+                APP_LOGE("bundle_test_tool %{public}s with error -f %{private}s", commandName.c_str(), optarg);
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                ret = false;
+            }
+            break;
+        }
+        default: {
+            ret = false;
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGW("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            break;
+        }
+    }
+    return ret;
+}
+ 
+ErrCode BundleTestTool::RunAsUninstallPreInstallBundleCommand()
+{
+    int32_t result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string name = "";
+    std::string bundleName = "";
+    int32_t userId = 100;
+    int forceValue = 0;
+    while (counter <= MAX_PARAMS_FOR_UNINSTALL) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_PREINSTALL.c_str(), LONG_OPTIONS_PREINSTALL, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool uninstallPreInstallBundle with no option.");
+                resultReceiver_.append(HELP_MSG_UNINSTALL_PREINSTALL_BUNDLE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckUnisntallCorrectOption(option, UNINSTALL_PREINSTALL_BUNDLE, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        bundleName = option == 'n' ? name : bundleName;
+        userId = option == 'u' ? temp : userId;
+        forceValue = option == 'f' ? temp : forceValue;
+    }
+    if (result != OHOS::ERR_OK || bundleName == "") {
+        resultReceiver_.append(HELP_MSG_UNINSTALL_PREINSTALL_BUNDLE);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+ 
+    InstallParam installParam;
+    installParam.userId = userId;
+    if (forceValue > 0) {
+        OHOS::system::SetParameter(IS_ENTERPRISE_DEVICE, "true");
+        installParam.parameters.emplace(Constants::VERIFY_UNINSTALL_FORCED_KEY,
+            Constants::VERIFY_UNINSTALL_FORCED_VALUE);
+    }
+    result = UninstallPreInstallBundleOperation(bundleName, installParam);
+    if (result == OHOS::ERR_OK) {
+        resultReceiver_ = STRING_UNINSTALL_PREINSTALL_BUNDLE_SUCCESSFULLY + "\n";
+    } else {
+        resultReceiver_ = STRING_UNINSTALL_PREINSTALL_BUNDLE_FAILED + "\n";
+        resultReceiver_.append(GetMessageFromCode(result));
+    }
     return result;
 }
 } // AppExecFwk

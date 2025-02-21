@@ -57,6 +57,7 @@ private:
     ErrCode RunAsGetRemovableCommand();
     ErrCode RunAsInstallSandboxCommand();
     ErrCode RunAsUninstallSandboxCommand();
+    ErrCode RunAsUninstallPreInstallBundleCommand();
     ErrCode RunAsDumpSandboxCommand();
     ErrCode RunAsGetStringCommand();
     ErrCode RunAsGetIconCommand();
@@ -193,6 +194,10 @@ private:
         std::set<AppDistributionTypeEnum> &appDistributionTypeEnums);
     void ReloadNativeTokenInfo();
     ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
+    ErrCode UninstallPreInstallBundleOperation(
+        const std::string &bundleName, InstallParam &installParam) const;
+    bool CheckUnisntallCorrectOption(int option, const std::string &commandName,
+        int &temp, std::string &Name);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
