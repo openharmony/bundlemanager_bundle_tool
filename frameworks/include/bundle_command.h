@@ -30,6 +30,8 @@ const std::string HELP_MSG = "usage: bm <command> <options>\n"
                              "  help         list available commands\n"
                              "  install      install a bundle with options\n"
                              "  uninstall    uninstall a bundle with options\n"
+                             "  install-plugin install a plugin with options\n"
+                             "  uninstall-plugin  uninstall a plugin with option\n"
                              "  dump         dump the bundle info\n"
                              "  get          obtain device udid\n"
                              "  quickfix     quick fix, including query and install\n"
@@ -176,6 +178,25 @@ const std::string HELP_MSG_DUMP_SHARED_DEPENDENCIES =
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       dump dependencies by bundleName and moduleName\n"
     "  -m, --module-name  <module-name>       dump dependencies by bundleName and moduleName\n";
+const std::string HELP_MSG_INSTALL_PLUGIN =
+    "usage: bm install-plugin <options>\n"
+    "options list:\n"
+    "  -h, --help                                                              list available commands\n"
+    "  -n  --host-bundle-name <host-bundle_name> -p --plugin-path <file-path>  install a plugin by hsp path and host bundle name\n";
+
+const std::string HELP_MSG_UNINSTALL_PLUGIN =
+    "usage: bm uninstall-plugin <options>\n"
+    "options list:\n"
+    "  -h, --help                                                              list available commands\n"
+    "  -n  --host-bundle-name <host-bundle_name> -p --plugin-bundle-name <plugin-bundle-name>  uninstall a plugin by plugin bundle name and host bundle name\n";
+
+const std::string HELP_MSG_NO_INSTALL_PLUGIN_OPTION =
+    "error: you must specify a plugin path with '-p' or '--plugin-path' \n"
+        "and a host bundle name with '-n' or '--host-bundle-name' \n";
+
+const std::string HELP_MSG_NO_UNINSTALL_PLUGIN_OPTION =
+    "error: you must specify a plugin bundle name with '-p' or '--plugin-bundle-name' \n"
+        "and a host bundle name with '-n' or '--host-bundle-name' \n";
 
 const std::string STRING_INCORRECT_OPTION = "error: incorrect option";
 const std::string HELP_MSG_NO_BUNDLE_PATH_OPTION =
@@ -253,6 +274,8 @@ private:
     ErrCode RunAsDumpSharedCommand();
     ErrCode RunAsCompileCommand();
     ErrCode RunAsCopyApCommand();
+    ErrCode RunAsInstallPluginCommand();
+    ErrCode RunAsUninstallPluginCommand();
 
     std::string CopyAp(const std::string &bundleName, bool isAllBundle) const;
 
@@ -295,9 +318,16 @@ private:
         std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug, const std::string &targetPath) const;
     ErrCode DeleteQuickFix(const std::string &bundleName, std::shared_ptr<QuickFixResult> &quickFixRes) const;
     std::string GetWaringString(int32_t currentUserId, int32_t specifedUserId) const;
+    ErrCode ParseInstallPluginCommand(int32_t option, std::string &hostBundleName,
+        std::vector<std::string> &pluginPaths);
+    ErrCode GetPluginPath(const std::string& param, std::vector<std::string>& pluginPaths) const;
+    int32_t TransformErrCode(const int32_t resultCode);
+    ErrCode ParseUninstallPluginCommand(int32_t option, std::string &hostBundleName, std::string &pluginBundleName);
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
+
+    static std::map<int32_t, int32_t> errCodeMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

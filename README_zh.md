@@ -22,6 +22,8 @@ foundation/bundlemanager/bundle_tool
 | help | 帮助命令，显示bm支持的命令信息。 |
 | install | 安装命令，用来安装应用。 |
 | uninstall | 卸载命令，用来卸载应用。 |
+| install-plugin | 安装插件命令，用于安装插件。|
+| uninstall-plugin | 卸载插件命令，用于卸载插件。|
 | dump | 查询命令，用来查询应用的相关信息。 |
 | clean | 清理命令，用来清理应用的缓存和数据。此命令在root版本下可用，在user版本下打开开发者模式可用。其它情况不可用。|
 | enable | 使能命令，用来使能应用，使能后应用可以继续使用。此命令在root版本下可用，在user版本下不可用。 |
@@ -129,6 +131,51 @@ bm uninstall -n com.ohos.example -s -v 100001
 bm uninstall -n com.ohos.app -k
 ```
 
+#### 安装插件命令
+
+```bash
+bm install-plugin [-h] [-n hostBundleName] [-p filePath]
+```
+
+命令可以组合，下面列出部分命令。
+
+
+  **表4** 安装插件命令列表
+
+| 命令                          | 描述                     |
+| ----------------------------- | ------------------------ |
+| bm install-plugin -h | 显示install-plugin支持的命令信息。-h为非必选字段。 |
+| bm install-plugin -n \<hostBundleName\> -p \<filePath\>| 通过指定主体应用包名和插件文件路径安装插件应用。-n为必选字段，-p为必选字段|
+
+示例：
+
+```bash
+# 安装一个插件
+bm install-plugin -n com.ohos.app -p /data/app/plugin.hsp
+```
+
+#### 卸载插件命令
+
+```bash
+bm uninstall-plugin [-h] [-n hostBundleName] [-p pluginBundleName]
+```
+
+命令可以组合，下面列出部分命令。
+
+
+  **表4** 卸载插件命令列表
+
+| 命令                          | 描述                     |
+| ----------------------------- | ------------------------ |
+| bm uninstall-plugin -h | 显示 uninstall-plugin 支持的命令信息。-h为非必选字段。 |
+| bm uninstall-plugin -n \<hostBundleName\> -p \<pluginBundleName\>| 通过指定主体应用包名和插件应用包名卸载插件应用。-n为必选字段，-p为必选字段|
+
+示例：
+
+```bash
+# 卸载一个插件
+bm uninstall-plugin -n com.ohos.app -p com.ohos.plugin
+```
 
 #### 查询应用信息命令
 
