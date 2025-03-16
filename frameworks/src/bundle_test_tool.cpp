@@ -33,6 +33,7 @@
 #include "bundle_death_recipient.h"
 #include "bundle_dir.h"
 #include "bundle_mgr_client.h"
+#include "bundle_mgr_ext_proxy.h"
 #include "bundle_mgr_proxy.h"
 #include "bundle_tool_callback_stub.h"
 #include "common_event_manager.h"
@@ -625,6 +626,12 @@ const std::string HELP_MSG_GET_BUNDLENAME_BY_APPID =
     "options list:\n"
     "  -a, --app-id <app-id>            specify a app index or app identifier\n";
 
+const std::string HELP_MSG_GET_BUNDLENAMES_FOR_UID_EXT =
+    "usage: bundle_test_tool getBundleNamesForUidExt <options>\n"
+    "eg:bundle_test_tool getBundleNamesForUidExt -u <uid>\n"
+    "options list:\n"
+    "  -u, --uid <uid>            specify a app uid\n";
+
 const std::string HELP_MSG_GET_SIMPLE_APP_INFO_FOR_UID =
     "usage: bundle_test_tool GetSimpleAppInfoForUid <options>\n"
     "eg:bundle_test_tool getSimpleAppInfoForUid -u <uid>,<uid>,<uid>...\n"
@@ -660,6 +667,7 @@ const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInst
 const std::string STRING_GET_BUNDLENAME_BY_APPID_OK = "getBundleNameByAppId is ok \n";
 const std::string STRING_GET_BUNDLENAME_BY_APPID_NG =
     "error: failed to getBundleNameByAppId \n";
+const std::string STRING_GET_BUNDLENAMES_FOR_UID_EXT_NG = "error: failed to getBundleNamesForUidExt \n";
 
 const std::string STRING_GET_SIMPLE_APP_INFO_FOR_UID_OK = "getSimpleAppInfoForUid is ok \n";
 const std::string STRING_GET_SIMPLE_APP_INFO_FOR_UID_NG =
@@ -805,6 +813,13 @@ const std::string SHORT_OPTIONS_GET_BUNDLENAME_BY_APPID = "ha:";
 const struct option LONG_OPTIONS_GET_BUNDLENAME_BY_APPID[] = {
     {"help", no_argument, nullptr, 'h'},
     {"app-id", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_BUNDLENAMES_FOR_UID_EXT = "hu:";
+const struct option LONG_OPTIONS_GET_BUNDLENAMES_FOR_UID_EXT[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"uid", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1225,7 +1240,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getAssetAccessGroups",
             std::bind(&BundleTestTool::RunAsGetAssetAccessGroups, this)},
         {"setAppDistributionTypes",
-                std::bind(&BundleTestTool::RunAsSetAppDistributionTypes, this)}
+                std::bind(&BundleTestTool::RunAsSetAppDistributionTypes, this)},
+        {"getBundleNamesForUidExt", std::bind(&BundleTestTool::RunAsGetBundleNamesForUidExtCommand, this)}
     };
 
     return OHOS::ERR_OK;
@@ -5570,6 +5586,64 @@ ErrCode BundleTestTool::RunAsUninstallPreInstallBundleCommand()
         resultReceiver_ = STRING_UNINSTALL_PREINSTALL_BUNDLE_FAILED + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetBundleNamesForUidExtCommand()
+{
+    APP_LOGI("RunAsGetBundleNameForUidExtCommand start");
+    std::string uid;
+    std::vector<std::string> bundleNames;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_BUNDLENAMES_FOR_UID_EXT.c_str(),
+            LONG_OPTIONS_GET_BUNDLENAMES_FOR_UID_EXT, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool isBundleInstalled with no option.");
+                resultReceiver_.append(HELP_MSG_GET_BUNDLENAMES_FOR_UID_EXT);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        switch (option) {
+            case 'u': {
+                uid = optarg;
+                break;
+            }
+            default: {
+                resultReceiver_.append(HELP_MSG_GET_BUNDLENAMES_FOR_UID_EXT);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+        }
+    }
+
+    ErrCode result = ERR_OK;
+    auto bundleMgrExtProxy = bundleMgrProxy_->GetBundleMgrExtProxy();
+    if (bundleMgrExtProxy != nullptr) {
+        result = bundleMgrExtProxy->GetBundleNamesForUidExt(std::stoi(uid), bundleNames);
+    }
+    if (result == ERR_OK) {
+        resultReceiver_.append("GetBundleNamesForUidExt success");
+        std::string msg = "bundle name list:\n{\n";
+        for (const auto &name : bundleNames) {
+            msg +="     ";
+            msg += name;
+            msg += "\n";
+        }
+        msg += "}\n";
+        resultReceiver_.append(msg);
+        return ERR_OK;
+    } else {
+        resultReceiver_.append(STRING_GET_BUNDLENAMES_FOR_UID_EXT_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    APP_LOGI("RunAsGetBundleNameForUidExtCommand end");
     return result;
 }
 } // AppExecFwk
