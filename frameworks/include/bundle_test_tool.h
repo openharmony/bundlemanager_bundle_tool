@@ -112,6 +112,7 @@ private:
     ErrCode RunAsGetBundleNameByAppId();
     ErrCode RunAsGetAssetAccessGroups();
     ErrCode RunAsSetAppDistributionTypes();
+    ErrCode RunAsGetBundleNamesForUidExtCommand();
 
     std::condition_variable cv_;
     std::mutex mutex_;
