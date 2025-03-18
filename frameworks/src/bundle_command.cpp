@@ -397,7 +397,7 @@ ErrCode BundleManagerShellCommand::ParseCopyApCommand(int32_t option, std::strin
 
 ErrCode BundleManagerShellCommand::RunAsCompileCommand()
 {
-    APP_LOGI("begin to RunAsCompileCommand");
+    APP_LOGI("begin");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string compileMode = "";
