@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #define private public
+#define protected public
+
 #include "bundle_command.h"
 #undef private
 #include "bundle_installer_interface.h"
@@ -36,6 +38,81 @@ namespace {
     const std::string IS_DEVELOPER_MODE_PARAM = "const.security.developermode.state";
     const int32_t ROOT_MODE = 1;
 }
+
+class MockCreateCommandMap : public ShellCommand {
+public:
+    MockCreateCommandMap(int argc, char *argv[]) : ShellCommand(argc, argv, TOOL_NAME)
+    {
+    };
+
+    ErrCode CreateCommandMap() override
+    {
+        return -1;
+    };
+    ErrCode CreateMessageMap() override
+    {
+        return ERR_OK;
+    };
+    ErrCode Init() override
+    {
+        return ERR_OK;
+    };
+
+    ErrCode RunAsHelpCommand() const
+    {
+        return OHOS::ERR_OK;
+    }
+};
+
+class MockCreateMessageMap : public ShellCommand {
+public:
+    MockCreateMessageMap(int argc, char *argv[]) : ShellCommand(argc, argv, TOOL_NAME)
+    {
+    };
+
+    ErrCode CreateCommandMap() override
+    {
+        return ERR_OK;
+    };
+    ErrCode CreateMessageMap() override
+    {
+        return -1;
+    };
+    ErrCode Init() override
+    {
+        return ERR_OK;
+    };
+
+    ErrCode RunAsHelpCommand() const
+    {
+        return OHOS::ERR_OK;
+    }
+};
+
+class MockInit : public ShellCommand {
+public:
+    MockInit(int argc, char *argv[]) : ShellCommand(argc, argv, TOOL_NAME)
+    {
+    };
+
+    ErrCode CreateCommandMap() override
+    {
+        return ERR_OK;
+    };
+    ErrCode CreateMessageMap() override
+    {
+        return ERR_OK;
+    };
+    ErrCode Init() override
+    {
+        return -1;
+    };
+
+    ErrCode RunAsHelpCommand() const
+    {
+        return OHOS::ERR_OK;
+    }
+};
 
 class BmCommandTest : public ::testing::Test {
 public:
@@ -1326,5 +1403,443 @@ HWTEST_F(BmCommandTest, GetBundlePath_0001, Function | MediumTest | Level1)
     param = "-x";
     res = cmd.GetBundlePath(param, bundlePaths);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.number: ShellCommand_0010
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0010, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    auto ret = cmd.GetMessageFromCode(-1);
+
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.number: ShellCommand_0020
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0020, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    cmd.ExecCommand();
+    auto ret = cmd.GetMessageFromCode(IStatusReceiver::ERR_INSTALL_INTERNAL_ERROR);
+
+    EXPECT_NE(ret, "");
+}
+
+/**
+ * @tc.number: ShellCommand_0030
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0030, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    auto originOptind = optind;
+    optind = 100;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    std::string unknownOption;
+    auto ret = cmd.GetUnknownOptionMsg(unknownOption);
+    optind = originOptind;
+
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.number: ShellCommand_0040
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0040, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    MockCreateCommandMap mockCreateCommandMap(argc, argv);
+    mockCreateCommandMap.commandMap_.emplace(
+        std::make_pair("help", [mockCreateCommandMap]{ return mockCreateCommandMap.RunAsHelpCommand(); }));
+    mockCreateCommandMap.cmd_ = "help";
+    auto ret = mockCreateCommandMap.ExecCommand();
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.number: ShellCommand_0050
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0050, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    MockCreateMessageMap mockCreateMessageMap(argc, argv);
+    mockCreateMessageMap.commandMap_.emplace(
+        std::make_pair("help", [mockCreateMessageMap]{ return mockCreateMessageMap.RunAsHelpCommand(); }));
+    mockCreateMessageMap.cmd_ = "help";
+    auto ret = mockCreateMessageMap.ExecCommand();
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.number: ShellCommand_0060
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0060, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    MockInit mockInit(argc, argv);
+    mockInit.commandMap_.emplace(
+        std::make_pair("help", [mockInit]{ return mockInit.RunAsHelpCommand(); }));
+    mockInit.cmd_ = "help";
+    auto ret = mockInit.OnCommand();
+    EXPECT_EQ(ret, OHOS::ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: ShellCommand_0070
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0070, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    MockCreateMessageMap mockCreateMessageMap(argc, argv);
+    mockCreateMessageMap.commandMap_.emplace(
+        std::make_pair("help", [mockCreateMessageMap]{ return mockCreateMessageMap.RunAsHelpCommand(); }));
+    mockCreateMessageMap.cmd_ = "help";
+    auto ret = mockCreateMessageMap.OnCommand();
+    EXPECT_EQ(ret, OHOS::ERR_OK);
+}
+
+/**
+ * @tc.number: ShellCommand_0080
+ * @tc.name: ShellCommand
+ * @tc.desc: Verify the ShellCommand.
+ */
+HWTEST_F(BmCommandTest, ShellCommand_0080, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    MockInit mockInit(argc, argv);
+    mockInit.commandMap_.emplace(
+        std::make_pair("help", [mockInit]{ return mockInit.RunAsHelpCommand(); }));
+    mockInit.cmd_ = "help";
+    auto ret = mockInit.ExecCommand();
+    EXPECT_NE(ret, "");
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0090
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the BundleManagerShellCommand.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0090, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_EQ(ret, HELP_MSG + ENABLE_DISABLE_HELP_MSG + CLEAN_HELP_MSG);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0100
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the BundleManagerShellCommand.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0100, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    auto originOptind = optind;
+    optind = 100;
+
+    auto ret = cmd.RunAsCopyApCommand();
+    optind = originOptind;
+    EXPECT_EQ(ret, OHOS::ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0110
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0110, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-n"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_EQ(ret, HELP_MSG_NO_OPTION + "\n" + HELP_MSG_COPY_AP);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0120
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0120, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-n"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_EQ(ret, STRING_REQUIRE_CORRECT_VALUE + HELP_MSG_COPY_AP);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0130
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0130, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-n"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    auto originOptind = optind;
+    optind = 100;
+
+    auto ret = cmd.ExecCommand();
+    optind = originOptind;
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0140
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0140, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-m"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_EQ(ret, "error: unknown option.\n" + HELP_MSG_COPY_AP);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0150
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0150, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-a"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_NE(ret, "");
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0160
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0160, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-h"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_EQ(ret, HELP_MSG_COPY_AP);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0170
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0170, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-n"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_NE(ret, "");
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0180
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0180, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-b"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    auto ret = cmd.ExecCommand();
+    EXPECT_NE(ret, "");
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0190
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0190, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-n"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    int32_t option = -1;
+    std::string bundleName = "111";
+    bool isAllBundle = false;
+
+    auto originOption = option;
+    auto originOptarg = optarg;
+    option = 'n';
+    optarg = const_cast<char*>("test");
+    auto ret = cmd.ParseCopyApCommand(option, bundleName, isAllBundle);
+    option = originOption;
+    optarg = originOptarg;
+    EXPECT_EQ(ret, OHOS::ERR_OK);
+}
+
+/**
+ * @tc.number: BundleManagerShellCommand_0200
+ * @tc.name: BundleManagerShellCommand
+ * @tc.desc: Verify the copy-ap.
+ */
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0200, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>("copy-ap"),
+        const_cast<char*>("-b"),
+        const_cast<char*>("test"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    int32_t option = -1;
+    std::string bundleName;
+    bool isAllBundle = false;
+
+    auto originOption = option;
+    option = 'm';
+    auto ret = cmd.ParseCopyApCommand(option, bundleName, isAllBundle);
+    option = originOption;
+    EXPECT_EQ(ret, OHOS::ERR_INVALID_VALUE);
 }
 } // namespace OHOS
