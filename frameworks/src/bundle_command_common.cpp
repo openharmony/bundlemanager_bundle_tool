@@ -723,6 +723,34 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         IStatusReceiver::ERR_APP_DISTRIBUTION_TYPE_NOT_ALLOW_INSTALL_ISR,
         "error: Failed to install the HAP or HSP because the app distribution type is not allowed."
     },
+    {
+        IStatusReceiver::ERR_PLUGIN_INSTALL_CHECK_PLUGINID_ERROR,
+        "error: Check pluginDistributionID between plugin and host application failed."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_SUPPORT_PLUGIN_PERMISSION_ERROR,
+        "error: Failed to install the plugin because host application check permission failed."
+    },
+    {
+        IStatusReceiver::ERR_HOST_APP_NOT_FOUND,
+        "error: Host application is not found."
+    },
+    {
+        IStatusReceiver::ERR_DEVICE_NOT_SUPPORT_PLUGIN,
+        "error: Failed to install the plugin because current device does not support plugin."
+    },
+    {
+        IStatusReceiver::ERR_MULTIPLE_HSP_INFO_INCONSISTENT,
+        "error: Failed to install the plugin because they have different configuration information."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_ID_PARSE_FAILED,
+        "error: Failed to install the plugin because the plugin id failed to be parsed."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_APP_NOT_FOUND,
+        "error: The plugin is not found."
+    }
 };
 } // AppExecFwk
 } // OHOS
