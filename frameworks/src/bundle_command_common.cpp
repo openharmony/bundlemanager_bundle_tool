@@ -750,6 +750,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_PLUGIN_APP_NOT_FOUND,
         "error: The plugin is not found."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_SAME_BUNDLE_NAME,
+        "error: The plugin name is same as host bundle name."
     }
 };
 } // AppExecFwk
