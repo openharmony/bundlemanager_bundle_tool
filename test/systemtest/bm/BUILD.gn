@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../bundletool.gni")
 
-module_output_path = "bundle_tool/tools"
+module_output_path = "bundle_tool/bundle_tool"
 
 config("tools_bm_config_systemtest") {
   include_dirs = [ "${bundletool_test_path}/mock/" ]
