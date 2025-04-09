@@ -1419,7 +1419,9 @@ ErrCode BundleTestTool::RunAsCheckCommand()
                 break;
             }
             case 'u': {
-                userId = std::stoi(optarg);
+                if (!OHOS::StrToInt(optarg, userId)) {
+                    APP_LOGD("userId strToInt failed");
+                }
                 break;
             }
             default: {
