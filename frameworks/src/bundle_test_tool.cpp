@@ -1392,10 +1392,7 @@ ErrCode BundleTestTool::RunAsCheckCommand()
             return OHOS::ERR_INVALID_VALUE;
         }
         if (option == -1) {
-            // When scanning the first argument
             if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
-                // 'CheckAbilityEnableInstall' with no option: CheckAbilityEnableInstall
-                // 'CheckAbilityEnableInstall' with a wrong argument: CheckAbilityEnableInstall
                 APP_LOGD("'CheckAbilityEnableInstall' with no option.");
                 return OHOS::ERR_INVALID_VALUE;
             }
@@ -1419,7 +1416,9 @@ ErrCode BundleTestTool::RunAsCheckCommand()
                 break;
             }
             case 'u': {
-                userId = std::stoi(optarg);
+                if (!OHOS::StrToInt(optarg, userId)) {
+                    APP_LOGD("userId strToInt failed");
+                }
                 break;
             }
             default: {
