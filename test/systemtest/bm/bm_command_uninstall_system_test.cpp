@@ -60,7 +60,7 @@ void BmCommandUninstallSystemTest::TearDown()
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Function | MediumTest | Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -79,7 +79,7 @@ HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Fun
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Function | MediumTest | Level0)
 {
     // uninstall an invalid bundle
     std::string command = "bm uninstall -n " + STRING_BUNDLE_NAME_INVALID;
