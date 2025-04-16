@@ -59,7 +59,7 @@ void BmCommandDumpSystemTest::TearDown()
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -a" command.
  */
-HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0100, Function | MediumTest | Level0)
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0100, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -82,7 +82,7 @@ HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0100, Function | Me
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0200, Function | MediumTest | Level0)
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0200, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -105,7 +105,7 @@ HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0200, Function | Me
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0300, Function | MediumTest | TestSize.Level1)
 {
     // dump an invalid bundle
     std::string command = "bm dump -n " + STRING_BUNDLE_NAME_INVALID;

@@ -173,7 +173,7 @@ void BmCommandTest::SetMockObjects(BundleManagerShellCommand &cmd) const
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_0001, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -205,7 +205,7 @@ HWTEST_F(BmCommandTest, Bm_Command_0001, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_0002, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -238,7 +238,7 @@ HWTEST_F(BmCommandTest, Bm_Command_0002, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm -xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_0003, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -271,7 +271,7 @@ HWTEST_F(BmCommandTest, Bm_Command_0003, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm --xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_0004, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -304,7 +304,7 @@ HWTEST_F(BmCommandTest, Bm_Command_0004, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm help" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_0005, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -337,7 +337,7 @@ HWTEST_F(BmCommandTest, Bm_Command_0005, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0001, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -356,7 +356,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0001, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean xx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0002, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -376,7 +376,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0002, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0003, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -396,7 +396,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0003, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0004, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -417,7 +417,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0004, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0005, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -439,7 +439,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0005, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> -d" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0006, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0006, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -461,7 +461,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0006, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> -c" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0007, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0007, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -483,7 +483,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0007, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -c" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0008, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0008, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -503,7 +503,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0008, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -d" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0009, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0009, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -523,7 +523,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0009, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> -d -u" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0010, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0010, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -547,7 +547,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0010, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> -d -u <user-id>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0012, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0012, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -572,7 +572,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0012, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -h" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0013, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0013, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -591,7 +591,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0013, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0014, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0014, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -611,7 +611,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0014, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -n <bundle-name> -d -xxx <user-id>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0015, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0015, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -636,7 +636,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0015, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -xxx <bundle-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0016, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0016, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -657,7 +657,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0016, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm clean -h" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Clean_0017, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Clean_0017, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -677,7 +677,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Clean_0017, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0001, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -696,7 +696,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0001, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0002, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -716,7 +716,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0002, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0003, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -737,7 +737,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0003, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name> -a <ability-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0004, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -759,7 +759,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0004, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name> -a <ability-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0005, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -782,7 +782,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0005, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -x" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0006, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0006, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -803,7 +803,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0006, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name> -u" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0007, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0007, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -825,7 +825,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0007, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name> -u <user-id>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0009, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0009, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -848,7 +848,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0009, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -h" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0010, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0010, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -868,7 +868,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0010, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm enable -n <bundle-name> -xxx <user-id>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Enable_0011, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Enable_0011, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -891,7 +891,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Enable_0011, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0001, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -910,7 +910,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0001, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0002, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -930,7 +930,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0002, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0003, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -951,7 +951,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0003, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name> -a <ability-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0004, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -973,7 +973,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0004, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name> -a <ability-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0005, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -996,7 +996,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0005, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name> -u <user-id>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0006, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0006, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1018,7 +1018,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0006, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name> -u <user-id>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0007, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0007, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1041,7 +1041,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0007, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -x" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0008, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0008, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1061,7 +1061,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0008, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -h" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0009, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0009, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1081,7 +1081,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0009, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm disable -n <bundle-name> -xxx <ability-name>" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Disable_0011, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Disable_0011, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1104,7 +1104,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Disable_0011, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0001, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1127,7 +1127,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0001, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get -u" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0002, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1154,7 +1154,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0002, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get -x" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0003, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1178,7 +1178,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0003, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get -u -x" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0004, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1203,7 +1203,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0004, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get -u xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0005, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1228,7 +1228,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0005, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get --udid" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0006, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0006, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1255,7 +1255,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0006, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get --xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0007, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0007, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1279,7 +1279,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0007, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get --udid -x" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0008, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0008, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1304,7 +1304,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0008, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get -u xxx" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0009, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0009, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1329,7 +1329,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0009, Function | MediumTest | Level1)
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm get -h" command.
  */
-HWTEST_F(BmCommandTest, Bm_Command_Get_0010, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, Bm_Command_Get_0010, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1353,7 +1353,7 @@ HWTEST_F(BmCommandTest, Bm_Command_Get_0010, Function | MediumTest | Level1)
  * @tc.name: test GetBundlePath
  * @tc.desc: Verify the "GetBundlePath".
  */
-HWTEST_F(BmCommandTest, GetBundlePath_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, GetBundlePath_0001, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1410,7 +1410,7 @@ HWTEST_F(BmCommandTest, GetBundlePath_0001, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0010, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0010, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1429,7 +1429,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0010, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0020, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0020, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1449,7 +1449,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0020, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0030, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0030, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1473,7 +1473,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0030, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0040, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0040, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1494,7 +1494,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0040, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0050, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0050, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1515,7 +1515,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0050, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0060, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0060, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1536,7 +1536,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0060, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0070, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0070, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1557,7 +1557,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0070, Function | MediumTest | Level1)
  * @tc.name: ShellCommand
  * @tc.desc: Verify the ShellCommand.
  */
-HWTEST_F(BmCommandTest, ShellCommand_0080, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, ShellCommand_0080, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1578,7 +1578,7 @@ HWTEST_F(BmCommandTest, ShellCommand_0080, Function | MediumTest | Level1)
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the BundleManagerShellCommand.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0090, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0090, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1597,7 +1597,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0090, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the BundleManagerShellCommand.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1619,7 +1619,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0100, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0110, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0110, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1639,7 +1639,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0110, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0120, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0120, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1660,7 +1660,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0120, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0130, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0130, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1684,7 +1684,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0130, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0140, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0140, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1705,7 +1705,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0140, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0150, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0150, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1726,7 +1726,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0150, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0160, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0160, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1747,7 +1747,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0160, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0170, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0170, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1768,7 +1768,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0170, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0180, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0180, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1789,7 +1789,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0180, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0190, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0190, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -1820,7 +1820,7 @@ HWTEST_F(BmCommandTest, BundleManagerShellCommand_0190, Function | MediumTest | 
  * @tc.name: BundleManagerShellCommand
  * @tc.desc: Verify the copy-ap.
  */
-HWTEST_F(BmCommandTest, BundleManagerShellCommand_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandTest, BundleManagerShellCommand_0200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),

@@ -90,7 +90,7 @@ void BmCommandUninstallTest::SetMockObjects(BundleManagerShellCommand &cmd) cons
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -112,7 +112,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0100, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall xxx" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -135,7 +135,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0200, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -x" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0300, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -158,7 +158,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0300, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -xxx" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0400, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -181,7 +181,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0400, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall --x" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0500, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -204,7 +204,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0500, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall --xxx" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0600, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -227,7 +227,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0600, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall --h" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0700, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -250,7 +250,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0700, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall --help" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0800, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -273,7 +273,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0800, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0900, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0900, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -296,7 +296,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_0900, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1000, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -320,7 +320,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1000, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -m" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -345,7 +345,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1100, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -m <module-name>" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -369,7 +369,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1200, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -m <module-name>" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1300, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -395,7 +395,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1300, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -u" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1400, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -420,7 +420,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1400, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -k" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1600, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -445,7 +445,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1600, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -k xxx" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1700, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -471,7 +471,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1700, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n xxx" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1800, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -495,7 +495,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1800, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -xxx <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1900, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1900, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -519,7 +519,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_1900, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -u <user-id>" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2000, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -545,7 +545,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2000, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -k 1" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -571,7 +571,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2100, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -cc <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -595,7 +595,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2200, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -k 1 -v 1 -s" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2300, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -624,7 +624,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2300, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -k xxxx" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2400, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -647,7 +647,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2400, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -v 1" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2500, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -670,7 +670,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2500, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -s" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2600, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -693,7 +693,7 @@ HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2600, Function | MediumTes
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -k" command.
  */
-HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallTest, Bm_Command_Uninstall_2700, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
