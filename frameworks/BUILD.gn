@@ -155,6 +155,7 @@ ohos_source_set("tools_test_bm_source_set") {
     "jsoncpp:jsoncpp",
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
+    "selinux_adapter:librestorecon",
   ]
 
   public_external_deps = [
