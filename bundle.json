@@ -30,6 +30,7 @@
                 "ipc",
                 "os_account",
                 "samgr",
+                "selinux_adapter",
                 "json",
                 "jsoncpp",
                 "access_token",
