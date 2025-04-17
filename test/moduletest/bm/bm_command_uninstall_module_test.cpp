@@ -91,7 +91,7 @@ void BmCommandUninstallModuleTest::SetMockObjects(BundleManagerShellCommand &cmd
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallModuleTest, Bm_Command_Uninstall_ModuleTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallModuleTest, Bm_Command_Uninstall_ModuleTest_0100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char *>(TOOL_NAME.c_str()),
@@ -115,7 +115,7 @@ HWTEST_F(BmCommandUninstallModuleTest, Bm_Command_Uninstall_ModuleTest_0100, Fun
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name> -m <module-name>" command.
  */
-HWTEST_F(BmCommandUninstallModuleTest, Bm_Command_Uninstall_ModuleTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallModuleTest, Bm_Command_Uninstall_ModuleTest_0200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char *>(TOOL_NAME.c_str()),

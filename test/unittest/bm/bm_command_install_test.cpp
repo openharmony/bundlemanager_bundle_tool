@@ -91,7 +91,7 @@ void BmCommandInstallTest::SetMockObjects(BundleManagerShellCommand &cmd) const
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -113,7 +113,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0100, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install xxx" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -136,7 +136,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0200, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -x" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0300, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -159,7 +159,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0300, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -xxx" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0400, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -182,7 +182,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0400, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install --x" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0500, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -205,7 +205,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0500, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install --xxx" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0600, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -228,7 +228,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0600, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install --h" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0700, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -251,7 +251,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0700, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install --help" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0800, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -274,7 +274,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0800, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0900, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0900, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -297,7 +297,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_0900, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -r" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1000, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -321,7 +321,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1000, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1100, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -346,7 +346,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1100, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -r" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1200, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -372,7 +372,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1200, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -r -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1300, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -398,7 +398,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1300, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1600, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -424,7 +424,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1600, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1700, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -450,7 +450,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1700, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1800, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -476,7 +476,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1800, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install --bundle-path <bundle-path> <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1900, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1900, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -502,7 +502,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_1900, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2000, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -528,7 +528,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2000, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2100, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -554,7 +554,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2100, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> <bundle-path> -r" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2300, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -581,7 +581,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2300, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -r -p <bundle-path> <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2400, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -608,7 +608,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2400, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p -r <bundle-path> <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2600, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -635,7 +635,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2600, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> <bundle-path> -u xxx" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2700, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -663,7 +663,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2700, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> <bundle-path> -u" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2800, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -690,7 +690,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_2800, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -w" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3000, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -716,7 +716,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3000, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -w <waitting-time>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3100, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -743,7 +743,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3100, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -XXX <user-id>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3200, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -771,7 +771,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3200, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -w <waitting-time>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3300, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -798,7 +798,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3300, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -w <waitting-time>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3400, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -825,7 +825,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3400, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3500, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -849,7 +849,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3500, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3600, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -874,7 +874,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3600, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3700, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -899,7 +899,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3700, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3800, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -925,7 +925,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3800, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3900, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3900, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -951,7 +951,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_3900, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4000, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -977,7 +977,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4000, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4100, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1003,7 +1003,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4100, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4200, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1029,7 +1029,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4200, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4300, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1055,7 +1055,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4300, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4400, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -1081,7 +1081,7 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4400, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -s <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4500, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {

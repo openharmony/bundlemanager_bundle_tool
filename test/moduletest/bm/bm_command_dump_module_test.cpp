@@ -91,7 +91,7 @@ void BmCommandDumpModuleTest::SetMockObjects(BundleManagerShellCommand &cmd) con
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -a" command.
  */
-HWTEST_F(BmCommandDumpModuleTest, Bm_Command_Dump_ModuleTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpModuleTest, Bm_Command_Dump_ModuleTest_0100, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -115,7 +115,7 @@ HWTEST_F(BmCommandDumpModuleTest, Bm_Command_Dump_ModuleTest_0100, Function | Me
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump --all" command.
  */
-HWTEST_F(BmCommandDumpModuleTest, Bm_Command_Dump_ModuleTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpModuleTest, Bm_Command_Dump_ModuleTest_0200, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {

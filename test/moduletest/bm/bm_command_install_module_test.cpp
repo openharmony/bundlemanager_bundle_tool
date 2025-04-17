@@ -91,7 +91,7 @@ void BmCommandInstallModuleTest::SetMockObjects(BundleManagerShellCommand &cmd) 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0100, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {
@@ -116,7 +116,7 @@ HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0100, Functio
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -r" command.
  */
-HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallModuleTest, Bm_Command_Install_ModuleTest_0200, Function | MediumTest | TestSize.Level1)
 {
     // install a bundle
     char *argv[] = {

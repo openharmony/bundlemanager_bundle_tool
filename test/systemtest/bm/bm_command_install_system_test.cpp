@@ -60,7 +60,7 @@ void BmCommandInstallSystemTest::TearDown()
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0100, Function | MediumTest | Level0)
+HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0100, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -79,7 +79,7 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0100, Functio
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Function | MediumTest | Level0)
+HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Function | MediumTest | TestSize.Level0)
 {
     // install an invalid bundle
     std::string command = "bm install -p " + STRING_BUNDLE_PATH_INVALID;
@@ -93,7 +93,7 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Functio
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -r" command.
  */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0300, Function | MediumTest | TestSize.Level1)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);

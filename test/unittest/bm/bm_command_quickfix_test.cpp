@@ -71,7 +71,7 @@ HWTEST_F(BmCommandQuickFixTest, Bm_Command_QuickFix_0100, TestSize.Level1)
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     BundleManagerShellCommand cmd(argc, argv);
-    
+
     EXPECT_EQ(cmd.ExecCommand(), "error: parameter is not enough.\n" + HELP_MSG_QUICK_FIX);
 }
 
