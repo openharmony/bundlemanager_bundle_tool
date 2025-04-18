@@ -24,6 +24,7 @@
                 "bundle_framework",
                 "common_event_service",
                 "c_utils",
+                "cJSON",
                 "distributed_bundle_framework",
                 "hilog",
                 "init",
