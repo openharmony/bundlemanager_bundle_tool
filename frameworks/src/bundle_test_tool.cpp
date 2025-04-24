@@ -5631,6 +5631,7 @@ ErrCode BundleTestTool::RunAsGetBundleNamesForUidExtCommand()
             result = bundleMgrExtProxy->GetBundleNamesForUidExt(uidInt, bundleNames);
         } else {
             APP_LOGI("Failed to convert uid");
+            ERR_INVALID_VALUE;
         }
     }
     if (result == ERR_OK) {
