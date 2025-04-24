@@ -5626,7 +5626,12 @@ ErrCode BundleTestTool::RunAsGetBundleNamesForUidExtCommand()
     ErrCode result = ERR_OK;
     auto bundleMgrExtProxy = bundleMgrProxy_->GetBundleMgrExtProxy();
     if (bundleMgrExtProxy != nullptr) {
-        result = bundleMgrExtProxy->GetBundleNamesForUidExt(std::stoi(uid), bundleNames);
+        int32_t uidInt = 0;
+        if (StrToInt(uid, uidInt)) {
+            result = bundleMgrExtProxy->GetBundleNamesForUidExt(uidInt, bundleNames);
+        } else {
+            APP_LOGI("Failed to convert uid");
+        }
     }
     if (result == ERR_OK) {
         resultReceiver_.append("GetBundleNamesForUidExt success");
