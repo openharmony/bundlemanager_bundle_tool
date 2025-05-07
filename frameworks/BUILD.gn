@@ -148,6 +148,7 @@ ohos_source_set("tools_test_bm_source_set") {
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_tool_libs",
     "c_utils:utils",
+    "cJSON:cjson_static",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "init:libbegetutil",
