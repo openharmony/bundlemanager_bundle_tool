@@ -754,6 +754,11 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_PLUGIN_SAME_BUNDLE_NAME,
         "error: The plugin name is same as host bundle name."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_FAILED_DEVICE_UNAUTHORIZED,
+        "error: Failed to install the HAP because the device is unauthorized, "
+        "make sure the UDID of your device is configured in the signing profile."
     }
 };
 } // AppExecFwk
