@@ -292,6 +292,8 @@ private:
     std::string DumpSharedDependencies(const std::string &bundleName, const std::string &moduleName) const;
     std::string DumpShared(const std::string &bundleName) const;
     std::string DumpSharedAll() const;
+    std::string DumpAllLabel(int32_t userId) const;
+    std::string DumpBundleLabel(const std::string &bundleName, int32_t userId) const;
 
     int32_t InstallOperation(const std::vector<std::string> &bundlePaths, InstallParam &installParam,
         int32_t waittingTime, std::string &resultMsg) const;
