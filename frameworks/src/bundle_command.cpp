@@ -125,7 +125,7 @@ const struct option UNINSTALL_LONG_OPTIONS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_DUMP = "hn:aisu:d:g";
+const std::string SHORT_OPTIONS_DUMP = "hn:aisu:d:gl";
 const struct option LONG_OPTIONS_DUMP[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
@@ -135,6 +135,7 @@ const struct option LONG_OPTIONS_DUMP[] = {
     {"user-id", required_argument, nullptr, 'u'},
     {"device-id", required_argument, nullptr, 'd'},
     {"debug-bundle", no_argument, nullptr, 'g'},
+    {"label", no_argument, nullptr, 'l'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1016,6 +1017,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     bool bundleDumpInfo = false;
     bool bundleDumpShortcut = false;
     bool bundleDumpDistributedBundleInfo = false;
+    bool bundleDumpLabel = false;
     std::string deviceId = "";
     const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     int32_t userId = currentUser;
@@ -1094,6 +1096,13 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                 bundleDumpAll = true;
                 break;
             }
+            case 'l': {
+                // 'bm dump -l'
+                // 'bm dump --label'
+                APP_LOGD("'bm dump %{public}s'", argv_[optind - 1]);
+                bundleDumpLabel = true;
+                break;
+            }
             case 'g': {
                 // 'bm dump -g'
                 // 'bm dump --debug-bundle'
@@ -1168,12 +1177,16 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             dumpResults = DumpShortcutInfos(bundleName, userId);
         } else if (bundleDumpDistributedBundleInfo) {
             dumpResults = DumpDistributedBundleInfo(deviceId, bundleName);
-        } else if (bundleDumpAll) {
+        } else if (bundleDumpAll && !bundleDumpLabel) {
             dumpResults = DumpBundleList(userId);
         } else if (bundleDumpDebug) {
             dumpResults = DumpDebugBundleList(userId);
-        } else if (bundleDumpInfo) {
+        } else if (bundleDumpInfo && !bundleDumpLabel) {
             dumpResults = DumpBundleInfo(bundleName, userId);
+        } else if (bundleDumpAll && bundleDumpLabel) {
+            dumpResults = DumpAllLabel(userId);
+        } else if (bundleDumpInfo && bundleDumpLabel) {
+            dumpResults = DumpBundleLabel(bundleName, userId);
         }
         if (dumpResults.empty() || (dumpResults == "")) {
             dumpResults = HELP_MSG_DUMP_FAILED + "\n";
@@ -2175,6 +2188,28 @@ std::string BundleManagerShellCommand::DumpBundleList(int32_t userId) const
         DumpFlag::DUMP_BUNDLE_LIST, BUNDLE_NAME_EMPTY, userId, dumpResults);
     if (!dumpRet) {
         APP_LOGE("failed to dump bundle list.");
+    }
+    return dumpResults;
+}
+
+std::string BundleManagerShellCommand::DumpBundleLabel(const std::string &bundleName, int32_t userId) const
+{
+    std::string dumpResults;
+    bool dumpRet = bundleMgrProxy_->DumpInfos(
+        DumpFlag::DUMP_BUNDLE_LABEL, bundleName, userId, dumpResults);
+    if (!dumpRet) {
+        APP_LOGE("failed to dump bundle label.");
+    }
+    return dumpResults;
+}
+
+std::string BundleManagerShellCommand::DumpAllLabel(int32_t userId) const
+{
+    std::string dumpResults;
+    bool dumpRet = bundleMgrProxy_->DumpInfos(
+        DumpFlag::DUMP_LABEL_LIST, BUNDLE_NAME_EMPTY, userId, dumpResults);
+    if (!dumpRet) {
+        APP_LOGE("failed to dump bundle label list.");
     }
     return dumpResults;
 }

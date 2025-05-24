@@ -113,4 +113,64 @@ HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0300, Function | Me
 
     EXPECT_EQ(commandResult, GET_FALSE + "\n");
 }
+
+/**
+ * @tc.number: Bm_Command_Dump_SystemTest_0400
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm dump -n <bundle-name> -l" command.
+ */
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0400, Function | MediumTest | TestSize.Level1)
+{
+    // dump an invalid bundle
+    std::string command = "bm dump -l -n " + STRING_BUNDLE_NAME_INVALID;
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+
+    EXPECT_EQ(commandResult, GET_FALSE + "\n");
+}
+
+/**
+ * @tc.number: Bm_Command_Dump_SystemTest_0500
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm dump -a -l" command.
+ */
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0500, Function | MediumTest | TestSize.Level0)
+{
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+
+    // install a valid bundle
+    ToolSystemTest::InstallBundle(STRING_BUNDLE_PATH, true);
+
+    // dump all bundle
+    std::string command = "bm dump -a -l";
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+
+    EXPECT_NE(commandResult, "");
+
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+}
+
+/**
+ * @tc.number: Bm_Command_Dump_SystemTest_0600
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm dump -n <bundle-name>" command.
+ */
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0600, Function | MediumTest | TestSize.Level0)
+{
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+
+    // install a valid bundle
+    ToolSystemTest::InstallBundle(STRING_BUNDLE_PATH, true);
+
+    // dump a valid bundle
+    std::string command = "bm dump -l -n " + STRING_BUNDLE_NAME;
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+
+    EXPECT_NE(commandResult, "");
+
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+}
 } // OHOS
