@@ -198,6 +198,7 @@ static const std::string HELP_MSG =
     "  getSimpleAppInfoForUid           get bundlename list and appIndex list by uid list\n"
     "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
     "  getAssetAccessGroups             get asset access groups by bundlename\n"
+    "  getAppIdentifierAndAppIndex      get appIdentifier and appIndex\n"
     "  setAppDistributionTypes          set white list of appDistributionType\n";
 
 
@@ -654,6 +655,13 @@ const std::string HELP_MSG_GET_ASSET_ACCESS_GROUPS =
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
 
+const std::string HELP_MSG_GET_APPIDENTIFIER_AND_APPINDEX =
+    "usage: bundle_test_tool getAppIdentifierAndAppIndex <options>\n"
+    "eg:bundle_test_tool getAppIdentifierAndAppIndex -a <access-token-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -a, --access-token-id <access-token-id>        specify access token ID of the application\n";
+
 const std::string HELP_MSG_SET_APP_DISTRIBUTION_TYPES =
     "usage: bundle_test_tool setAppDistributionTypes <options>\n"
     "eg:bundle_test_tool setAppDistributionTypes -a <appDistributionTypes>\n"
@@ -769,6 +777,9 @@ const std::string STRING_UNINSTALL_PREINSTALL_BUNDLE_FAILED = "uninstall preinst
 
 const std::string STRING_GET_ASSET_ACCESS_GROUPS_OK = "getAssetAccessGroups successfully\n";
 const std::string STRING_GET_ASSET_ACCESS_GROUPS_NG = "getAssetAccessGroups failed\n";
+
+const std::string STRING_GET_APPIDENTIFIER_AND_APPINDEX_OK = "getAppIdentifierAndAppIndex successfully\n";
+const std::string STRING_GET_APPIDENTIFIER_AND_APPINDEX_NG = "getAppIdentifierAndAppIndex failed\n";
 
 const std::string STRING_SET_APP_DISTRIBUTION_TYPES_OK = "setAppDistributionTypes successfully\n";
 const std::string STRING_SET_APP_DISTRIBUTION_TYPES_NG = "setAppDistributionTypes failed\n";
@@ -1078,6 +1089,13 @@ const struct option LONG_OPTIONS_SET_APP_DISTRIBUTION_TYPES[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX = "ha:";
+const struct option LONG_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"access-token-id", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
 }  // namespace
 
 class ProcessCacheCallbackImpl : public ProcessCacheCallbackHost {
@@ -1239,6 +1257,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"uninstallPreInstallBundle", std::bind(&BundleTestTool::RunAsUninstallPreInstallBundleCommand, this)},
         {"getAssetAccessGroups",
             std::bind(&BundleTestTool::RunAsGetAssetAccessGroups, this)},
+        {"getAppIdentifierAndAppIndex",
+            std::bind(&BundleTestTool::RunAsGetAppIdentifierAndAppIndex, this)},
         {"setAppDistributionTypes",
                 std::bind(&BundleTestTool::RunAsSetAppDistributionTypes, this)},
         {"getBundleNamesForUidExt", std::bind(&BundleTestTool::RunAsGetBundleNamesForUidExtCommand, this)}
@@ -1955,6 +1975,25 @@ ErrCode BundleTestTool::StringToUnsignedLongLong(
         result = false;
     }
     return OHOS::ERR_OK;
+}
+
+bool BundleTestTool::StrToUint32(const std::string &str, uint32_t &value)
+{
+    if (str.empty() || !isdigit(str.front())) {
+        APP_LOGE("str is empty!");
+        return false;
+    }
+    char* end = nullptr;
+    errno = 0;
+    auto addr = str.c_str();
+    auto result = strtoul(addr, &end, 10); /* 10 means decimal */
+    if ((end == addr) || (end[0] != '\0') || (errno == ERANGE) ||
+        (result > UINT32_MAX)) {
+        APP_LOGE("the result was incorrect!");
+        return false;
+    }
+    value = static_cast<uint32_t>(result);
+    return true;
 }
 
 bool BundleTestTool::HandleUnknownOption(const std::string &commandName, bool &ret)
@@ -5535,7 +5574,83 @@ bool BundleTestTool::CheckUnisntallCorrectOption(
     }
     return ret;
 }
- 
+
+bool BundleTestTool::CheckGetAppIdentifierAndAppIndexOption(int32_t option, const std::string &commandName,
+    uint32_t &accessTokenId)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'a': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            if (!StrToUint32(optarg, accessTokenId)) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetAppIdentifierAndAppIndex()
+{
+    APP_LOGI("RunAsGetAppIdentifierAndAppIndex start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getAppIdentifierAndAppIndex";
+    uint32_t accessTokenId;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX.c_str(),
+            LONG_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_GET_APPIDENTIFIER_AND_APPINDEX);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = !CheckGetAppIdentifierAndAppIndexOption(option, commandName, accessTokenId)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        APP_LOGE("accessTokenId = %{public}d", accessTokenId);
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_APPIDENTIFIER_AND_APPINDEX);
+    } else {
+        std::string appIdentifier = "";
+        int32_t appIndex;
+        
+        auto res = bundleMgrProxy_->GetAppIdentifierAndAppIndex(accessTokenId, appIdentifier, appIndex);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_GET_APPIDENTIFIER_AND_APPINDEX_NG);
+            return result;
+        } else {
+            resultReceiver_.append(STRING_GET_APPIDENTIFIER_AND_APPINDEX_OK);
+            resultReceiver_.append("appIdentifier:" + appIdentifier);
+            resultReceiver_.append("\n");
+            resultReceiver_.append("appIndex:" + std::to_string(appIndex));
+            resultReceiver_.append("\n");
+        }
+    }
+    return result;
+}
+
 ErrCode BundleTestTool::RunAsUninstallPreInstallBundleCommand()
 {
     int32_t result = OHOS::ERR_OK;
