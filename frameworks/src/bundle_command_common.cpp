@@ -759,6 +759,14 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         IStatusReceiver::ERR_INSTALL_FAILED_DEVICE_UNAUTHORIZED,
         "error: Failed to install the HAP because the device is unauthorized, "
         "make sure the UDID of your device is configured in the signing profile."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_BUNDLE_EXISTED_IN_U1_AND_OTHER_USERS,
+        "error: install failed due to U1Enabled can not change."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_U1_ENABLE_NOT_SAME_IN_ALL_BUNDLE_INFOS,
+        "error: install failed due to the U1Enabled is not same in all haps."
     }
 };
 } // AppExecFwk
