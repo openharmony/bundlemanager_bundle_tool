@@ -113,6 +113,7 @@ private:
     ErrCode RunAsGetAssetAccessGroups();
     ErrCode RunAsSetAppDistributionTypes();
     ErrCode RunAsGetBundleNamesForUidExtCommand();
+    ErrCode RunAsGetAppIdentifierAndAppIndex();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -160,6 +161,7 @@ private:
     ErrCode StringToInt(std::string option, const std::string &commandName, int &temp, bool &result);
     ErrCode StringToUnsignedLongLong(std::string optarg, const std::string &commandName,
         uint64_t &temp, bool &result);
+    bool StrToUint32(const std::string &str, uint32_t &value);
     ErrCode DeployQuickFix(const std::vector<std::string> &quickFixPaths,
         std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug);
     ErrCode SwitchQuickFix(const std::string &bundleName, int32_t enable,
@@ -199,6 +201,8 @@ private:
         const std::string &bundleName, InstallParam &installParam) const;
     bool CheckUnisntallCorrectOption(int option, const std::string &commandName,
         int &temp, std::string &Name);
+    bool CheckGetAppIdentifierAndAppIndexOption(int32_t option, const std::string &commandName,
+        uint32_t &accessTokenId);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
