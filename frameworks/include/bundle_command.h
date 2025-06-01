@@ -102,7 +102,8 @@ const std::string HELP_MSG_DUMP =
     "  -g, --debug-bundle                   list debug bundles in system\n"
     "  -n, --bundle-name <bundle-name>      list the bundle info by a bundle name\n"
     "  -s, --shortcut-info                  list the shortcut info\n"
-    "  -d, --device-id <device-id>          specify a device id\n";
+    "  -d, --device-id <device-id>          specify a device id\n"
+    "  -l, --label                          list the label info\n";
 
 const std::string HELP_MSG_CLEAN =
     "usage: bm clean <options>\n"
