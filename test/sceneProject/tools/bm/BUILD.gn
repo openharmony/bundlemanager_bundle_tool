@@ -17,7 +17,6 @@ group("bm_tool") {
 
   deps += [
     # deps file
-    "pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
+    "test_app_one:test_app_one"
   ]
 }

@@ -25,8 +25,8 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForInstall.hap";
-const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForInstall";
+const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/test_one.hap";
+const std::string STRING_BUNDLE_NAME = "com.test.bundlename.one";
 const std::string STRING_BUNDLE_NAME_INVALID = STRING_BUNDLE_NAME + ".invalid";
 const std::string GET_FALSE = "error: failed to get information and the parameters may be wrong.";
 }  // namespace
