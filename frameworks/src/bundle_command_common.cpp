@@ -761,7 +761,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "make sure the UDID of your device is configured in the signing profile."
     },
     {
-        IStatusReceiver::ERR_INSTALL_BUNDLE_EXISTED_IN_U1_AND_OTHER_USERS,
+        IStatusReceiver::ERR_INSTALL_BUNDLE_CAN_NOT_BOTH_EXISTED_IN_U1_AND_OTHER_USERS,
         "error: install failed due to U1Enabled can not change."
     },
     {
