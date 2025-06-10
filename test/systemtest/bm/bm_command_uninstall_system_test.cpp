@@ -25,8 +25,8 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForUninstall.hap";
-const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForUninstall";
+const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/test_one.hap";
+const std::string STRING_BUNDLE_NAME = "com.test.bundlename.one";
 const std::string STRING_BUNDLE_NAME_INVALID = STRING_BUNDLE_NAME + ".invalid";
 const std::string UNINSTALL_FALSE = "error: uninstall missing installed bundle.";
 const std::string ERR_CODE = "code:9568386\n";

@@ -25,9 +25,9 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForInstall.hap";
+const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/test_one.hap";
 const std::string STRING_BUNDLE_PATH_INVALID = STRING_BUNDLE_PATH + ".invalid";
-const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForInstall";
+const std::string STRING_BUNDLE_NAME = "com.test.bundlename.one";
 const std::string INSTALL_FALSE = "error: install file path invalid.";
 const std::string ERR_CODE = "code:9568269\n";
 }  // namespace

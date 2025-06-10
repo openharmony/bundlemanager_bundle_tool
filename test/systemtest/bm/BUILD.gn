@@ -30,8 +30,7 @@ ohos_systemtest("bm_command_install_system_test") {
 
   deps = [
     "${bundletool_test_path}/systemtest/bm/ohos_test:copy_ohos_test",
-    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
+    "${bundletool_test_path}/sceneProject/tools/bm/test_app_one:test_app_one",
   ]
 
   configs = [
@@ -80,8 +79,7 @@ ohos_systemtest("bm_command_uninstall_system_test") {
 
   deps = [
     "${bundletool_test_path}/systemtest/bm/ohos_test:copy_ohos_test",
-    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
+    "${bundletool_test_path}/sceneProject/tools/bm/test_app_one:test_app_one",
   ]
 
   external_deps = [
@@ -120,8 +118,7 @@ ohos_systemtest("bm_command_dump_system_test") {
 
   deps = [
     "${bundletool_test_path}/systemtest/bm/ohos_test:copy_ohos_test",
-    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForInstall:pageAbilityBundleForInstall",
-    "${bundletool_test_path}/systemtest/bm/pageAbilityBundleForUninstall:pageAbilityBundleForUninstall",
+    "${bundletool_test_path}/sceneProject/tools/bm/test_app_one:test_app_one",
   ]
 
   external_deps = [
