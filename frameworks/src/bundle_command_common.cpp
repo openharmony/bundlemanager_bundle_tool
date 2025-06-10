@@ -767,6 +767,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_U1_ENABLE_NOT_SAME_IN_ALL_BUNDLE_INFOS,
         "error: install failed due to the U1Enabled is not same in all haps."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_U1_ENABLE_NOT_SUPPORT_APP_SERVICE_AND_SHARED_BUNDLE,
+        "error: install failed due to the U1Enabled is not supported shared bundle."
     }
 };
 } // AppExecFwk
