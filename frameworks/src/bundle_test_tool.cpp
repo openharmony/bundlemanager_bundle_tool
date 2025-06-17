@@ -1125,10 +1125,7 @@ public:
     bool WaitForStatCompletion();
     void OnGetAllBundleCacheFinished(uint64_t cacheStat) override;
     void OnCleanAllBundleCacheFinished(int32_t result) override;
-    uint64_t GetCacheStat()
-    {
-        return cacheSize_;
-    }
+    uint64_t GetCacheStat() override;
     int32_t GetDelRet()
     {
         return cleanRet_;
@@ -1144,6 +1141,11 @@ private:
     std::future<void> statFuture_ = stat_.get_future();
     DISALLOW_COPY_AND_MOVE(ProcessCacheCallbackImpl);
 };
+
+uint64_t ProcessCacheCallbackImpl::GetCacheStat()
+{
+    return cacheSize_;
+}
  
 void ProcessCacheCallbackImpl::OnGetAllBundleCacheFinished(uint64_t cacheStat)
 {
