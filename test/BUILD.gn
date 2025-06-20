@@ -15,6 +15,10 @@ group("systemtest") {
   testonly = true
 
   deps = [ "systemtest/bm:systemtest" ]
+
+  deps += [
+    "sceneProject:test_hap",
+  ]
 }
 
 group("moduletest") {

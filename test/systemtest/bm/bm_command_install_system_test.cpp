@@ -25,9 +25,9 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForInstall.hap";
+const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/test_one.hap";
 const std::string STRING_BUNDLE_PATH_INVALID = STRING_BUNDLE_PATH + ".invalid";
-const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForInstall";
+const std::string STRING_BUNDLE_NAME = "com.test.bundlename.one";
 const std::string INSTALL_FALSE = "error: install file path invalid.";
 const std::string ERR_CODE = "code:9568269\n";
 }  // namespace
@@ -60,7 +60,7 @@ void BmCommandInstallSystemTest::TearDown()
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0100, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -79,7 +79,7 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0100, Functio
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path>" command.
  */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Function | MediumTest | TestSize.Level0)
 {
     // install an invalid bundle
     std::string command = "bm install -p " + STRING_BUNDLE_PATH_INVALID;
@@ -93,7 +93,7 @@ HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0200, Functio
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm install -p <bundle-path> -r" command.
  */
-HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandInstallSystemTest, Bm_Command_Install_SystemTest_0300, Function | MediumTest | TestSize.Level1)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);

@@ -77,6 +77,22 @@ const struct option LONG_OPTIONS_COPY_AP[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_INSTALL_PLUGIN = "hn:p:";
+const struct option LONG_OPTIONS_INSTALL_PLUGIN[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"host-bundle-name", required_argument, nullptr, 'n'},
+    {"plugin-path", required_argument, nullptr, 'p'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_UNINSTALL_PLUGIN = "hn:p:";
+const struct option LONG_OPTIONS_UNINSTALL_PLUGIN[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"host-bundle-name", required_argument, nullptr, 'n'},
+    {"plugin-bundle-name", required_argument, nullptr, 'p'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:i:";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -109,7 +125,7 @@ const struct option UNINSTALL_LONG_OPTIONS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_DUMP = "hn:aisu:d:g";
+const std::string SHORT_OPTIONS_DUMP = "hn:aisu:d:gl";
 const struct option LONG_OPTIONS_DUMP[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
@@ -119,6 +135,7 @@ const struct option LONG_OPTIONS_DUMP[] = {
     {"user-id", required_argument, nullptr, 'u'},
     {"device-id", required_argument, nullptr, 'd'},
     {"debug-bundle", no_argument, nullptr, 'g'},
+    {"label", no_argument, nullptr, 'l'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -198,6 +215,37 @@ bool CleanCacheCallbackImpl::GetResultCode()
     return false;
 }
 
+std::map<int32_t, int32_t> BundleManagerShellCommand::errCodeMap_ = {
+    {ERR_APPEXECFWK_PLUGIN_INSTALL_CHECK_PLUGINID_ERROR, IStatusReceiver::ERR_PLUGIN_INSTALL_CHECK_PLUGINID_ERROR},
+    {ERR_APPEXECFWK_SUPPORT_PLUGIN_PERMISSION_ERROR, IStatusReceiver::ERR_PLUGIN_SUPPORT_PLUGIN_PERMISSION_ERROR},
+    {ERR_APPEXECFWK_HOST_APPLICATION_NOT_FOUND, IStatusReceiver::ERR_HOST_APP_NOT_FOUND},
+    {ERR_APPEXECFWK_INSTALL_VERSION_DOWNGRADE, IStatusReceiver::ERR_INSTALL_VERSION_DOWNGRADE},
+    {ERR_APPEXECFWK_INSTALL_FAILED_INCONSISTENT_SIGNATURE, IStatusReceiver::ERR_INSTALL_FAILED_INCONSISTENT_SIGNATURE},
+    {ERR_APPEXECFWK_PLUGIN_PARSER_ERROR, IStatusReceiver::ERR_INSTALL_PARSE_FAILED},
+    {ERR_APPEXECFWK_INSTALL_FILE_PATH_INVALID, IStatusReceiver::ERR_INSTALL_FILE_PATH_INVALID},
+    {ERR_APPEXECFWK_INSTALL_INVALID_BUNDLE_FILE, IStatusReceiver::ERR_INSTALL_INVALID_BUNDLE_FILE},
+    {ERR_APPEXECFWK_INSTALL_INVALID_HAP_SIZE, IStatusReceiver::ERR_INSTALL_INVALID_HAP_SIZE},
+    {ERR_APPEXECFWK_INSTALL_FAILED_INCOMPATIBLE_SIGNATURE, IStatusReceiver::ERR_INSTALL_FAILED_INCOMPATIBLE_SIGNATURE},
+    {ERR_APPEXECFWK_INSTALL_FAILED_BUNDLE_SIGNATURE_VERIFICATION_FAILURE,
+        IStatusReceiver::ERR_INSTALL_FAILED_BUNDLE_SIGNATURE_VERIFICATION_FAILURE},
+    {ERR_APPEXECFWK_INSTALL_PERMISSION_DENIED, IStatusReceiver::ERR_INSTALL_PERMISSION_DENIED},
+    {ERR_APPEXECFWK_INSTALL_SYSCAP_FAILED_AND_DEVICE_TYPE_ERROR,
+        IStatusReceiver::ERR_INSTALL_CHECK_SYSCAP_FAILED_AND_DEVICE_TYPE_NOT_SUPPORTED},
+    {ERR_APPEXECFWK_USER_NOT_EXIST, IStatusReceiver::ERR_USER_NOT_EXIST},
+    {ERR_BUNDLEMANAGER_INSTALL_CODE_SIGNATURE_FAILED, IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_FAILED},
+    {ERR_APPEXECFWK_DEVICE_NOT_SUPPORT_PLUGIN, IStatusReceiver::ERR_DEVICE_NOT_SUPPORT_PLUGIN},
+    {ERR_APPEXECFWK_PLUGIN_CHECK_APP_LABEL_ERROR, IStatusReceiver::ERR_MULTIPLE_HSP_INFO_INCONSISTENT},
+    {ERR_APPEXECFWK_INSTALL_DEBUG_BUNDLE_NOT_ALLOWED, IStatusReceiver::ERR_INSTALL_DEBUG_BUNDLE_NOT_ALLOWED},
+    {ERR_APPEXECFWK_PLUGIN_INSTALL_PARSE_PLUGINID_ERROR, IStatusReceiver::ERR_PLUGIN_ID_PARSE_FAILED},
+    {ERR_APPEXECFWK_PLUGIN_NOT_FOUND, IStatusReceiver::ERR_PLUGIN_APP_NOT_FOUND},
+    {ERR_APPEXECFWK_PLUGIN_INSTALL_NOT_ALLOW, IStatusReceiver::ERR_INSTALL_PARSE_FAILED},
+    {ERR_APPEXECFWK_PLUGIN_INSTALL_SAME_BUNDLE_NAME, IStatusReceiver::ERR_PLUGIN_SAME_BUNDLE_NAME},
+    {ERR_APPEXECFWK_INSTALL_PERMISSION_DENIED, IStatusReceiver::ERR_INSTALL_PERMISSION_DENIED},
+    {ERR_APPEXECFWK_UNINSTALL_PERMISSION_DENIED, IStatusReceiver::ERR_UNINSTALL_PERMISSION_DENIED},
+    {ERR_APPEXECFWK_INSTALL_INVALID_HAP_NAME, IStatusReceiver::ERR_INSTALL_INVALID_HAP_NAME},
+    {ERR_APPEXECFWK_INSTALL_DISK_MEM_INSUFFICIENT, IStatusReceiver::ERR_INSTALL_DISK_MEM_INSUFFICIENT}
+};
+
 BundleManagerShellCommand::BundleManagerShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, TOOL_NAME)
 {}
 
@@ -207,6 +255,8 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"help", [this] { return this->RunAsHelpCommand(); } },
         {"install", [this] { return this->RunAsInstallCommand(); } },
         {"uninstall", [this] { return this->RunAsUninstallCommand(); } },
+        {"install-plugin", [this] { return this->RunAsInstallPluginCommand(); } },
+        {"uninstall-plugin", [this] { return this->RunAsUninstallPluginCommand(); } },
         {"dump", [this] { return this->RunAsDumpCommand(); } },
         {"clean", [this] { return this->RunAsCleanCommand(); } },
         {"enable", [this] { return this->RunAsEnableCommand(); } },
@@ -397,7 +447,7 @@ ErrCode BundleManagerShellCommand::ParseCopyApCommand(int32_t option, std::strin
 
 ErrCode BundleManagerShellCommand::RunAsCompileCommand()
 {
-    APP_LOGI("begin to RunAsCompileCommand");
+    APP_LOGI("begin");
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string compileMode = "";
@@ -740,6 +790,20 @@ ErrCode BundleManagerShellCommand::GetBundlePath(const std::string& param,
     return OHOS::ERR_OK;
 }
 
+ErrCode BundleManagerShellCommand::GetPluginPath(const std::string& param,
+    std::vector<std::string>& pluginPaths) const
+{
+    if (param.empty()) {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    if (param == "-p" || param == "--plugin-path" ||
+        param == "-n" || param == "--host-bundle-name") {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    pluginPaths.emplace_back(param);
+    return OHOS::ERR_OK;
+}
+
 ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
 {
     APP_LOGI("begin to RunAsUninstallCommand");
@@ -952,6 +1016,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     bool bundleDumpInfo = false;
     bool bundleDumpShortcut = false;
     bool bundleDumpDistributedBundleInfo = false;
+    bool bundleDumpLabel = false;
     std::string deviceId = "";
     const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
     int32_t userId = currentUser;
@@ -1030,6 +1095,13 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                 bundleDumpAll = true;
                 break;
             }
+            case 'l': {
+                // 'bm dump -l'
+                // 'bm dump --label'
+                APP_LOGD("'bm dump %{public}s'", argv_[optind - 1]);
+                bundleDumpLabel = true;
+                break;
+            }
             case 'g': {
                 // 'bm dump -g'
                 // 'bm dump --debug-bundle'
@@ -1104,12 +1176,16 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             dumpResults = DumpShortcutInfos(bundleName, userId);
         } else if (bundleDumpDistributedBundleInfo) {
             dumpResults = DumpDistributedBundleInfo(deviceId, bundleName);
-        } else if (bundleDumpAll) {
+        } else if (bundleDumpAll && !bundleDumpLabel) {
             dumpResults = DumpBundleList(userId);
         } else if (bundleDumpDebug) {
             dumpResults = DumpDebugBundleList(userId);
-        } else if (bundleDumpInfo) {
+        } else if (bundleDumpInfo && !bundleDumpLabel) {
             dumpResults = DumpBundleInfo(bundleName, userId);
+        } else if (bundleDumpAll && bundleDumpLabel) {
+            dumpResults = DumpAllLabel(userId);
+        } else if (bundleDumpInfo && bundleDumpLabel) {
+            dumpResults = DumpBundleLabel(bundleName, userId);
         }
         if (dumpResults.empty() || (dumpResults == "")) {
             dumpResults = HELP_MSG_DUMP_FAILED + "\n";
@@ -2115,6 +2191,28 @@ std::string BundleManagerShellCommand::DumpBundleList(int32_t userId) const
     return dumpResults;
 }
 
+std::string BundleManagerShellCommand::DumpBundleLabel(const std::string &bundleName, int32_t userId) const
+{
+    std::string dumpResults;
+    bool dumpRet = bundleMgrProxy_->DumpInfos(
+        DumpFlag::DUMP_BUNDLE_LABEL, bundleName, userId, dumpResults);
+    if (!dumpRet) {
+        APP_LOGE("failed to dump bundle label.");
+    }
+    return dumpResults;
+}
+
+std::string BundleManagerShellCommand::DumpAllLabel(int32_t userId) const
+{
+    std::string dumpResults;
+    bool dumpRet = bundleMgrProxy_->DumpInfos(
+        DumpFlag::DUMP_LABEL_LIST, BUNDLE_NAME_EMPTY, userId, dumpResults);
+    if (!dumpRet) {
+        APP_LOGE("failed to dump bundle label list.");
+    }
+    return dumpResults;
+}
+
 std::string BundleManagerShellCommand::DumpDebugBundleList(int32_t userId) const
 {
     std::string dumpResults;
@@ -2806,6 +2904,223 @@ std::string BundleManagerShellCommand::GetWaringString(int32_t currentUserId, in
         pos = res.find('$');
     }
     return res;
+}
+
+int32_t BundleManagerShellCommand::TransformErrCode(const int32_t resultCode)
+{
+    if (errCodeMap_.find(resultCode) != errCodeMap_.end()) {
+        return errCodeMap_.at(resultCode);
+    }
+    return IStatusReceiver::ERR_INSTALL_INTERNAL_ERROR;
+}
+
+ErrCode BundleManagerShellCommand::RunAsInstallPluginCommand()
+{
+    APP_LOGI("begin to RunAsInstallPluginCommand");
+    int result = OHOS::ERR_OK;
+    std::string hostBundleName;
+    std::vector<std::string> pluginPaths;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t option;
+    while ((option = getopt_long(argc_, argv_, SHORT_OPTIONS_INSTALL_PLUGIN.c_str(),
+        LONG_OPTIONS_INSTALL_PLUGIN, nullptr)) != -1) {
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseInstallPluginCommand(option, hostBundleName, pluginPaths);
+    }
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && (pluginPaths.empty() || hostBundleName.empty())) {
+            APP_LOGD("'bm install-plugin' with no bundle path option.");
+            resultReceiver_.append(HELP_MSG_NO_INSTALL_PLUGIN_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_INSTALL_PLUGIN);
+    } else {
+        InstallPluginParam installPluginParam;
+        installPluginParam.userId = userId;
+        std::vector<std::string> pathVec;
+        GetAbsPaths(pluginPaths, pathVec);
+        int32_t installResult = bundleInstallerProxy_->InstallPlugin(hostBundleName, pathVec, installPluginParam);
+        if (installResult == OHOS::ERR_OK) {
+            resultReceiver_ = STRING_INSTALL_BUNDLE_OK + "\n";
+        } else {
+            int32_t res = TransformErrCode(installResult);
+            resultReceiver_ = STRING_INSTALL_BUNDLE_NG + "\n";
+            resultReceiver_.append(GetMessageFromCode(res));
+        }
+    }
+    APP_LOGI("RunAsInstallPluginCommand end");
+    return result;
+}
+
+ErrCode BundleManagerShellCommand::ParseInstallPluginCommand(int32_t option, std::string &hostBundleName,
+    std::vector<std::string> &pluginPaths)
+{
+    int32_t result = OHOS::ERR_OK;
+    if (option == '?') {
+        switch (optopt) {
+            case 'n': {
+                // 'bm install-plugin -n' with no argument: bm install-plugin -n
+                // 'bm install-plugin --host-bundle-name' with no argument: bm install-plugin --host-bundle-name
+                APP_LOGD("'bm install-plugin -n' with no argument.");
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'p': {
+                // 'bm install-plugin -p' with no argument: bm install-plugin -p
+                // 'bm install-plugin --plugin-path' with no argument: bm install-plugin --plugin-path
+                APP_LOGD("'bm install-plugin -p' with no argument.");
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            default: {
+                // 'bm install-plugin' with an unknown option: bm dump-shared -x
+                // 'bm install-plugin' with an unknown option: bm dump-shared -xxx
+                std::string unknownOption = "";
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    } else {
+        switch (option) {
+            case 'h': {
+                // 'bm install-plugin -h'
+                // 'bm install-plugin --help'
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                // 'bm install-plugin -n xxx'
+                // 'bm install-plugin --host-bundle-name xxx'
+                hostBundleName = optarg;
+                break;
+            }
+            case 'p': {
+                // 'bm install-plugin -p xxx'
+                // 'bm install-plugin --plugin-path xxx'
+                APP_LOGD("'bm install-plugin %{public}s'", argv_[optind - 1]);
+                if (GetPluginPath(optarg, pluginPaths) != OHOS::ERR_OK) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    return result;
+}
+ErrCode BundleManagerShellCommand::RunAsUninstallPluginCommand()
+{
+    APP_LOGI("begin to RunAsUninstallPluginCommand");
+    int result = OHOS::ERR_OK;
+    std::string hostBundleName;
+    std::string pluginBundleName;
+    int32_t userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t option;
+    while ((option = getopt_long(argc_, argv_, SHORT_OPTIONS_UNINSTALL_PLUGIN.c_str(),
+        LONG_OPTIONS_UNINSTALL_PLUGIN, nullptr)) != -1) {
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseUninstallPluginCommand(option, hostBundleName, pluginBundleName);
+    }
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && (pluginBundleName.empty() || hostBundleName.empty())) {
+            APP_LOGD("'bm uninstall-plugin' with no bundle path option.");
+            resultReceiver_.append(HELP_MSG_NO_UNINSTALL_PLUGIN_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_UNINSTALL_PLUGIN);
+    } else {
+        InstallPluginParam installPluginParam;
+        installPluginParam.userId = userId;
+        int32_t installResult =
+            bundleInstallerProxy_->UninstallPlugin(hostBundleName, pluginBundleName, installPluginParam);
+        if (installResult == OHOS::ERR_OK) {
+            resultReceiver_ = STRING_UNINSTALL_BUNDLE_OK + "\n";
+        } else {
+            int32_t res = TransformErrCode(installResult);
+            resultReceiver_ = STRING_UNINSTALL_BUNDLE_NG + "\n";
+            resultReceiver_.append(GetMessageFromCode(res));
+        }
+    }
+    APP_LOGI("RunAsUninstallPluginCommand end");
+    return result;
+}
+
+ErrCode BundleManagerShellCommand::ParseUninstallPluginCommand(int32_t option, std::string &hostBundleName,
+    std::string &pluginBundleName)
+{
+    int32_t result = OHOS::ERR_OK;
+    if (option == '?') {
+        switch (optopt) {
+            case 'n': {
+                // 'bm uninstall-plugin -n' with no argument: bm uninstall-plugin -n
+                // 'bm uninstall-plugin --host-bundle-name' with no argument: bm uninstall-plugin --host-bundle-name
+                APP_LOGD("'bm uninstall-plugin -n' with no argument.");
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'p': {
+                // 'bm uninstall-plugin -p' with no argument: bm uninstall-plugin -p
+                // 'bm uninstall-plugin --plugin-bundle-name' with no argument: bm uninstall-plugin --plugin-bundle-name
+                APP_LOGD("'bm uninstall-plugin -p' with no argument.");
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            default: {
+                // 'bm uninstall-plugin' with an unknown option: bm uninstall-plugin -x
+                // 'bm uninstall-plugin' with an unknown option: bm uninstall-plugin -xxx
+                std::string unknownOption = "";
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    } else {
+        switch (option) {
+            case 'h': {
+                // 'bm uninstall-plugin -h'
+                // 'bm uninstall-plugin --help'
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                // 'bm uninstall-plugin -n xxx'
+                // 'bm uninstall-plugin --host-bundle-name xxx'
+                hostBundleName = optarg;
+                break;
+            }
+            case 'p': {
+                // 'bm uninstall-plugin -p xxx'
+                // 'bm uninstall-plugin --plugin-bundle-name xxx'
+                APP_LOGD("'bm uninstall-plugin %{public}s'", argv_[optind - 1]);
+                pluginBundleName = optarg;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    return result;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

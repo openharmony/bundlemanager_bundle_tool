@@ -304,27 +304,27 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_APPTYPE_NOT_SAME,
-        "error: install failed due to apptype not same",
+        "error: install failed due to apptype not same.",
     },
     {
         IStatusReceiver::ERR_INSTALL_TYPE_ERROR,
-        "error: install failed due to error bundle type"
+        "error: install failed due to error bundle type."
     },
     {
         IStatusReceiver::ERR_INSTALL_SDK_INCOMPATIBLE,
-        "error: install failed due to older sdk version in the device"
+        "error: install failed due to older sdk version in the device."
     },
     {
         IStatusReceiver::ERR_INSTALL_SO_INCOMPATIBLE,
-        "error: install failed due to native so is incompatible"
+        "error: install failed due to native so is incompatible."
     },
     {
         IStatusReceiver::ERR_INSTALL_AN_INCOMPATIBLE,
-        "error: install failed due to ark native file is incompatible"
+        "error: install failed due to ark native file is incompatible."
     },
     {
         IStatusReceiver::ERR_INSTALL_URI_DUPLICATE,
-        "error: install failed due to uri prefix duplicate",
+        "error: install failed due to uri prefix duplicate.",
     },
     {
         IStatusReceiver::ERR_INSTALL_PARSE_UNEXPECTED,
@@ -584,7 +584,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_OVERLAY_INSTALLATION_FAILED_TARGET_MODULE_IS_OVERLAY_MODULE,
-        "error: target module cannot be overlay module of overlay installation",
+        "error: target module cannot be overlay module of overlay installation.",
     },
     {
         IStatusReceiver::ERR_OVERLAY_INSTALLATION_FAILED_OVERLAY_TYPE_NOT_SAME,
@@ -596,19 +596,19 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_ASAN_ENABLED_NOT_SAME,
-        "error: install asanEnabled not same",
+        "error: install asanEnabled not same.",
     },
     {
         IStatusReceiver::ERR_INSTALL_ASAN_ENABLED_NOT_SUPPORT,
-        "error: install asan enabled is not support",
+        "error: install asan enabled is not support.",
     },
     {
         IStatusReceiver::ERR_INSTALL_BUNDLE_TYPE_NOT_SAME,
-        "error: install bundleType not same",
+        "error: install bundleType not same.",
     },
     {
         IStatusReceiver::ERR_APPEXECFWK_UNINSTALL_SHARE_APP_LIBRARY_IS_NOT_EXIST,
-        "error: shared bundle is not exist",
+        "error: shared bundle is not exist.",
     },
     {
         IStatusReceiver::ERR_APPEXECFWK_UNINSTALL_SHARE_APP_LIBRARY_IS_RELIED,
@@ -616,15 +616,15 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_URI_FAILED,
-        "error: uri in proxy data is wrong",
+        "error: uri in proxy data is wrong.",
     },
     {
         IStatusReceiver::ERR_INSATLL_CHECK_PROXY_DATA_PERMISSION_FAILED,
-        "error: apl of required permission in proxy data is too low",
+        "error: apl of required permission in proxy data is too low.",
     },
     {
         IStatusReceiver::ERR_INSTALL_FAILED_DEBUG_NOT_SAME,
-        "error: install debug type not same",
+        "error: install debug type not same.",
     },
     {
         IStatusReceiver::ERR_INSTALL_ISOLATION_MODE_FAILED,
@@ -636,7 +636,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_UNINSTALL_FROM_BMS_EXTENSION_FAILED,
-        "error: uninstall bundle from extension failed",
+        "error: uninstall bundle from extension failed.",
     },
     {
         IStatusReceiver::ERR_INSTALL_ENTERPRISE_BUNDLE_NOT_ALLOWED,
@@ -645,31 +645,31 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALLD_COPY_FILE_FAILED,
-        "error: copy file failed",
+        "error: copy file failed.",
     },
     {
         IStatusReceiver::ERR_INSTALL_GWP_ASAN_ENABLED_NOT_SAME,
-        "error: install GWPAsanEnabled not same",
+        "error: install GWPAsanEnabled not same.",
     },
     {
         IStatusReceiver::ERR_INSTALL_DEBUG_BUNDLE_NOT_ALLOWED,
-        "error: debug bundle can only be installed in developer mode",
+        "error: debug bundle can only be installed in developer mode.",
     },
     {
         IStatusReceiver::ERR_INSTALL_CHECK_ENCRYPTION_FAILED,
-        "error: check encryption failed",
+        "error: check encryption failed.",
     },
     {
         IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_DELIVERY_FILE_FAILED,
-        "error: delivery sign profile failed",
+        "error: delivery sign profile failed.",
     },
     {
         IStatusReceiver::ERR_INSTALL_CODE_SIGNATURE_REMOVE_FILE_FAILED,
-        "error: remove sign profile failed",
+        "error: remove sign profile failed.",
     },
     {
         IStatusReceiver::ERR_INSTALL_CODE_APP_CONTROLLED_FAILED,
-        "error: failed to install because the device be controlled",
+        "error: failed to install because the device be controlled.",
     },
     {
         IStatusReceiver::ERR_UNKNOWN,
@@ -715,6 +715,59 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         IStatusReceiver::ERR_APPEXECFWK_INSTALL_OS_INTEGRATION_BUNDLE_NOT_ALLOWED_FOR_SHELL,
         "error: os_integration Bundle is not allowed to install for shell."
     },
+    {
+        IStatusReceiver::ERR_APP_DISTRIBUTION_TYPE_NOT_ALLOW_INSTALL_ISR,
+        "error: Failed to install the HAP or HSP because the app distribution type is not allowed."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_INSTALL_CHECK_PLUGINID_ERROR,
+        "error: Check pluginDistributionID between plugin and host application failed."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_SUPPORT_PLUGIN_PERMISSION_ERROR,
+        "error: Failed to install the plugin because host application check permission failed."
+    },
+    {
+        IStatusReceiver::ERR_HOST_APP_NOT_FOUND,
+        "error: Host application is not found."
+    },
+    {
+        IStatusReceiver::ERR_DEVICE_NOT_SUPPORT_PLUGIN,
+        "error: Failed to install the plugin because current device does not support plugin."
+    },
+    {
+        IStatusReceiver::ERR_MULTIPLE_HSP_INFO_INCONSISTENT,
+        "error: Failed to install the plugin because they have different configuration information."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_ID_PARSE_FAILED,
+        "error: Failed to install the plugin because the plugin id failed to be parsed."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_APP_NOT_FOUND,
+        "error: The plugin is not found."
+    },
+    {
+        IStatusReceiver::ERR_PLUGIN_SAME_BUNDLE_NAME,
+        "error: The plugin name is same as host bundle name."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_FAILED_DEVICE_UNAUTHORIZED,
+        "error: Failed to install the HAP because the device is unauthorized, "
+        "make sure the UDID of your device is configured in the signing profile."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_BUNDLE_CAN_NOT_BOTH_EXISTED_IN_U1_AND_OTHER_USERS,
+        "error: install failed due to U1Enabled can not change."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_U1_ENABLE_NOT_SAME_IN_ALL_BUNDLE_INFOS,
+        "error: install failed due to the U1Enabled is not same in all haps."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_U1_ENABLE_NOT_SUPPORT_APP_SERVICE_AND_SHARED_BUNDLE,
+        "error: install failed due to the U1Enabled is not supported shared bundle."
+    }
 };
 } // AppExecFwk
 } // OHOS

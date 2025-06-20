@@ -57,6 +57,7 @@ private:
     ErrCode RunAsGetRemovableCommand();
     ErrCode RunAsInstallSandboxCommand();
     ErrCode RunAsUninstallSandboxCommand();
+    ErrCode RunAsUninstallPreInstallBundleCommand();
     ErrCode RunAsDumpSandboxCommand();
     ErrCode RunAsGetStringCommand();
     ErrCode RunAsGetIconCommand();
@@ -74,6 +75,7 @@ private:
     ErrCode RunAsDeleteQuickFix();
     ErrCode RunAsSetDebugMode();
     ErrCode RunAsGetBundleStats();
+    ErrCode RunAsBatchGetBundleStats();
     ErrCode RunAsGetAppProvisionInfo();
     ErrCode RunAsGetContinueBundleName();
     ErrCode RunAsGetDistributedBundleName();
@@ -110,6 +112,9 @@ private:
     ErrCode RunAsGetSimpleAppInfoForUid();
     ErrCode RunAsGetBundleNameByAppId();
     ErrCode RunAsGetAssetAccessGroups();
+    ErrCode RunAsSetAppDistributionTypes();
+    ErrCode RunAsGetBundleNamesForUidExtCommand();
+    ErrCode RunAsGetAppIdentifierAndAppIndex();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -157,6 +162,7 @@ private:
     ErrCode StringToInt(std::string option, const std::string &commandName, int &temp, bool &result);
     ErrCode StringToUnsignedLongLong(std::string optarg, const std::string &commandName,
         uint64_t &temp, bool &result);
+    bool StrToUint32(const std::string &str, uint32_t &value);
     ErrCode DeployQuickFix(const std::vector<std::string> &quickFixPaths,
         std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug);
     ErrCode SwitchQuickFix(const std::string &bundleName, int32_t enable,
@@ -165,9 +171,11 @@ private:
     ErrCode GetQuickFixPath(int32_t index, std::vector<std::string> &quickFixPaths) const;
     ErrCode SetDebugMode(int32_t debugMode);
     bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string &msg, int32_t appIndex);
+    bool BatchGetBundleStats(const std::vector<std::string> &bundleNames, int32_t userId, std::string &msg);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string &msg);
     ErrCode GetDistributedBundleName(const std::string &networkId, int32_t accessTokenId, std::string &msg);
     ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex);
+    ErrCode BatchBundleNameAndUserIdCommonFunc(std::vector<std::string> &bundleNames, int32_t &userId);
     ErrCode CheckGetDistributedBundleNameCorrectOption(int32_t option, const std::string &commandName,
         std::string &networkId, int32_t &accessTokenId);
     bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::string& msg);
@@ -186,7 +194,18 @@ private:
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
     bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
         std::string &bundleName);
+    bool CheckSetAppDistributionTypesOption(int32_t option, const std::string &commandName,
+        std::string &appDistributionTypes);
+    bool ProcessAppDistributionTypeEnums(std::vector<std::string> appDistributionTypeStrings,
+        std::set<AppDistributionTypeEnum> &appDistributionTypeEnums);
+    void ReloadNativeTokenInfo();
     ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
+    ErrCode UninstallPreInstallBundleOperation(
+        const std::string &bundleName, InstallParam &installParam) const;
+    bool CheckUnisntallCorrectOption(int option, const std::string &commandName,
+        int &temp, std::string &Name);
+    bool CheckGetAppIdentifierAndAppIndexOption(int32_t option, const std::string &commandName,
+        uint32_t &accessTokenId);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -25,8 +25,8 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForUninstall.hap";
-const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForUninstall";
+const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/test_one.hap";
+const std::string STRING_BUNDLE_NAME = "com.test.bundlename.one";
 const std::string STRING_BUNDLE_NAME_INVALID = STRING_BUNDLE_NAME + ".invalid";
 const std::string UNINSTALL_FALSE = "error: uninstall missing installed bundle.";
 const std::string ERR_CODE = "code:9568386\n";
@@ -60,7 +60,7 @@ void BmCommandUninstallSystemTest::TearDown()
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -79,7 +79,7 @@ HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0100, Fun
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm uninstall -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandUninstallSystemTest, Bm_Command_Uninstall_SystemTest_0200, Function | MediumTest | TestSize.Level0)
 {
     // uninstall an invalid bundle
     std::string command = "bm uninstall -n " + STRING_BUNDLE_NAME_INVALID;

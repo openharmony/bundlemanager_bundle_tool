@@ -90,7 +90,7 @@ void BmCommandOverlayTest::SetMockObjects(BundleManagerShellCommand &cmd) const
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0001, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -112,7 +112,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0001, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -xxx" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0002, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -135,7 +135,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0002, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -b" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0003, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -158,7 +158,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0003, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -m" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0004, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -181,7 +181,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0004, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -t" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0005, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -204,7 +204,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0005, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -u" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0006, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0006, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -227,7 +227,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0006, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -h" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0007, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0007, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -250,7 +250,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0007, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -b <bundle-name>" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0008, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0008, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -274,7 +274,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0008, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -m <module-name>" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0009, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0009, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -298,7 +298,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0009, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-overlay -t <target-module-name>" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0010, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0010, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -323,7 +323,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0010, Function | MediumTest | 
  * @tc.desc: Verify the "bm dump-overlay -b <bundle-name>
  *     -m <module-name> -t <target-module-name>" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0017, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0017, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -353,7 +353,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Overlay_0017, Function | MediumTest | 
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-target-overlay" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0001, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0001, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -375,7 +375,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0001, Function | Medium
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-target-overlay -b" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0002, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0002, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -398,7 +398,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0002, Function | Medium
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-target-overlay -xxx" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0003, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0003, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -421,7 +421,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0003, Function | Medium
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-target-overlay -m" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0004, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0004, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -444,7 +444,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0004, Function | Medium
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-target-overlay -u" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0005, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0005, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -467,7 +467,7 @@ HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0005, Function | Medium
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-target-overlay -h" command.
  */
-HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0006, Function | MediumTest | Level1)
+HWTEST_F(BmCommandOverlayTest, Bm_Command_Target_Overlay_0006, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),

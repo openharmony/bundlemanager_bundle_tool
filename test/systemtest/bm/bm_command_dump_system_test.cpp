@@ -25,8 +25,8 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/pageAbilityBundleForInstall.hap";
-const std::string STRING_BUNDLE_NAME = "com.ohos.tools.pageAbilityBundleForInstall";
+const std::string STRING_BUNDLE_PATH = "/data/test/resource/bm/test_one.hap";
+const std::string STRING_BUNDLE_NAME = "com.test.bundlename.one";
 const std::string STRING_BUNDLE_NAME_INVALID = STRING_BUNDLE_NAME + ".invalid";
 const std::string GET_FALSE = "error: failed to get information and the parameters may be wrong.";
 }  // namespace
@@ -59,7 +59,7 @@ void BmCommandDumpSystemTest::TearDown()
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -a" command.
  */
-HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0100, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -82,7 +82,7 @@ HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0100, Function | Me
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0200, Function | MediumTest | TestSize.Level0)
 {
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
@@ -105,12 +105,72 @@ HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0200, Function | Me
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0300, Function | MediumTest | TestSize.Level1)
 {
     // dump an invalid bundle
     std::string command = "bm dump -n " + STRING_BUNDLE_NAME_INVALID;
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
     EXPECT_EQ(commandResult, GET_FALSE + "\n");
+}
+
+/**
+ * @tc.number: Bm_Command_Dump_SystemTest_0400
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm dump -n <bundle-name> -l" command.
+ */
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0400, Function | MediumTest | TestSize.Level1)
+{
+    // dump an invalid bundle
+    std::string command = "bm dump -l -n " + STRING_BUNDLE_NAME_INVALID;
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+
+    EXPECT_EQ(commandResult, GET_FALSE + "\n");
+}
+
+/**
+ * @tc.number: Bm_Command_Dump_SystemTest_0500
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm dump -a -l" command.
+ */
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0500, Function | MediumTest | TestSize.Level0)
+{
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+
+    // install a valid bundle
+    ToolSystemTest::InstallBundle(STRING_BUNDLE_PATH, true);
+
+    // dump all bundle
+    std::string command = "bm dump -a -l";
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+
+    EXPECT_NE(commandResult, "");
+
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+}
+
+/**
+ * @tc.number: Bm_Command_Dump_SystemTest_0600
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm dump -n <bundle-name>" command.
+ */
+HWTEST_F(BmCommandDumpSystemTest, Bm_Command_Dump_SystemTest_0600, Function | MediumTest | TestSize.Level0)
+{
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
+
+    // install a valid bundle
+    ToolSystemTest::InstallBundle(STRING_BUNDLE_PATH, true);
+
+    // dump a valid bundle
+    std::string command = "bm dump -l -n " + STRING_BUNDLE_NAME;
+    std::string commandResult = ToolSystemTest::ExecuteCommand(command);
+
+    EXPECT_NE(commandResult, "");
+
+    // uninstall the bundle
+    ToolSystemTest::UninstallBundle(STRING_BUNDLE_NAME);
 }
 } // OHOS

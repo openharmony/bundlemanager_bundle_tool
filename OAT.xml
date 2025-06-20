@@ -61,7 +61,8 @@ Note:If the text contains special characters, please escape them according to th
         </policylist>
         <filefilterlist>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies" >
-                <filteritem type="filepath" name="test/systemtest/bm/.*.png" desc="Tdd-developed image"/>
+            <filteritem type="filepath" name="test/systemtest/bm/.*.png" desc="Tdd-developed image"/>
+            <filteritem type="filepath" name="test/sceneProject/.*.png" desc="Tdd-developed image"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>

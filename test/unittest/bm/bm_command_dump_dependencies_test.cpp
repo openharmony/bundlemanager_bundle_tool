@@ -90,7 +90,7 @@ void BmCommandDumpDependenciesTest::SetMockObjects(BundleManagerShellCommand &cm
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -112,7 +112,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0100, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies xxx" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -135,7 +135,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0200, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -x" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0300, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -158,7 +158,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0300, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -xxx" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0400, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -181,7 +181,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0400, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies --x" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0500, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -204,7 +204,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0500, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies --xxx" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0600, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0600, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -227,7 +227,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0600, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -h" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0700, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0700, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -250,7 +250,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0700, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies --help" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0800, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0800, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -273,7 +273,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0800, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -n" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0900, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0900, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -296,7 +296,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_0900, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -n <bundle-name>" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1000, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1000, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -320,7 +320,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1000, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -m" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1100, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1100, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -340,7 +340,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1100, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -m <module-name>" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1200, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1200, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -361,7 +361,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1200, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -n <bundle-name> -m <module-name>" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1300, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1300, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -387,7 +387,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1300, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -n <bundle-name> -XXX <module-name>" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1400, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1400, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),
@@ -413,7 +413,7 @@ HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1400, F
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "bm dump-dependencies -xxx <bundle-name>" command.
  */
-HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1500, Function | MediumTest | Level1)
+HWTEST_F(BmCommandDumpDependenciesTest, Bm_Command_Dump_DumpDependencies_1500, Function | MediumTest | TestSize.Level1)
 {
     char *argv[] = {
         const_cast<char*>(TOOL_NAME.c_str()),

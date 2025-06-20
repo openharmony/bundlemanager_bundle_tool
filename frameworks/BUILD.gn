@@ -140,10 +140,15 @@ ohos_source_set("tools_test_bm_source_set") {
 
   external_deps = [
     "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_tool_libs",
     "c_utils:utils",
+    "cJSON:cjson_static",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "init:libbegetutil",
@@ -151,6 +156,7 @@ ohos_source_set("tools_test_bm_source_set") {
     "jsoncpp:jsoncpp",
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
+    "selinux_adapter:librestorecon",
   ]
 
   public_external_deps = [
