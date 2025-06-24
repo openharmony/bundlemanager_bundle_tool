@@ -4432,7 +4432,7 @@ bool BundleTestTool::QueryDataGroupInfos(const std::string &bundleName,
 {
     if (bundleMgrProxy_ == nullptr) {
         APP_LOGE("bundleMgrProxy_ is nullptr");
-        return OHOS::ERR_INVALID_VALUE;
+        return false;
     }
     std::vector<DataGroupInfo> infos;
     bool ret = bundleMgrProxy_->QueryDataGroupInfos(bundleName, userId, infos);
@@ -4516,7 +4516,7 @@ bool BundleTestTool::GetGroupDir(const std::string &dataGroupId, std::string& ms
 {
     if (bundleMgrProxy_ == nullptr) {
         APP_LOGE("bundleMgrProxy_ is nullptr");
-        return OHOS::ERR_INVALID_VALUE;
+        return false;
     }
     std::string dir;
     bool ret = bundleMgrProxy_->GetGroupDir(dataGroupId, dir);
@@ -5675,7 +5675,7 @@ ErrCode BundleTestTool::UninstallPreInstallBundleOperation(
         APP_LOGE("statusReceiver is null");
         return IStatusReceiver::ERR_UNKNOWN;
     }
- 
+
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
         APP_LOGE("recipient is null");
@@ -5685,7 +5685,7 @@ ErrCode BundleTestTool::UninstallPreInstallBundleOperation(
     bundleInstallerProxy_->Uninstall(bundleName, installParam, statusReceiver);
     return statusReceiver->GetResultCode();
 }
- 
+
 bool BundleTestTool::CheckUnisntallCorrectOption(
     int option, const std::string &commandName, int &temp, std::string &name)
 {
@@ -5788,7 +5788,7 @@ ErrCode BundleTestTool::RunAsGetAppIdentifierAndAppIndex()
     } else {
         std::string appIdentifier = "";
         int32_t appIndex;
-        
+
         auto res = bundleMgrProxy_->GetAppIdentifierAndAppIndex(accessTokenId, appIdentifier, appIndex);
         if (res != OHOS::ERR_OK) {
             resultReceiver_.append(STRING_GET_APPIDENTIFIER_AND_APPINDEX_NG);
@@ -5838,7 +5838,7 @@ ErrCode BundleTestTool::RunAsUninstallPreInstallBundleCommand()
         resultReceiver_.append(HELP_MSG_UNINSTALL_PREINSTALL_BUNDLE);
         return OHOS::ERR_INVALID_VALUE;
     }
- 
+
     InstallParam installParam;
     installParam.userId = userId;
     if (forceValue > 0) {
