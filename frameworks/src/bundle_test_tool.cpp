@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@
 #include "bundle_death_recipient.h"
 #include "bundle_dir.h"
 #include "bundle_mgr_client.h"
-#include "bundle_mgr_ext_proxy.h"
+#include "bundle_mgr_ext_client.h"
 #include "bundle_mgr_proxy.h"
 #include "bundle_tool_callback_stub.h"
 #include "common_event_manager.h"
@@ -5892,15 +5892,12 @@ ErrCode BundleTestTool::RunAsGetBundleNamesForUidExtCommand()
     }
 
     ErrCode result = ERR_OK;
-    auto bundleMgrExtProxy = bundleMgrProxy_->GetBundleMgrExtProxy();
-    if (bundleMgrExtProxy != nullptr) {
-        int32_t uidInt = 0;
-        if (StrToInt(uid, uidInt)) {
-            result = bundleMgrExtProxy->GetBundleNamesForUidExt(uidInt, bundleNames);
-        } else {
-            APP_LOGI("Failed to convert uid");
-            return OHOS::ERR_INVALID_VALUE;
-        }
+    int32_t uidInt = 0;
+    if (StrToInt(uid, uidInt)) {
+        result = BundleMgrExtClient::GetInstance().GetBundleNamesForUidExt(uidInt, bundleNames);
+    } else {
+        APP_LOGE("Failed to convert uid");
+        return OHOS::ERR_INVALID_VALUE;
     }
     if (result == ERR_OK) {
         resultReceiver_.append("GetBundleNamesForUidExt success");
