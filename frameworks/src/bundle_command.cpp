@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "bundle_command_common.h"
 #include "bundle_death_recipient.h"
 #include "bundle_mgr_client.h"
-#include "overlay_manager_client.h"
 #include "bundle_mgr_proxy.h"
 #include "clean_cache_callback_host.h"
 #include "json_serializer.h"
@@ -2481,21 +2480,25 @@ std::string BundleManagerShellCommand::DumpOverlayInfo(const std::string &bundle
         return res;
     }
 
+    auto overlayManagerProxy = bundleMgrProxy_->GetOverlayManagerProxy();
+    if (overlayManagerProxy == nullptr) {
+        APP_LOGE("overlayManagerProxy is null");
+        return res;
+    }
     std::vector<OverlayModuleInfo> overlayModuleInfos;
     OverlayModuleInfo overlayModuleInfo;
     ErrCode ret = ERR_OK;
     userId = BundleCommandCommon::GetCurrentUserId(userId);
     if (moduleName.empty() && targetModuleName.empty()) {
-        ret = OverlayManagerClient::GetInstance().GetAllOverlayModuleInfo(bundleName, overlayModuleInfos, userId);
+        ret = overlayManagerProxy->GetAllOverlayModuleInfo(bundleName, overlayModuleInfos, userId);
         if (overlayModuleInfos.empty()) {
             ret = ERR_BUNDLEMANAGER_OVERLAY_QUERY_FAILED_NO_OVERLAY_MODULE_INFO;
         }
     } else if (!moduleName.empty()) {
-        ret = OverlayManagerClient::GetInstance().GetOverlayModuleInfo(bundleName, moduleName,
-            overlayModuleInfo, userId);
+        ret = overlayManagerProxy->GetOverlayModuleInfo(bundleName, moduleName, overlayModuleInfo, userId);
     } else {
-        ret = OverlayManagerClient::GetInstance().GetOverlayModuleInfoForTarget(bundleName, targetModuleName,
-            overlayModuleInfos, userId);
+        ret = overlayManagerProxy->GetOverlayModuleInfoForTarget(bundleName, targetModuleName, overlayModuleInfos,
+            userId);
         if (overlayModuleInfos.empty()) {
             ret = ERR_BUNDLEMANAGER_OVERLAY_QUERY_FAILED_NO_OVERLAY_MODULE_INFO;
         }
@@ -2522,12 +2525,18 @@ std::string BundleManagerShellCommand::DumpTargetOverlayInfo(const std::string &
         APP_LOGE("error value of the dump-target-overlay command options");
         return res;
     }
+    auto overlayManagerProxy = bundleMgrProxy_->GetOverlayManagerProxy();
+    if (overlayManagerProxy == nullptr) {
+        APP_LOGE("overlayManagerProxy is null");
+        return res;
+    }
+
     userId = BundleCommandCommon::GetCurrentUserId(userId);
     ErrCode ret = ERR_OK;
     nlohmann::json overlayInfoJson;
     if (moduleName.empty()) {
         std::vector<OverlayBundleInfo> overlayBundleInfos;
-        ret = OverlayManagerClient::GetInstance().GetOverlayBundleInfoForTarget(bundleName, overlayBundleInfos, userId);
+        ret = overlayManagerProxy->GetOverlayBundleInfoForTarget(bundleName, overlayBundleInfos, userId);
         if (ret != ERR_OK || overlayBundleInfos.empty()) {
             APP_LOGE("dump-target-overlay failed due to errcode %{public}d", ret);
             return res;
@@ -2535,8 +2544,7 @@ std::string BundleManagerShellCommand::DumpTargetOverlayInfo(const std::string &
         overlayInfoJson = nlohmann::json {{OVERLAY_BUNDLE_INFOS, overlayBundleInfos}};
     } else {
         std::vector<OverlayModuleInfo> overlayModuleInfos;
-        ret = OverlayManagerClient::GetInstance().GetOverlayModuleInfoForTarget(bundleName, moduleName,
-            overlayModuleInfos, userId);
+        ret = overlayManagerProxy->GetOverlayModuleInfoForTarget(bundleName, moduleName, overlayModuleInfos, userId);
         if (ret != ERR_OK || overlayModuleInfos.empty()) {
             APP_LOGE("dump-target-overlay failed due to errcode %{public}d", ret);
             return res;
