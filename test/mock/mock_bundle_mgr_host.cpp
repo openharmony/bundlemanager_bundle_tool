@@ -45,7 +45,8 @@ ErrCode MockBundleMgrHost::CleanBundleCacheFiles(const std::string &bundleName,
     return ERR_OK;
 }
 
-bool MockBundleMgrHost::CleanBundleDataFiles(const std::string &bundleName, const int userId, const int appIndex)
+bool MockBundleMgrHost::CleanBundleDataFiles(const std::string &bundleName, const int userId,
+    const int appIndex, const int callerUid)
 {
     APP_LOGD("enter");
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
