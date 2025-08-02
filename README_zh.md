@@ -196,6 +196,8 @@ bm dump [-h] [-a] [-g] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceI
 | bm dump -n \<bundleName\> -s | 查询指定包名下的快捷方式信息。-s为非必选字段。 |
 | bm dump -n \<bundleName\> -d \<deviceId\> | 跨设备查询包信息。-d为非必选字段。 |
 | bm dump -n \<bundleName\> -u \<userId\> | 查询指定用户下指定包名的详细信息。-u为非必选字段，默认为所有用户。 |
+| bm dump -n \<bundleName\> -l | 查询指定Bundle名称的label值（应用的名称）。-l为非必选字段。*注*：在命令行里输出的结果若包含特殊字符，可以在退出hdc shell命令行（`exit`）以后使用`chcp 65001`命令设置命令行的字符集。 |
+| bm dump -a -l| 所有已安装应用的bundle名称和label值（应用的名称）。-l为非必选字段。*注*：在命令行里输出的结果若包含特殊字符，可以在退出hdc shell命令行（`exit`）以后使用`chcp 65001`命令设置命令行的字符集。 |
 
 
 示例：
@@ -211,6 +213,10 @@ bm dump -n com.ohos.app -u 100
 bm dump -s -n com.ohos.app -u 100
 # 查询跨设备应用信息
 bm dump -n com.ohos.app -d xxxxx
+# 查询该应用的label值（应用的名称）
+bm dump -n com.ohos.app -l
+# 显示所有已安装应用的bundle名称和label值（应用的名称）
+bm dump -a -l
 ```
 
 #### 清理命令
@@ -323,7 +329,7 @@ udid of current device is :
 #### 快速修复命令
 
 ```bash
-bm quickfix [-h] [-a -f filePath [-t targetPath] [-d]] [-q -b bundleName] [-r -b bundleName] 
+bm quickfix [-h] [-a -f filePath [-t targetPath] [-d]] [-q -b bundleName] [-r -b bundleName]
 ```
 
 注：hqf文件制作方式可参考[HQF打包指令](packing-tool.md#hqf打包指令)。
@@ -346,16 +352,16 @@ bm quickfix [-h] [-a -f filePath [-t targetPath] [-d]] [-q -b bundleName] [-r -b
 # 根据包名查询补丁包信息
 bm quickfix -q -b com.ohos.app
 // 执行结果
-// Information as follows:            
-// ApplicationQuickFixInfo:           
-//  bundle name: com.ohos.app 
-//  bundle version code: xxx     
-//  bundle version name: xxx       
-//  patch version code: x            
-//  patch version name:              
-//  cpu abi:                          
-//  native library path:             
-//  type:                            
+// Information as follows:
+// ApplicationQuickFixInfo:
+//  bundle name: com.ohos.app
+//  bundle version code: xxx
+//  bundle version name: xxx
+//  patch version code: x
+//  patch version name:
+//  cpu abi:
+//  native library path:
+//  type:
 # 快速修复补丁安装
 bm quickfix -a -f /data/app/
 // 执行结果
