@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ int32_t QuickFixCommand::ApplyQuickFix(const std::vector<std::string> &quickFixF
         APP_LOGI("apply hqf file %{private}s.", file.c_str());
     }
 
-    APP_LOGI("IsDEBUG is %d isReplace is %d", isDebug, isReplace);
+    APP_LOGI("IsDEBUG is %{public}d isReplace is %{public}d", isDebug, isReplace);
 
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
