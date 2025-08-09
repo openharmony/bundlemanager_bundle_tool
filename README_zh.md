@@ -72,7 +72,7 @@ bm install [-h] [-p filePath] [-u userId] [-r] [-w waitingTime] [-s hspDirPath]
 | ----------------------------------- | -------------------------- |
 | bm install -h | 显示install支持的命令信息。-h为非必选字段。 |
 | bm install -p \<filePath\>    | 安装应用，支持指定路径和多个hap、hsp同时安装。安装应用时，-p为必选字段。 |
-| bm install -p \<filePath\> -u \<userId\>   |给指定用户安装一个应用。-u非必选字段，默认为当前活跃用户。 |
+| bm install -p \<filePath\> -u \<userId\>   |给指定用户安装一个应用。-u非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下安装。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm install -p /data/app/ohos.app.hap -u 102`安装时，只会在当前活跃用户100下安装应用。 |
 | bm install -p \<filePath\> -r | 覆盖安装一个应用，-r为非必选字段，默认支持覆盖安装。 |
 | bm install -p \<filePath\> -r -u \<userId\> | 给指定用户覆盖安装一个应用。 |
 | bm install -p \<filePath\> -r -u \<userId\> -w \<waitingTime\> | 安装时指定bm工具等待时间，-w非必选字段，最小的等待时长为180s，最大的等待时长为600s，默认缺省为5s。 |
@@ -85,6 +85,8 @@ bm install [-h] [-p filePath] [-u userId] [-r] [-w waitingTime] [-s hspDirPath]
 ```bash
 # 安装一个hap
 bm install -p /data/app/ohos.app.hap
+# 在用户100下安装一个hap
+bm install -p /data/app/ohos.app.hap -u 100
 # 覆盖安装一个hap
 bm install -p /data/app/ohos.app.hap -r
 # 安装一个应用间共享库
@@ -110,7 +112,7 @@ bm uninstall [-h] [-n bundleName] [-m moduleName] [-u userId] [-k] [-s] [-v vers
 | ----------------------------- | ------------------------ |
 | bm uninstall -h | 显示uninstall支持的命令信息。-h为非必选字段。 |
 | bm uninstall -n \<bundleName\> | 通过指定包名卸载应用。-n为必选字段。 |
-| bm uninstall -n \<bundleName\> -u \<userId\>| 通过指定包名和用户卸载应用。-u非必选字段，默认为当前活跃用户。 |
+| bm uninstall -n \<bundleName\> -u \<userId\>| 通过指定包名和用户卸载应用。-u非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下卸载应用。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm uninstall -n com.ohos.app -u 102`卸载时，只会在当前活跃用户100下卸载应用。 |
 | bm uninstall -n \<bundleName\> -u \<userId\> -k| 通过指定包名和用户以保留用户数据方式卸载应用。-k为非必选字段。 |
 | bm uninstall -n \<bundleName\> -m \<moduleName\> | 通过指定包名卸载应用的一个模块。-m为非必选字段。 |
 | bm uninstall -n \<bundleName\> -s | 卸载指定的shared bundle。-s为非必选字段，卸载共享库应用时为必选字段。 |
@@ -121,6 +123,8 @@ bm uninstall [-h] [-n bundleName] [-m moduleName] [-u userId] [-k] [-s] [-v vers
 ```bash
 # 卸载一个应用
 bm uninstall -n com.ohos.app
+# 在用户100下卸载一个应用
+bm uninstall -n com.ohos.app -u 100
 # 卸载应用的一个模块
 bm uninstall -n com.ohos.app -m entry
 # 卸载一个shared bundle
@@ -191,11 +195,12 @@ bm dump [-h] [-a] [-g] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceI
 | ---------- | -------------------------- |
 | bm dump -h | 显示dump支持的命令信息。-h为非必选字段。 |
 | bm dump -a | 查询系统已经安装的所有应用包名。-a为非必选字段。 |
+| bm dump -a -u \<userId\> | 查询系统指定用户下已经安装的所有应用包名。-u为非必选字段，仅支持当前活跃用户或0用户下的查询。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm dump -a -u 102`查询时，只会返回当前活跃用户100下所有应用包名。 |
 | bm dump -g | 查询系统中签名为调试类型的应用包名。-g为非必选字段。 |
 | bm dump -n \<bundleName\> | 查询指定包名的详细信息。-n为非必选字段。 |
 | bm dump -n \<bundleName\> -s | 查询指定包名下的快捷方式信息。-s为非必选字段。 |
 | bm dump -n \<bundleName\> -d \<deviceId\> | 跨设备查询包信息。-d为非必选字段。 |
-| bm dump -n \<bundleName\> -u \<userId\> | 查询指定用户下指定包名的详细信息。-u为非必选字段，默认为所有用户。 |
+| bm dump -n \<bundleName\> -u \<userId\> | 查询指定用户下指定包名的详细信息。-u为非必选字段，仅支持当前活跃用户或0用户下的查询。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm dump -n com.ohos.app -u 102`查询时，只会返回当前活跃用户100下的应用信息。 |
 | bm dump -n \<bundleName\> -l | 查询指定Bundle名称的label值（应用的名称）。-l为非必选字段。*注*：在命令行里输出的结果若包含特殊字符，可以在退出hdc shell命令行（`exit`）以后使用`chcp 65001`命令设置命令行的字符集。 |
 | bm dump -a -l| 所有已安装应用的bundle名称和label值（应用的名称）。-l为非必选字段。*注*：在命令行里输出的结果若包含特殊字符，可以在退出hdc shell命令行（`exit`）以后使用`chcp 65001`命令设置命令行的字符集。 |
 
@@ -205,6 +210,10 @@ bm dump [-h] [-a] [-g] [-n bundleName] [-s shortcutInfo] [-u userId] [-d deviceI
 ```bash
 # 显示所有已安装的Bundle名称
 bm dump -a
+# 显示用户0下所有已安装的Bundle名称
+bm dump -a -u 0
+# 显示当前活跃用户100下所有已安装的Bundle名称
+bm dump -a -u 100
 # 查询系统中签名为调试类型的应用包名
 bm dump -g
 # 查询该应用的详细信息
@@ -215,6 +224,10 @@ bm dump -s -n com.ohos.app -u 100
 bm dump -n com.ohos.app -d xxxxx
 # 查询该应用的label值（应用的名称）
 bm dump -n com.ohos.app -l
+# 查询当前0用户下的应用信息
+bm dump -n com.ohos.app -u 0
+# 查询当前活跃用户100下的应用数据
+bm dump -n com.ohos.app -u 100
 # 显示所有已安装应用的bundle名称和label值（应用的名称）
 bm dump -a -l
 ```
@@ -231,7 +244,7 @@ bm clean [-h] [-c] [-n bundleName] [-d] [-u userId] [-i appIndex]
 | bm clean -h | 显示clean支持的命令信息。-h为非必选字段。 |
 | bm clean -n \<bundleName\> -c | 清除指定包名的缓存数据。-n为必选字段，-c为非必选字段。 |
 | bm clean -n \<bundleName\> -d | 清除指定包名的数据目录。-d为非必选字段。 |
-| bm clean -n \<bundleName\> -c -u \<userId\> | 清除指定用户下包名的缓存数据。-u为非必选字段，默认为当前活跃用户。 |
+| bm clean -n \<bundleName\> -c -u \<userId\> | 清除指定用户下包名的缓存数据。-u为非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下缓存数据。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm clean -n com.ohos.app -c -u 102`缓存数据时，只会在当前活跃用户100下缓存数据。 |
 | bm clean -n \<bundleName\> -d -u \<userId\> | 清除指定用户下包名的数据目录。 |
 | bm clean -n \<bundleName\> -d -u \<userId\> -i \<appIndex\> | 清除指定用户下分身应用的数据目录。-i为非必选字段，默认为0。 |
 
@@ -261,7 +274,7 @@ bm enable [-h] [-n bundleName] [-a abilityName] [-u userId]
 | bm enable -h | 显示enable支持的命令信息。-h为非必选字段。 |
 | bm enable -n \<bundleName\> | 使能指定包名的应用。-n为必选字段。 |
 | bm enable -n \<bundleName\> -a \<abilityName\> | 使能指定包名下的元能力模块。-a为非必选字段。 |
-| bm enable -n \<bundleName\> -u \<userId\>| 使能指定用户和包名的应用。-u为非必选字段，默认为当前活跃用户。 |
+| bm enable -n \<bundleName\> -u \<userId\>| 使能指定用户和包名的应用。-u为非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下使能。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm enable -n com.ohos.app -u 102`使能应用时，只会在当前活跃用户100下使能应用。 |
 
 
 示例：
@@ -288,7 +301,7 @@ bm disable [-h] [-n bundleName] [-a abilityName] [-u userId]
 | bm disable -h | 显示disable支持的命令信息。-h为非必选字段。 |
 | bm disable -n \<bundleName\> | 禁用指定包名的应用。-n为必选字段。 |
 | bm disable -n \<bundleName\> -a \<abilityName\> | 禁用指定包名下的元能力模块。-a为非必选字段。 |
-| bm disable -n \<bundleName\> -u \<userId\>| 禁用指定用户和包名下的应用。-u为非必选字段，默认为当前活跃用户。 |
+| bm disable -n \<bundleName\> -u \<userId\>| 禁用指定用户和包名下的应用。-u为非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下禁用。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm disable -n com.ohos.app -u 102`禁用应用时，只会在当前活跃用户100下禁用应用。 |
 
 
 示例：
@@ -478,7 +491,7 @@ bm dump-overlay [-h] [-b bundleName] [-m moduleName] [-u userId] [-t targetModul
 | bm dump-overlay -b \<bundleName\>| 获取指定应用的所有OverlayModuleInfo信息。-b为必选字段。 |
 | bm dump-overlay -b \<bundleName\> -m \<moduleName\>| 根据指定的包名和module名查询OverlayModuleInfo信息。-m为非必选字段。 |
 | bm dump-overlay -b \<bundleName\> -t \<target-moduleName\>| 根据指定的包名和目标module名查询OverlayModuleInfo信息。-t为非必选字段。 |
-| bm dump-overlay -b \<bundleName\> -t \<target-moduleName\> -u \<userId\>| 根据指定的包名\目标module名和用户查询OverlayModuleInfo信息。-u为非必选字段，默认为当前活跃用户。 |
+| bm dump-overlay -b \<bundleName\> -t \<target-moduleName\> -u \<userId\>| 根据指定的包名\目标module名和用户查询OverlayModuleInfo信息。-u为非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下查询OverlayModuleInfo信息。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm dump-overlay -b com.ohos.app -t feature -u 102`查询时，只会返回当前活跃用户100下的OverlayModuleInfo信息。 |
 
 示例：
 
@@ -491,6 +504,9 @@ bm dump-overlay -b com.ohos.app -m entry
 
 # 根据包名和module来获取overlay应用com.ohos.app中目标module为feature的所有OverlayModuleInfo信息
 bm dump-overlay -b com.ohos.app -m feature
+
+# 在用户100下，根据包名com.ohos.app和module来获取overlay应用com.ohos.app中目标module为feature的OverlayModuleInfo信息
+bm dump-overlay -b com.ohos.app -t feature -u 100
 ```
 
 #### 查询应用的overlay相关信息命令
@@ -507,7 +523,7 @@ bm dump-target-overlay [-h] [-b bundleName] [-m moduleName] [-u userId]
 | bm dump-target-overlay -h| 显示dump-target-overlay支持的命令信息。-h为非必选字段。 |
 | bm dump-target-overlay -b \<bundleName\> | 获取指定目标应用的所有OverlayBundleInfo信息。-b为必选字段。 |
 | bm dump-target-overlay -b \<bundleName\> -m \<moduleName\> | 根据指定的目标应用的包名和module名查询OverlayModuleInfo信息。-m为非必选字段。 |
-| bm dump-target-overlay -b \<bundleName\> -m \<moduleName\> -u \<userId\> | 根据指定的目标应用的包名、module名和用户查询OverlayModuleInfo信息。-u为非必选字段，默认为当前活跃用户。 |
+| bm dump-target-overlay -b \<bundleName\> -m \<moduleName\> -u \<userId\> | 根据指定的目标应用的包名、module名和用户查询OverlayModuleInfo信息。-u为非必选字段，默认为当前活跃用户。仅支持在当前活跃用户或0用户下查询OverlayModuleInfo信息。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm dump-target-overlay -b com.ohos.app -m feature -u 102`查询时，只会返回当前活跃用户100下的OverlayModuleInfo信息。 |
 
 示例：
 
@@ -517,6 +533,9 @@ bm dump-target-overlay-b com.ohos.app
 
 # 根据包名和module来获取目标应用com.ohos.app中目标module为entry的所有关联的OverlayModuleInfo信息
 bm dump-target-overlay -b com.ohos.app -m entry
+
+# 在用户100下，根据包名和module来获取目标应用com.ohos.app中目标module为entry的所有关联的OverlayModuleInfo信息
+bm dump-target-overlay -b com.ohos.app -m entry -u 100
 ```
 ## 相关仓
 

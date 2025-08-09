@@ -73,6 +73,8 @@ const std::string HELP_MSG_INSTALL =
     "  -r -p <bundle-file-path>                                       replace an existing bundle\n"
     "  -r --bundle-path <bundle-file-path>                            replace an existing bundle\n"
     "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>          install inter-application hsp files\n"
+    "  -u, --user-id <user-id>                                        specify a user id,\n"
+    "                                                                   only supports current user or userId is 0\n"
     "  -w, --waitting-time <waitting-time>                            specify waitting time for installation,\n"
     "                                                                    the minimum waitting time is 180s,\n"
     "                                                                    the maximum waitting time is 600s\n";
@@ -83,6 +85,7 @@ const std::string HELP_MSG_UNINSTALL =
     "  -h, --help                           list available commands\n"
     "  -n, --bundle-name <bundle-name>      uninstall a bundle by bundle name\n"
     "  -m, --module-name <module-name>      uninstall a module by module name\n"
+    "  -u, --user-id <user-id>              specify a user id,only supports current user or userId is 0\n"
     "  -k, --keep-data                      keep the user data after uninstall\n"
     "  -s, --shared                         uninstall inter-application shared library\n"
     "  -v, --version                        uninstall a inter-application shared library by versionCode\n";
@@ -103,6 +106,7 @@ const std::string HELP_MSG_DUMP =
     "  -n, --bundle-name <bundle-name>      list the bundle info by a bundle name\n"
     "  -s, --shortcut-info                  list the shortcut info\n"
     "  -d, --device-id <device-id>          specify a device id\n"
+    "  -u, --user-id <user-id>              specify a user id,only supports current user or userId is 0\n"
     "  -l, --label                          list the label info\n";
 
 const std::string HELP_MSG_CLEAN =
@@ -112,6 +116,7 @@ const std::string HELP_MSG_CLEAN =
     "  -n, --bundle-name  <bundle-name>                bundle name\n"
     "  -c, --cache                                     clean bundle cache files by bundle name\n"
     "  -d, --data                                      clean bundle data files by bundle name\n"
+    "  -u, --user-id <user-id>                         specify a user id,only supports current user or userId is 0\n"
     "  -i, --app-index <app-index>                     specify a app index\n";
 
 const std::string HELP_MSG_ENABLE =
@@ -119,14 +124,16 @@ const std::string HELP_MSG_ENABLE =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       enable bundle by bundle name\n"
-    "  -a, --ability-name <ability-name>      enable ability by ability name\n";
+    "  -a, --ability-name <ability-name>      enable ability by ability name\n"
+    "  -u, --user-id <user-id>                specify a user id,only supports current user or userId is 0\n";
 
 const std::string HELP_MSG_DISABLE =
     "usage: bm disable <options>\n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       disable bundle by bundle name\n"
-    "  -a, --ability-name <ability-name>      disable ability by ability name\n";
+    "  -a, --ability-name <ability-name>      disable ability by ability name\n"
+    "  -u, --user-id <user-id>                specify a user id,only supports current user or userId is 0\n";
 
 const std::string HELP_MSG_GET =
     "usage: bm get <options>\n"
@@ -155,14 +162,18 @@ const std::string HELP_MSG_OVERLAY =
     "  -h, --help                                         list available commands\n"
     "  -b, --bundle-name <bundle-name>                    bundle name of the overlay bundle\n"
     "  -m, --module-name <module-name>                    module name of the overlay bundle\n"
-    "  -t, --target-module-name <target-module-name>      target module name of overlay bundle\n";
+    "  -t, --target-module-name <target-module-name>      target module name of overlay bundle\n"
+    "  -u, --user-id <user-id>                            specify a user id,\n"
+    "                                                         only supports current user or userId is 0\n";
 
 const std::string HELP_MSG_OVERLAY_TARGET =
     "usage: bm dump-target-overlay <options>\n"
     "options list:\n"
     "  -h, --help                                         list available commands\n"
     "  -b, --bundle-name <bundle-name>                    bundle name of the target overlay bundle\n"
-    "  -m, --module-name <module-name>                    module name of the target overlay bundle\n";
+    "  -m, --module-name <module-name>                    module name of the target overlay bundle\n"
+    "  -u, --user-id <user-id>                            specify a user id,\n"
+    "                                                         only supports current user or userId is 0\n";
 
 const std::string HELP_MSG_DUMP_SHARED =
     "usage: bm dump-shared <options>\n"
