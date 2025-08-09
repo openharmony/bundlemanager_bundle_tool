@@ -259,8 +259,6 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"uninstall-plugin", [this] { return this->RunAsUninstallPluginCommand(); } },
         {"dump", [this] { return this->RunAsDumpCommand(); } },
         {"clean", [this] { return this->RunAsCleanCommand(); } },
-        {"enable", [this] { return this->RunAsEnableCommand(); } },
-        {"disable", [this] { return this->RunAsDisableCommand(); } },
         {"get", [this] { return this->RunAsGetCommand(); } },
         {"quickfix", [this] { return this->RunAsQuickFixCommand(); } },
         {"compile", [this] { return this->RunAsCompileCommand(); } },
@@ -270,6 +268,12 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"dump-dependencies", [this] { return this->RunAsDumpSharedDependenciesCommand(); } },
         {"dump-shared", [this] { return this->RunAsDumpSharedCommand(); } },
     };
+
+    int32_t mode = GetIntParameter(IS_ROOT_MODE_PARAM, USER_MODE);
+    if (mode == ROOT_MODE) {
+        commandMap_.emplace("enable", [this] { return this->RunAsEnableCommand(); });
+        commandMap_.emplace("disable", [this] { return this->RunAsDisableCommand(); });
+    }
 
     return OHOS::ERR_OK;
 }
