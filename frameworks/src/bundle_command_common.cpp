@@ -774,7 +774,7 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     },
     {
         IStatusReceiver::ERR_INSTALL_NOT_SUPPORT_STATIC_ATOMIC_SERVICE,
-        "error: install failed due to not support install static atomicService."
+        "error: Atomic services that include static modules cannot be installed."
     }
 };
 } // AppExecFwk
