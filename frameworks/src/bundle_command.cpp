@@ -764,6 +764,9 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime, resultMsg);
         if (installResult == OHOS::ERR_OK) {
             resultReceiver_ = STRING_INSTALL_BUNDLE_OK + "\n";
+            if (!resultMsg.empty() && resultMsg[0] != '[') {
+                resultReceiver_.append(resultMsg + "\n");
+            }
         } else {
             resultReceiver_ = STRING_INSTALL_BUNDLE_NG + "\n";
             resultReceiver_.append(GetMessageFromCode(installResult));
