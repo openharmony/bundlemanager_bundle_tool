@@ -83,7 +83,7 @@ int32_t QuickFixCommand::ApplyQuickFix(const std::vector<std::string> &quickFixF
     auto applyMonitor = std::make_shared<ApplyQuickFixMonitor>(subscribeInfo, statusReceiver);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
 
-    auto result = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance()->ApplyQuickFix(
+    auto result = AAFwk::QuickFixManagerClient::GetInstance()->ApplyQuickFix(
         quickFixFiles, isDebug, isReplace);
     if (result == ERR_OK) {
         APP_LOGD("Waiting apply finished.");
