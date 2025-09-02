@@ -2908,15 +2908,27 @@ ErrCode BundleTestTool::CheckAppRunningRuleCorrectOption(int option, const std::
             while (getline(array, object, ';')) {
                 size_t pos1 = object.find("appId");
                 size_t pos2 = object.find("controlMessage");
-                size_t pos3 = object.find(":", pos2);
-                if ((pos1 == std::string::npos) || (pos2 == std::string::npos)) {
+                size_t pos3 = object.find("allowRunning");
+                size_t pos4 = object.find(":", pos3);
+                if ((pos1 == std::string::npos) || (pos2 == std::string::npos) || (pos3 == std::string::npos)) {
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 std::string appId = object.substr(pos1+6, pos2-pos1-7);
-                std::string controlMessage = object.substr(pos3+1);
+                std::string controlMessage = object.substr(pos2+15, pos3-pos2-16);
+                bool allowRunning = false;
+                std::string trustStr = object.substr(pos4+1);
+                if (trustStr == "true") {
+                    allowRunning = true;
+                } else if (trustStr == "false") {
+                    allowRunning = false;
+                } else {
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+
                 AppRunningControlRule rule;
                 rule.appId = appId;
                 rule.controlMessage = controlMessage;
+                rule.allowRunning = allowRunning;
                 controlRule.emplace_back(rule);
             }
             break;
@@ -2940,8 +2952,8 @@ ErrCode BundleTestTool::CheckAppRunningRuleCorrectOption(int option, const std::
     return OHOS::ERR_OK;
 }
 
-// bundle_test_tool addAppRunningRule -c appId:id1,controlMessage:msg1;appId:id2,controlMessage:msg2
-// -u 101 -e 3057
+// bundle_test_tool addAppRunningRule -c "appId:id1,controlMessage:msg1,allowRunning:true;
+// appId:id2,controlMessage:msg2,allowRunning:false" -u 101 -e 3057
 ErrCode BundleTestTool::RunAsAddAppRunningRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
@@ -2980,7 +2992,8 @@ ErrCode BundleTestTool::RunAsAddAppRunningRuleCommand()
     }
     std::string appIdParam = "";
     for (auto param : controlRule) {
-        appIdParam = appIdParam.append("appId:"+ param.appId + ":" + "message" + param.controlMessage);
+        appIdParam = appIdParam.append("appId:"+ param.appId + "," + "message:" + param.controlMessage +
+            ",allowRunning:" + (param.allowRunning ? "true" : "false"));
     }
     APP_LOGI("appRunningControlRule: %{public}s, userId: %{public}d", appIdParam.c_str(), userId);
     int32_t res = appControlProxy->AddAppRunningControlRule(controlRule, userId);
@@ -2992,7 +3005,7 @@ ErrCode BundleTestTool::RunAsAddAppRunningRuleCommand()
     return result;
 }
 
-// bundle_test_tool deleteAppRunningRule -c appId:101,controlMessage:msg1 -u 101 -e 3057
+// bundle_test_tool deleteAppRunningRule -c "appId:101,controlMessage:msg1,allowRunning:true" -u 101 -e 3057
 ErrCode BundleTestTool::RunAsDeleteAppRunningRuleCommand()
 {
     ErrCode result = OHOS::ERR_OK;
@@ -3031,7 +3044,8 @@ ErrCode BundleTestTool::RunAsDeleteAppRunningRuleCommand()
     }
     std::string appIdParam = "";
     for (auto param : controlRule) {
-        appIdParam = appIdParam.append("appId:"+ param.appId + ":" + "message" + param.controlMessage);
+        appIdParam = appIdParam.append("appId:"+ param.appId + ":" + "message" + param.controlMessage +
+            ":allowRunning:" + (param.allowRunning ? "true" : "false"));
     }
     APP_LOGI("appRunningControlRule: %{public}s, userId: %{public}d", appIdParam.c_str(), userId);
     int32_t res = appControlProxy->DeleteAppRunningControlRule(controlRule, userId);
@@ -3183,7 +3197,8 @@ ErrCode BundleTestTool::RunAsGetAppRunningControlRuleCommand()
     }
     APP_LOGI("userId: %{public}d", userId);
     std::vector<std::string> appIds;
-    int32_t res = appControlProxy->GetAppRunningControlRule(userId, appIds);
+    bool allowRunning;
+    int32_t res = appControlProxy->GetAppRunningControlRule(userId, appIds, allowRunning);
     if (res != OHOS::ERR_OK) {
         resultReceiver_.append(STRING_GET_RULE_NG);
         return res;
@@ -3192,7 +3207,7 @@ ErrCode BundleTestTool::RunAsGetAppRunningControlRuleCommand()
     for (auto param : appIds) {
         appIdParam = appIdParam.append(param) + "; ";
     }
-    resultReceiver_.append("appId : " + appIdParam + "\n");
+    resultReceiver_.append("appId : " + appIdParam + ",allowRunning:" + (allowRunning ? "true" : "false") + "\n");
     return result;
 }
 
