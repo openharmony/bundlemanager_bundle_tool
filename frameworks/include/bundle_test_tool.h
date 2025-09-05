@@ -106,6 +106,10 @@ private:
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsGetAllBundleDirs();
     ErrCode GetAllBundleDirs(int32_t userId, std::string& msg);
+    ErrCode RunAsGetDisposedRules();
+    ErrCode GetDisposedRules(int32_t userId, std::string &msg);
+    ErrCode CheckGetDisposedRulesCorrectOption(
+        int option, const std::string &commandName, int &userId, int &callerUid);
     ErrCode RunAsGetAllBundleCacheStat();
     ErrCode GetAllBundleCacheStat(std::string& msg);
     ErrCode RunAsCleanAllBundleCache();
