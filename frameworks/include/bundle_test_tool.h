@@ -61,6 +61,9 @@ private:
     ErrCode RunAsDumpSandboxCommand();
     ErrCode RunAsGetStringCommand();
     ErrCode RunAsGetIconCommand();
+    ErrCode RunAsDeleteDisposedRulesCommand();
+    ErrCode CheckDeleteRulesCorrectOption(int option, const std::string &commandName, std::vector<std::string> &appIds,
+        int &appIndex, int &userId, int &uid);
     ErrCode RunAsAddInstallRuleCommand();
     ErrCode RunAsGetInstallRuleCommand();
     ErrCode RunAsDeleteInstallRuleCommand();
