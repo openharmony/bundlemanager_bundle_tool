@@ -61,6 +61,9 @@ private:
     ErrCode RunAsDumpSandboxCommand();
     ErrCode RunAsGetStringCommand();
     ErrCode RunAsGetIconCommand();
+    ErrCode RunAsDeleteDisposedRulesCommand();
+    ErrCode CheckDeleteRulesCorrectOption(int option, const std::string &commandName, std::vector<std::string> &appIds,
+        int &appIndex, int &userId, int &uid);
     ErrCode RunAsAddInstallRuleCommand();
     ErrCode RunAsGetInstallRuleCommand();
     ErrCode RunAsDeleteInstallRuleCommand();
@@ -103,6 +106,10 @@ private:
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsGetAllBundleDirs();
     ErrCode GetAllBundleDirs(int32_t userId, std::string& msg);
+    ErrCode RunAsGetDisposedRules();
+    ErrCode GetDisposedRules(int32_t userId, std::string &msg);
+    ErrCode CheckGetDisposedRulesCorrectOption(
+        int option, const std::string &commandName, int &userId, int &callerUid);
     ErrCode RunAsGetAllBundleCacheStat();
     ErrCode GetAllBundleCacheStat(std::string& msg);
     ErrCode RunAsCleanAllBundleCache();
