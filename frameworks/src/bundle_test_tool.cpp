@@ -193,12 +193,14 @@ static const std::string HELP_MSG =
     "  getAllBundleDirs                 obtain all bundle dirs \n"
     "  getAllBundleCacheStat            obtain all bundle cache size \n"
     "  cleanAllBundleCache              clean all bundle cache \n"
+    "  deleteDisposedRules              delete disposed rules \n"
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
     "and appIndex\n"
     "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n"
     "  getSimpleAppInfoForUid           get bundlename list and appIndex list by uid list\n"
     "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
     "  getAssetAccessGroups             get asset access groups by bundlename\n"
+    "  getDisposedRules                 get disposed rules\n"
     "  getAppIdentifierAndAppIndex      get appIdentifier and appIndex\n"
     "  setAppDistributionTypes          set white list of appDistributionType\n";
 
@@ -374,6 +376,12 @@ const std::string HELP_MSG_NO_ADD_INSTALL_RULE_OPTION =
     "error: you must specify a app id with '-a' or '--app-id' \n"
     "and a control type with '-t' or '--control-rule-type' \n"
     "and a userid with '-u' or '--user-id' \n";
+
+const std::string HELP_MSG_DELETE_RULES_OPTION =
+    "error: you must specify a app id with '-a' or '--app-id' \n"
+    "and a app index with '-i' or '--app-index' \n"
+    "and a userid with '-u' or '--user-id' \n"
+    "and a uid with '-u' or '--uid' \n";
 
 const std::string HELP_MSG_NO_GET_INSTALL_RULE_OPTION =
     "error: you must specify a control type with '-t' or '--control-rule-type' \n"
@@ -568,6 +576,14 @@ const std::string HELP_MSG_GET_ALL_BUNDLE_DIRS =
     "  -h, --help                             list available commands\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_GET_DISPOSED_RULES =
+    "usage: bundle_test_tool getDisposedRules <options>\n"
+    "eg:bundle_test_tool getDisposedRules -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -c, --caller-uid <caller-uid>          specify a caller uid\n";
+
 const std::string HELP_MSG_GET_ALL_BUNDLE_CACHE_STAT =
     "usage: bundle_test_tool getAllBundleCacheStat <options>\n"
     "eg:bundle_test_tool getAllBundleCacheStat\n"
@@ -758,6 +774,9 @@ const std::string STRING_GET_DIR_NG = "getDirByBundleNameAndAppIndex failed\n";
 const std::string STRING_GET_ALL_BUNDLE_DIRS_OK = "getAllBundleDirs successfully\n";
 const std::string STRING_GET_ALL_BUNDLE_DIRS_NG = "getAllBundleDirs failed\n";
 
+const std::string STRING_GET_DISPOSED_RULES_OK = "getDisposedRules successfully\n";
+const std::string STRING_GET_DISPOSED_RULES_NG = "getDisposedRules failed\n";
+
 const std::string STRING_GET_ALL_BUNDLE_CACHE_STAT_OK = "getAllBundleCacheStat successfully\n";
 const std::string STRING_GET_ALL_BUNDLE_CACHE_STAT_NG = "getAllBundleCacheStat failed\n";
 
@@ -883,6 +902,16 @@ const struct option LONG_OPTIONS_RULE[] = {
     {"euid", required_argument, nullptr, 'e'},
     {"control-rule-type", required_argument, nullptr, 't'},
     {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_DELETE_RULES = "ha:i:u:c:";
+const struct option LONG_OPTIONS_DELETES_RULES[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"app-id", required_argument, nullptr, 'a'},
+    {"app-index", required_argument, nullptr, 'i'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"caller-uid", required_argument, nullptr, 'c'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1062,6 +1091,14 @@ const struct option LONG_OPTIONS_GET_ALL_BUNDLE_DIRS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_DISPOSED_RULES = "hu:c:";
+const struct option LONG_OPTIONS_GET_DISPOSED_RULES[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"caller-uid", required_argument, nullptr, 'c'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_ALL_BUNDLE_CACHE_STAT = "hu:";
 const struct option LONG_OPTIONS_GET_ALL_BUNDLE_CACHE_STAT[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1219,6 +1256,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"dumpSandbox", std::bind(&BundleTestTool::RunAsDumpSandboxCommand, this)},
         {"getStr", std::bind(&BundleTestTool::RunAsGetStringCommand, this)},
         {"getIcon", std::bind(&BundleTestTool::RunAsGetIconCommand, this)},
+        {"deleteDisposedRules", std::bind(&BundleTestTool::RunAsDeleteDisposedRulesCommand, this)},
         {"addAppInstallRule", std::bind(&BundleTestTool::RunAsAddInstallRuleCommand, this)},
         {"getAppInstallRule", std::bind(&BundleTestTool::RunAsGetInstallRuleCommand, this)},
         {"deleteAppInstallRule", std::bind(&BundleTestTool::RunAsDeleteInstallRuleCommand, this)},
@@ -1264,6 +1302,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)},
         {"getAllBundleDirs",
             std::bind(&BundleTestTool::RunAsGetAllBundleDirs, this)},
+        {"getDisposedRules",
+            std::bind(&BundleTestTool::RunAsGetDisposedRules, this)},
         {"getAllBundleCacheStat",
             std::bind(&BundleTestTool::RunAsGetAllBundleCacheStat, this)},
         {"cleanAllBundleCache",
@@ -2562,6 +2602,107 @@ ErrCode BundleTestTool::CheckAddInstallRuleCorrectOption(int option, const std::
         }
         case 't': {
             StringToInt(optarg, commandName, controlRuleType, ret);
+            break;
+        }
+        case 'u': {
+            StringToInt(optarg, commandName, userId, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    return OHOS::ERR_OK;
+}
+
+
+ErrCode BundleTestTool::RunAsDeleteDisposedRulesCommand()
+{
+    ReloadNativeTokenInfo();
+    ErrCode result = OHOS::ERR_OK;
+    std::string commandName = "DisposedRulesCommand";
+    int counter = 0;
+    std::vector<std::string> appIds;
+    int uid = 0;
+    int userId = 100;
+    int appIndex = 0;
+    APP_LOGD("RunAsDeleteDisposedRulesCommand is start");
+    while (true) {
+        counter++;
+        int option = getopt_long(argc_, argv_, SHORT_OPTIONS_DELETE_RULES.c_str(), LONG_OPTIONS_DELETES_RULES, nullptr);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_DELETE_RULES_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckDeleteRulesCorrectOption(option, commandName, appIds, appIndex, userId, uid);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(HELP_MSG_DELETE_RULES_OPTION);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    auto appControlProxy = bundleMgrProxy_->GetAppControlProxy();
+    if (!appControlProxy) {
+        APP_LOGE("fail to get app control proxy.");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::vector<DisposedRuleConfiguration> disposedRuleConfigurations;
+    std::string appIdParam = "";
+    for (auto param : appIds) {
+        appIdParam = appIdParam.append(param) + ";";
+        DisposedRuleConfiguration config;
+        config.appId = param;
+        config.appIndex = appIndex;
+        disposedRuleConfigurations.emplace_back(config);
+    }
+    APP_LOGI("appIds: %{public}s, appIndex: %{public}d, userId: %{public}d, uid: %{public}d",
+        appIdParam.c_str(), appIndex, userId, uid);
+    setuid(uid);
+    int32_t res = appControlProxy->DeleteDisposedRules(disposedRuleConfigurations, userId);
+    setuid(Constants::ROOT_UID);
+    APP_LOGI("DeleteDisposedRules return code: %{public}d", res);
+    if (res != OHOS::ERR_OK) {
+        resultReceiver_.append("error: failed to delete rules");
+        return res;
+    }
+    resultReceiver_.append(std::to_string(res) + "\n");
+    return result;
+}
+
+ErrCode BundleTestTool::CheckDeleteRulesCorrectOption(int option, const std::string &commandName,
+    std::vector<std::string> &appIds, int &appIndex, int &userId, int &uid)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        case 'a': {
+            std::string arrayAppId = optarg;
+            std::stringstream array(arrayAppId);
+            std::string object;
+            while (getline(array, object, ',')) {
+                appIds.emplace_back(object);
+            }
+            APP_LOGD("bundle_test_tool %{public}s -a %{public}s", commandName.c_str(), argv_[optind - 1]);
+            break;
+        }
+        case 'c': {
+            StringToInt(optarg, commandName, uid, ret);
+            break;
+        }
+        case 'i': {
+            StringToInt(optarg, commandName, appIndex, ret);
             break;
         }
         case 'u': {
@@ -4697,10 +4838,11 @@ bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> ap
 
 void BundleTestTool::ReloadNativeTokenInfo()
 {
-    const int32_t permsNum = 1;
+    const int32_t permsNum = 2;
     uint64_t tokenId;
     const char *perms[permsNum];
     perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
+    perms[1] = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
@@ -5285,6 +5427,112 @@ ErrCode BundleTestTool::GetAllBundleDirs(int32_t userId, std::string& msg)
         msg += "}\n";
     }
     return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetDisposedRules()
+{
+    APP_LOGI("RunAsGetDisposedRules start");
+    ReloadNativeTokenInfo();
+    std::string commandName = "getDisposedRules";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    int32_t userId = 100;
+    int32_t callerUid = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_DISPOSED_RULES.c_str(),
+            LONG_OPTIONS_GET_DISPOSED_RULES, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("getDisposedRules with no option.");
+                resultReceiver_.append(HELP_MSG_GET_DISPOSED_RULES);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckGetDisposedRulesCorrectOption(option, commandName, userId, callerUid);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(HELP_MSG_GET_DISPOSED_RULES);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    APP_LOGI("getDisposedRules with userId:%{public}d, callerUid:%{public}d", userId, callerUid);
+    setuid(callerUid);
+    std::string msg;
+    result = GetDisposedRules(userId, msg);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_GET_DISPOSED_RULES_OK + msg + "\n");
+    } else {
+        resultReceiver_.append(STRING_GET_DISPOSED_RULES_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    APP_LOGI("RunAsGetDisposedRules end");
+    return result;
+}
+
+ErrCode BundleTestTool::GetDisposedRules(int32_t userId, std::string &msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    std::vector<DisposedRuleConfiguration> disposedRuleConfigurations;
+    auto appControlProxy = bundleMgrProxy_->GetAppControlProxy();
+    if (appControlProxy == nullptr) {
+        APP_LOGE("appControlProxy is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    ErrCode result = appControlProxy->GetDisposedRules(userId, disposedRuleConfigurations);
+    if (result == ERR_OK) {
+        msg += "[\n";
+        for (const auto &configuration: disposedRuleConfigurations) {
+            msg += "    {\n";
+            msg += "        \"appId\": ";
+            msg += configuration.appId;
+            msg += ",\n";
+            msg += "        \"appIndex\": ";
+            msg += std::to_string(configuration.appIndex);
+            msg += ",\n";
+            msg += "        \"disposedRule\": ";
+            msg += configuration.disposedRule.ToString();
+            msg += ",\n";
+            msg += "    },\n";
+        }
+        msg += "]";
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::CheckGetDisposedRulesCorrectOption(int option, const std::string &commandName,
+    int &userId, int &callerUid)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        case 'u': {
+            StringToInt(optarg, commandName, userId, ret);
+            break;
+        }
+        case 'c': {
+            StringToInt(optarg, commandName, callerUid, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    return OHOS::ERR_OK;
 }
 
 ErrCode BundleTestTool::RunAsGetAllBundleCacheStat()
