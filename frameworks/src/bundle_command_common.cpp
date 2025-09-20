@@ -775,6 +775,18 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_NOT_SUPPORT_STATIC_ATOMIC_SERVICE,
         "error: Atomic services that include static modules cannot be installed."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_MORE_THAN_ONE_APP,
+        "error: only one app can be installed at a time."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_DECOMPRESS_APP_FAILED,
+        "error: decompress app failed."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_NO_SUITABLE_BUNDLES,
+        "error: no suitable haps or hsps in the app."
     }
 };
 } // AppExecFwk
