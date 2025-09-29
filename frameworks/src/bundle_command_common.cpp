@@ -787,6 +787,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_NO_SUITABLE_BUNDLES,
         "error: no suitable haps or hsps in the app."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_VERIFY_APP_SIGNATURE_FAILED,
+        "error: verify app signature failed."
     }
 };
 } // AppExecFwk
