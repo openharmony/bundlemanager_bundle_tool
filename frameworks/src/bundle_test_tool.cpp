@@ -42,6 +42,7 @@
 #include "iservice_registry.h"
 #include "data_group_info.h"
 #include "directory_ex.h"
+#include "module_info.h"
 #include "parameter.h"
 #include "parameters.h"
 #include "process_cache_callback_host.h"
@@ -191,6 +192,7 @@ static const std::string HELP_MSG =
     "  updateAppEncryptedStatus         update app encrypted status\n"
     "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
     "  getAllBundleDirs                 obtain all bundle dirs \n"
+    "  getAllJsonProfile                obtain all json profile\n"
     "  getAllBundleCacheStat            obtain all bundle cache size \n"
     "  cleanAllBundleCache              clean all bundle cache \n"
     "  deleteDisposedRules              delete disposed rules \n"
@@ -576,6 +578,14 @@ const std::string HELP_MSG_GET_ALL_BUNDLE_DIRS =
     "  -h, --help                             list available commands\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_GET_ALL_JSON_PROFILE =
+    "usage: bundle_test_tool getAllJsonProfile <options>\n"
+    "eg:bundle_test_tool getAllJsonProfile -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -p, --profile-type <profile-type>      specify a profile-type\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
 const std::string HELP_MSG_GET_DISPOSED_RULES =
     "usage: bundle_test_tool getDisposedRules <options>\n"
     "eg:bundle_test_tool getDisposedRules -u <user-id>\n"
@@ -773,6 +783,9 @@ const std::string STRING_GET_DIR_NG = "getDirByBundleNameAndAppIndex failed\n";
 
 const std::string STRING_GET_ALL_BUNDLE_DIRS_OK = "getAllBundleDirs successfully\n";
 const std::string STRING_GET_ALL_BUNDLE_DIRS_NG = "getAllBundleDirs failed\n";
+
+const std::string STRING_GET_ALL_JSON_PROFILE_OK = "getAllJsonProfile successfully\n";
+const std::string STRING_GET_ALL_JSON_PROFILE_NG = "getAllJsonProfile failed\n";
 
 const std::string STRING_GET_DISPOSED_RULES_OK = "getDisposedRules successfully\n";
 const std::string STRING_GET_DISPOSED_RULES_NG = "getDisposedRules failed\n";
@@ -1091,6 +1104,14 @@ const struct option LONG_OPTIONS_GET_ALL_BUNDLE_DIRS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_ALL_JSON_PROFILE = "hp:u:";
+const struct option LONG_OPTIONS_GET_ALL_JSON_PROFILE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"profile-type", required_argument, nullptr, 'p'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DISPOSED_RULES = "hu:c:";
 const struct option LONG_OPTIONS_GET_DISPOSED_RULES[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1302,6 +1323,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetDirByBundleNameAndAppIndex, this)},
         {"getAllBundleDirs",
             std::bind(&BundleTestTool::RunAsGetAllBundleDirs, this)},
+        {"getAllJsonProfile",
+            std::bind(&BundleTestTool::RunAsGetAllJsonProfile, this)},
         {"getDisposedRules",
             std::bind(&BundleTestTool::RunAsGetDisposedRules, this)},
         {"getAllBundleCacheStat",
@@ -5437,6 +5460,73 @@ ErrCode BundleTestTool::GetAllBundleDirs(int32_t userId, std::string& msg)
         for (const auto &bundleDir: bundleDirs) {
             msg +="     ";
             msg += bundleDir.ToString();
+            msg += "\n";
+        }
+        msg += "}\n";
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetAllJsonProfile()
+{
+    APP_LOGI("RunAsGetAllJsonProfile start");
+    std::string commandName = "getAllJsonProfile";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    int32_t userId = 100;
+    int32_t profileType = -1;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ALL_JSON_PROFILE.c_str(),
+            LONG_OPTIONS_GET_ALL_JSON_PROFILE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getAllJsonProfile with no option.");
+                resultReceiver_.append(HELP_MSG_GET_ALL_JSON_PROFILE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        profileType = option == 'p' ? temp : profileType;
+        userId = option == 'u' ? temp : userId;
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_ALL_JSON_PROFILE);
+    } else {
+        std::string msg;
+        result = GetAllJsonProfile(static_cast<ProfileType>(profileType), userId, msg);
+        if (result == ERR_OK) {
+            resultReceiver_.append(STRING_GET_ALL_JSON_PROFILE_OK + msg);
+        } else {
+            resultReceiver_.append(STRING_GET_ALL_JSON_PROFILE_NG + "errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    APP_LOGI("RunAsGetAllJsonProfile end");
+    return result;
+}
+
+ErrCode BundleTestTool::GetAllJsonProfile(ProfileType profileType, int32_t userId, std::string& msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    std::vector<JsonProfileInfo> profileInfos;
+    auto ret = bundleMgrProxy_->GetAllJsonProfile(profileType, userId, profileInfos);
+    if (ret == ERR_OK) {
+        msg = "JsonProfileInfos:\n{\n";
+        for (const auto &info: profileInfos) {
+            msg +="     ";
+            msg += info.ToString();
             msg += "\n";
         }
         msg += "}\n";
