@@ -106,6 +106,8 @@ private:
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsGetAllBundleDirs();
     ErrCode GetAllBundleDirs(int32_t userId, std::string& msg);
+    ErrCode RunAsGetAllJsonProfile();
+    ErrCode GetAllJsonProfile(ProfileType profileType, int32_t userId, std::string& msg);
     ErrCode RunAsGetDisposedRules();
     ErrCode GetDisposedRules(int32_t userId, std::string &msg);
     ErrCode CheckGetDisposedRulesCorrectOption(
