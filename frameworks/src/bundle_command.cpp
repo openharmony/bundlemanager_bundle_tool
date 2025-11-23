@@ -50,6 +50,7 @@ const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
 const std::string DEPENDENCIES = "dependencies";
 const char* IS_ROOT_MODE_PARAM = "const.debuggable";
 const std::string IS_DEVELOPER_MODE_PARAM = "const.security.developermode.state";
+const char* BMS_PARA_INSTALL_ALLOW_DOWNGRADE = "ohos.bms.param.installAllowDowngrade";
 const int32_t ROOT_MODE = 1;
 const int32_t USER_MODE = 0;
 const int32_t INDEX_OFFSET = 2;
@@ -103,12 +104,23 @@ const struct option LONG_OPTIONS[] = {
     {"ability-name", required_argument, nullptr, 'a'},
     {"bundle-info", no_argument, nullptr, 'i'},
     {"cache", no_argument, nullptr, 'c'},
-    {"data", no_argument, nullptr, 'd'},
+    {"downgrade", no_argument, nullptr, 'd'},
     {"is-removable", required_argument, nullptr, 'i'},
     {"user-id", required_argument, nullptr, 'u'},
     {"waitting-time", required_argument, nullptr, 'w'},
     {"keep-data", no_argument, nullptr, 'k'},
     {"shared-bundle-dir-path", required_argument, nullptr, 's'},
+    {"app-index", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string CLEAN_SHORT_OPTIONS = "hn:cdu:i:";
+const struct option CLEAN_LONG_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"cache", no_argument, nullptr, 'c'},
+    {"data", no_argument, nullptr, 'd'},
+    {"user-id", required_argument, nullptr, 'u'},
     {"app-index", required_argument, nullptr, 'i'},
     {nullptr, 0, nullptr, 0},
 };
@@ -333,7 +345,8 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
         argList_[index - INDEX_OFFSET] == "-p" || argList_[index - INDEX_OFFSET] == "--bundle-path" ||
         argList_[index - INDEX_OFFSET] == "-u" || argList_[index - INDEX_OFFSET] == "--user-id" ||
         argList_[index - INDEX_OFFSET] == "-w" || argList_[index - INDEX_OFFSET] == "--waitting-time" ||
-        argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path") {
+        argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path" ||
+        argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--downgrade") {
         return true;
     }
     return false;
@@ -580,6 +593,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     int32_t userId = currentUser;
     int32_t waittingTime = MINIMUM_WAITTING_TIME;
     std::string warning;
+    bool isDowngrade = false;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -704,6 +718,10 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 hspIndex = optind;
                 break;
             }
+            case 'd': {
+                isDowngrade = true;
+                break;
+            }
             default: {
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -760,6 +778,10 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         installParam.installFlag = installFlag;
         installParam.userId = userId;
         installParam.sharedBundleDirPaths = sharedBundleDirPaths;
+        if (isDowngrade) {
+            APP_LOGI("install allow downgrade");
+            installParam.parameters[BMS_PARA_INSTALL_ALLOW_DOWNGRADE] = "true";
+        }
         std::string resultMsg;
         int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime, resultMsg);
         if (installResult == OHOS::ERR_OK) {
@@ -1228,7 +1250,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     std::string bundleName = "";
     while (true) {
         counter++;
-        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
+        int32_t option = getopt_long(argc_, argv_, CLEAN_SHORT_OPTIONS.c_str(), CLEAN_LONG_OPTIONS, nullptr);
         APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
         if (optind < 0 || optind > argc_) {
             return OHOS::ERR_INVALID_VALUE;
