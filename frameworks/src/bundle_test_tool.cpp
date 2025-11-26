@@ -204,6 +204,7 @@ static const std::string HELP_MSG =
     "  getAssetAccessGroups             get asset access groups by bundlename\n"
     "  getDisposedRules                 get disposed rules\n"
     "  getAppIdentifierAndAppIndex      get appIdentifier and appIndex\n"
+    "  getAssetGroupsInfo               get asset groups info by uid\n"
     "  setAppDistributionTypes          set white list of appDistributionType\n";
 
 
@@ -703,6 +704,16 @@ const std::string HELP_MSG_SET_APP_DISTRIBUTION_TYPES =
     "  -h, --help                             list available commands\n"
     "  -a, --app_distribution_types <appDistributionTypes>      specify app distribution type list\n";
 
+const std::string HELP_MSG_GET_ASSET_GROUPS_INFO =
+    "usage: bundle_test_tool getAssetGroupsInfo <options>\n"
+    "eg:bundle_test_tool getAssetGroupsInfo\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --uid <uid>                specify a uid\n";
+
+const std::string STRING_GET_ASSET_GROUPS_INFO_OK = "getAssetGroupsInfo successfully \n";
+const std::string STRING_GET_ASSET_GROUPS_INFO_NG = "error: failed to getAssetGroupsInfo \n";
+
 const std::string STRING_IS_BUNDLE_INSTALLED_OK = "IsBundleInstalled is ok \n";
 const std::string STRING_IS_BUNDLE_INSTALLED_NG = "error: failed to IsBundleInstalled \n";
 
@@ -1173,6 +1184,13 @@ const struct option LONG_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_ASSET_GROUPS_INFO = "hu:";
+const struct option LONG_OPTIONS_GET_ASSET_GROUPS_INFO[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"uid", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 }  // namespace
 
 class ProcessCacheCallbackImpl : public ProcessCacheCallbackHost {
@@ -1346,6 +1364,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetAppIdentifierAndAppIndex, this)},
         {"setAppDistributionTypes",
                 std::bind(&BundleTestTool::RunAsSetAppDistributionTypes, this)},
+        {"getAssetGroupsInfo",
+                std::bind(&BundleTestTool::RunAsGetAssetGroupsInfo, this)},
         {"getBundleNamesForUidExt", std::bind(&BundleTestTool::RunAsGetBundleNamesForUidExtCommand, this)}
     };
 
@@ -6267,6 +6287,50 @@ ErrCode BundleTestTool::RunAsGetBundleNamesForUidExtCommand()
         resultReceiver_.append(STRING_GET_BUNDLENAMES_FOR_UID_EXT_NG + "errCode is "+ std::to_string(result) + "\n");
     }
     APP_LOGI("RunAsGetBundleNameForUidExtCommand end");
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetAssetGroupsInfo()
+{
+    APP_LOGI("RunAsGetAssetGroupsInfo start");
+    int result = OHOS::ERR_OK;
+    std::string commandName = "getAssetGroupsInfo";
+    std::string name = "";
+    int counter = 0;
+    int32_t uid = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(
+            argc_, argv_, SHORT_OPTIONS_GET_ASSET_GROUPS_INFO.c_str(), LONG_OPTIONS_GET_ASSET_GROUPS_INFO, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            break;
+        }
+
+        int temp = 0;
+        result = !CheckGetAllProxyDataCorrectOption(option, commandName, temp, name)
+                 ? OHOS::ERR_INVALID_VALUE : result;
+        uid = option == 'u' ? temp : uid;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_ASSET_GROUPS_INFO);
+    } else {
+        AssetGroupInfo assetGroupInfo;
+        auto res = bundleMgrProxy_->GetAssetGroupsInfo(uid, assetGroupInfo);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append(STRING_GET_ASSET_GROUPS_INFO_NG);
+            return result;
+        }
+        resultReceiver_.append(STRING_GET_ASSET_GROUPS_INFO_OK);
+        nlohmann::json jsonObject = assetGroupInfo;
+        std::string results = jsonObject.dump(Constants::DUMP_INDENT);
+        resultReceiver_.append(results);
+        resultReceiver_.append("\n");
+    }
     return result;
 }
 } // AppExecFwk
