@@ -2685,7 +2685,7 @@ std::string BundleManagerShellCommand::DumpSharedDependencies(const std::string 
     } else {
         dependenciesJson = nlohmann::json {{DEPENDENCIES, dependencies}};
     }
-    return dependenciesJson.dump(Constants::DUMP_INDENT);
+    return dependenciesJson.dump(Constants::DUMP_INDENT) + "\n";
 }
 
 ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
