@@ -78,7 +78,8 @@ const std::string HELP_MSG_INSTALL =
     "                                                                   only supports current user or userId is 0\n"
     "  -w, --waitting-time <waitting-time>                            specify waitting time for installation,\n"
     "                                                                    the minimum waitting time is 180s,\n"
-    "                                                                    the maximum waitting time is 600s\n";
+    "                                                                    the maximum waitting time is 600s\n"
+    "  -d, --downgrade                                                install allow downgrade\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: bm uninstall <options>\n"
