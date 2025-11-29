@@ -124,6 +124,7 @@ private:
     ErrCode RunAsSetAppDistributionTypes();
     ErrCode RunAsGetBundleNamesForUidExtCommand();
     ErrCode RunAsGetAppIdentifierAndAppIndex();
+    ErrCode RunAsGetAssetGroupsInfo();
 
     std::condition_variable cv_;
     std::mutex mutex_;
