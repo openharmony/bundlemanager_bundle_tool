@@ -65,7 +65,7 @@ bm install [-h] [-p filePath] [-r] [-w waitingTime] [-s hspDirPath] [-u userId] 
 | -s | 根据场景判断，安装应用间HSP时为必选参数，其他场景为可选参数。安装应用间共享库， 每个路径目录下只能存在一个同包名的HSP。 |
 | -w | 可选参数，安装HAP时指定bm工具等待时间，最小的等待时长为5s，最大的等待时长为600s,&nbsp;默认缺省为180s。 |
 | -u | 可选参数，指定[用户](#userid)，默认在当前活跃用户下安装应用。仅支持在当前活跃用户或0用户下安装。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm install -p /data/local/tmp/ohos.app.hap -u 102`安装时，只会在当前活跃用户100下安装应用。 |
-| -d | 可选参数，允许应用降级安装。目前仅支持三方应用降级安装。 |
+| -d | 可选参数，允许应用降级安装，即设备已安装较高版本的应用，也可以覆盖安装较低版本的应用。仅支持三方应用降级安装。从API version 23开始支持。 |
 
 
 示例：
@@ -84,6 +84,8 @@ bm install -p aaa.hap -s xxx.hsp yyy.hsp
 bm install -p /data/local/tmp/hapPath/
 # 安装一个hap,等待时间为180s
 bm install -p /data/local/tmp/ohos.app.hap -w 180
+# 设备已安装了一个高版本的应用，覆盖安装一个同包名低版本的hap
+bm install -p /data/local/tmp/ohos.app.hap -d
 ```
 
 #### 卸载命令（uninstall）
