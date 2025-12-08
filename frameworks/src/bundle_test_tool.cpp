@@ -4185,7 +4185,8 @@ ErrCode BundleTestTool::BatchBundleNameAndUserIdCommonFunc(std::vector<std::stri
 
 ErrCode BundleTestTool::BatchBundleNameCommonFunc(
     std::string short_option, const struct option *long_options,
-    std::vector<std::string> &bundleNames) {
+    std::vector<std::string> &bundleNames)
+{
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
     while (true) {
@@ -6039,7 +6040,7 @@ ErrCode BundleTestTool::RunAsBatchGetCompatibleDeviceType()
     std::vector<std::string> bundleNames;
     int32_t result = BatchBundleNameCommonFunc(
         SHORT_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE,
-        LONG_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE, 
+        LONG_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE,
         bundleNames);
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_BATCH_GET_COMPATIBLE_DEVICE_TYPE);
