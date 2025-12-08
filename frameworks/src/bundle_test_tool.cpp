@@ -4213,11 +4213,6 @@ ErrCode BundleTestTool::BatchBundleNameCommonFunc(
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
-                case 'u': {
-                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
                 default: {
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
@@ -4230,10 +4225,6 @@ ErrCode BundleTestTool::BatchBundleNameCommonFunc(
         }
 
         switch (option) {
-            case 'h': {
-                result = OHOS::ERR_INVALID_VALUE;
-                break;
-            }
             case 'n': {
                 std::string names = optarg;
                 std::stringstream ss(names);
@@ -4244,10 +4235,6 @@ ErrCode BundleTestTool::BatchBundleNameCommonFunc(
                         bundleNames.emplace_back(name);
                     }
                 }
-                break;
-            }
-            case 'u': {
-                result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
             default: {
@@ -4261,11 +4248,6 @@ ErrCode BundleTestTool::BatchBundleNameCommonFunc(
             resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
             return OHOS::ERR_INVALID_VALUE;
         }
-    }
-    if (bundleNames.size() > 0) {
-        resultReceiver_.append(bundleNames[0]);
-    } else {
-        resultReceiver_.append("no bundlename\n");
     }
     return result;
 }
