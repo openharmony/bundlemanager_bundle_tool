@@ -120,6 +120,7 @@ private:
     ErrCode CleanAllBundleCache(std::string& msg);
     ErrCode RunAsIsBundleInstalled();
     ErrCode RunAsGetCompatibleDeviceType();
+    ErrCode RunAsBatchGetCompatibleDeviceType();
     ErrCode RunAsGetSimpleAppInfoForUid();
     ErrCode RunAsGetBundleNameByAppId();
     ErrCode RunAsGetAssetAccessGroups();
@@ -188,6 +189,9 @@ private:
     ErrCode GetDistributedBundleName(const std::string &networkId, int32_t accessTokenId, std::string &msg);
     ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex);
     ErrCode BatchBundleNameAndUserIdCommonFunc(std::vector<std::string> &bundleNames, int32_t &userId);
+    ErrCode BatchBundleNameCommonFunc(std::string short_option,
+                                      const struct option *long_options,
+                                      std::vector<std::string> &bundleNames);
     ErrCode CheckGetDistributedBundleNameCorrectOption(int32_t option, const std::string &commandName,
         std::string &networkId, int32_t &accessTokenId);
     bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::string& msg);

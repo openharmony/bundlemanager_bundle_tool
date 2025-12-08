@@ -199,6 +199,7 @@ static const std::string HELP_MSG =
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
     "and appIndex\n"
     "  getCompatibleDeviceType          obtain the compatible device type based on bundleName\n"
+    "  batchGetCompatibleDeviceType     batch obtain the compatible device types based on bundleNames\n"
     "  getSimpleAppInfoForUid           get bundlename list and appIndex list by uid list\n"
     "  getBundleNameByAppId             get bundlename by appid or appIdentifier\n"
     "  getAssetAccessGroups             get asset access groups by bundlename\n"
@@ -642,6 +643,13 @@ const std::string HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE =
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
 
+const std::string HELP_MSG_BATCH_GET_COMPATIBLE_DEVICE_TYPE =
+    "usage: bundle_test_tool batchGetCompatibleDeviceType <option>\n"
+    "eg: bundle_test_tool batchGetCompatibleDeviceType -n <bundle-name>,<bundle-name>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
+
 const std::string HELP_MSG_NO_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
     "and a continueType with '-c' or '--continue-type' \n"
@@ -785,6 +793,8 @@ const std::string STRING_GET_UNINSTALLED_BUNDLE_INFO_NG = "getUninstalledBundleI
 
 const std::string STRING_GET_COMPATIBLE_DEVICE_TYPE_OK = "getCompatibleDeviceType successfully\n";
 const std::string STRING_GET_COMPATIBLE_DEVICE_TYPE_NG = "getCompatibleDeviceType failed\n";
+
+const std::string STRING_BATCH_GET_COMPATIBLE_DEVICE_TYPE_NG = "batchGetCompatibleDeviceType failed\n";
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
@@ -1145,6 +1155,13 @@ const struct option LONG_OPTIONS_CLEAN_ALL_BUNDLE_CACHE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE = "hn:";
+const struct option LONG_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1353,6 +1370,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsIsBundleInstalled, this)},
         {"getCompatibleDeviceType",
             std::bind(&BundleTestTool::RunAsGetCompatibleDeviceType, this)},
+        {"batchGetCompatibleDeviceType",
+            std::bind(&BundleTestTool::RunAsBatchGetCompatibleDeviceType, this)},
         {"getSimpleAppInfoForUid",
             std::bind(&BundleTestTool::RunAsGetSimpleAppInfoForUid, this)},
         {"getBundleNameByAppId",
@@ -4164,6 +4183,92 @@ ErrCode BundleTestTool::BatchBundleNameAndUserIdCommonFunc(std::vector<std::stri
     return result;
 }
 
+ErrCode BundleTestTool::BatchBundleNameCommonFunc(
+    std::string short_option, const struct option *long_options,
+    std::vector<std::string> &bundleNames) {
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, short_option.c_str(),
+            long_options, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+        if (option == '?') {
+            switch (optopt) {
+                case 'n': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'u': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                std::string names = optarg;
+                std::stringstream ss(names);
+                std::string name;
+                while (std::getline(ss, name, ',')) {
+                    if (!name.empty()) {
+                        APP_LOGD("bundleName: %{public}s", name.c_str());
+                        bundleNames.emplace_back(name);
+                    }
+                }
+                break;
+            }
+            case 'u': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    if (result == OHOS::ERR_OK) {
+        if (bundleNames.empty()) {
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    if (bundleNames.size() > 0) {
+        resultReceiver_.append(bundleNames[0]);
+    } else {
+        resultReceiver_.append("no bundlename\n");
+    }
+    return result;
+}
+
 ErrCode BundleTestTool::RunAsGetBundleStats()
 {
     std::string bundleName;
@@ -4896,11 +5001,13 @@ bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> ap
 
 void BundleTestTool::ReloadNativeTokenInfo()
 {
-    const int32_t permsNum = 2;
+    const int32_t permsNum = 4;
     uint64_t tokenId;
     const char *perms[permsNum];
     perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
     perms[1] = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
+    perms[2] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
+    perms[3] = "ohos.permission.GET_INSTALLED_BUNDLE_LIST";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
@@ -5920,6 +6027,45 @@ ErrCode BundleTestTool::RunAsGetCompatibleDeviceType()
             resultReceiver_.append(deviceType + "\n");
         } else {
             resultReceiver_.append(STRING_GET_COMPATIBLE_DEVICE_TYPE_NG + "errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsBatchGetCompatibleDeviceType()
+{
+    APP_LOGI("RunAsBatchGetCompatibleDeviceType start");
+    ReloadNativeTokenInfo();
+    std::vector<std::string> bundleNames;
+    int32_t result = BatchBundleNameCommonFunc(
+        SHORT_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE,
+        LONG_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE, 
+        bundleNames);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_BATCH_GET_COMPATIBLE_DEVICE_TYPE);
+    } else {
+        std::string msg;
+        std::vector<BundleCompatibleDeviceType> compatibleDeviceTypes;
+        result = bundleMgrProxy_->BatchGetCompatibleDeviceType(bundleNames, compatibleDeviceTypes);
+        if (result == ERR_OK) {
+            nlohmann::json jsonResult = nlohmann::json::array();
+            for (const auto &compatibleDeviceType : compatibleDeviceTypes) {
+                nlohmann::json rowData;
+                rowData["bundleName"] = compatibleDeviceType.bundleName;
+                if (compatibleDeviceType.errCode == ERR_OK) {
+                    rowData["compatibleDeviceType"] = compatibleDeviceType.compatibleDeviceType;
+                    resultReceiver_.append(compatibleDeviceType.compatibleDeviceType);
+                } else {
+                    rowData["errCode"] = compatibleDeviceType.errCode;
+                }
+                jsonResult.push_back(rowData);
+            }
+            msg = jsonResult.dump() + "\n";
+            resultReceiver_.append(msg);
+        }   else {
+            resultReceiver_.append(STRING_BATCH_GET_COMPATIBLE_DEVICE_TYPE_NG +
+                                   "errCode is " + std::to_string(result) +
+                                   "\n");
         }
     }
     return result;
