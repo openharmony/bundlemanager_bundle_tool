@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_BUNDLEMANAGER_BUNDLE_FRAMEWORK_BUNDLE_TOOL_INCLUDE_BUNDLE_TEST_TOOL_H
 #define FOUNDATION_BUNDLEMANAGER_BUNDLE_FRAMEWORK_BUNDLE_TOOL_INCLUDE_BUNDLE_TEST_TOOL_H
 
+#include <getopt.h>
+
 #include "shell_command.h"
 #include "bundle_event_callback_host.h"
 #include "bundle_mgr_interface.h"
