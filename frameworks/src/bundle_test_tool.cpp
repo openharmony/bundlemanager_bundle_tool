@@ -6037,7 +6037,6 @@ ErrCode BundleTestTool::RunAsBatchGetCompatibleDeviceType()
                 rowData["bundleName"] = compatibleDeviceType.bundleName;
                 if (compatibleDeviceType.errCode == ERR_OK) {
                     rowData["compatibleDeviceType"] = compatibleDeviceType.compatibleDeviceType;
-                    resultReceiver_.append(compatibleDeviceType.compatibleDeviceType);
                 } else {
                     rowData["errCode"] = compatibleDeviceType.errCode;
                 }
