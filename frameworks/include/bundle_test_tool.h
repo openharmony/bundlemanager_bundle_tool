@@ -61,6 +61,8 @@ private:
     ErrCode RunAsUninstallSandboxCommand();
     ErrCode RunAsUninstallPreInstallBundleCommand();
     ErrCode RunAsDumpSandboxCommand();
+    ErrCode RunAsUninstallEnterpriseReSignCert();
+    ErrCode RunAsGetEnterpriseReSignCert();
     ErrCode RunAsGetStringCommand();
     ErrCode RunAsGetIconCommand();
     ErrCode RunAsDeleteDisposedRulesCommand();
