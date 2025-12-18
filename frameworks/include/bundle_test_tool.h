@@ -128,6 +128,9 @@ private:
     ErrCode RunAsGetBundleNamesForUidExtCommand();
     ErrCode RunAsGetAppIdentifierAndAppIndex();
     ErrCode RunAsGetAssetGroupsInfo();
+    ErrCode RunAsSetEnpDeviceCommand();
+    ErrCode RunAsGrantPermissionCommand();
+    ErrCode RunAsInstallEnterpriseResignCertCommand();
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -222,6 +225,8 @@ private:
         int &temp, std::string &Name);
     bool CheckGetAppIdentifierAndAppIndexOption(int32_t option, const std::string &commandName,
         uint32_t &accessTokenId);
+    bool CheckInstallEnterpriseResignCertOption(int32_t option, const std::string &commandName,
+        std::string& certAlias, std::string& certPath, int32_t& userId);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

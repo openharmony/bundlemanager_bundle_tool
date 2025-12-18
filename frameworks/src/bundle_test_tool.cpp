@@ -17,11 +17,13 @@
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 #include <future>
 #include <getopt.h>
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <sys/ioctl.h>
 #include <thread>
 #include <unistd.h>
 #include <vector>
@@ -55,6 +57,12 @@
 #include "status_receiver_impl.h"
 #include "string_ex.h"
 #include "json_util.h"
+
+#define CODE_SIGN_PATH "/dev/code_sign\0"
+#define HM_CODESIGN_IOCTL_BASE 'k'
+#define HM_CODESIGN_SET_ENP_DEVICE_FLAG_ID 0X20
+#define CODESIGN_SET_ENP_DEVICE_FLAG \
+    _IOW(HM_CODESIGN_IOCTL_BASE, HM_CODESIGN_SET_ENP_DEVICE_FLAG_ID, uint8_t)
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -206,7 +214,10 @@ static const std::string HELP_MSG =
     "  getDisposedRules                 get disposed rules\n"
     "  getAppIdentifierAndAppIndex      get appIdentifier and appIndex\n"
     "  getAssetGroupsInfo               get asset groups info by uid\n"
-    "  setAppDistributionTypes          set white list of appDistributionType\n";
+    "  setAppDistributionTypes          set white list of appDistributionType\n"
+    "  setEnpDevice                     set ENP device\n"
+    "  grantPermission                  grant permission to bundle_test_tool\n"
+    "  installEnterpriseResignCert      install an enterprise resign cert\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -719,6 +730,14 @@ const std::string HELP_MSG_GET_ASSET_GROUPS_INFO =
     "  -h, --help                             list available commands\n"
     "  -u, --uid <uid>                specify a uid\n";
 
+const std::string HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT =
+    "usage: bundle_test_tool installEnterpriseResignCert <options>\n"
+    "eg:bundle_test_tool installEnterpriseResignCert -a <certAlias> -f <certFilePath> -u <userId>\n"
+    "options list:\n"
+    "  -a, --alias <certAlias>              indicates the cert alias\n"
+    "  -f, --file <certFilePath>            indicates the chert path\n"
+    "  -u, --user-id <userId>               indicates the target user\n";
+
 const std::string STRING_GET_ASSET_GROUPS_INFO_OK = "getAssetGroupsInfo successfully \n";
 const std::string STRING_GET_ASSET_GROUPS_INFO_NG = "error: failed to getAssetGroupsInfo \n";
 
@@ -1208,6 +1227,15 @@ const struct option LONG_OPTIONS_GET_ASSET_GROUPS_INFO[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT = "ha:f:u:";
+const struct option LONG_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"alias", required_argument, nullptr, 'a'},
+    {"file", required_argument, nullptr, 'f'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 }  // namespace
 
 class ProcessCacheCallbackImpl : public ProcessCacheCallbackHost {
@@ -1385,7 +1413,10 @@ ErrCode BundleTestTool::CreateCommandMap()
                 std::bind(&BundleTestTool::RunAsSetAppDistributionTypes, this)},
         {"getAssetGroupsInfo",
                 std::bind(&BundleTestTool::RunAsGetAssetGroupsInfo, this)},
-        {"getBundleNamesForUidExt", std::bind(&BundleTestTool::RunAsGetBundleNamesForUidExtCommand, this)}
+        {"getBundleNamesForUidExt", std::bind(&BundleTestTool::RunAsGetBundleNamesForUidExtCommand, this)},
+        {"setEnpDevice", std::bind(&BundleTestTool::RunAsSetEnpDeviceCommand, this)},
+        {"grantPermission", std::bind(&BundleTestTool::RunAsGrantPermissionCommand, this)},
+        {"installEnterpriseResignCert", std::bind(&BundleTestTool::RunAsInstallEnterpriseResignCertCommand, this)},
     };
 
     return OHOS::ERR_OK;
@@ -6458,6 +6489,114 @@ ErrCode BundleTestTool::RunAsGetAssetGroupsInfo()
         std::string results = jsonObject.dump(Constants::DUMP_INDENT);
         resultReceiver_.append(results);
         resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsSetEnpDeviceCommand()
+{
+    APP_LOGI("start");
+    int fd = open(CODE_SIGN_PATH, O_RDONLY);
+    if (fd == -1) {
+        APP_LOGE("failed to open file");
+        resultReceiver_.append("failed to open file\n");
+        return -1;
+    }
+    int ret = ioctl(fd, CODESIGN_SET_ENP_DEVICE_FLAG, 1);
+    if (ret != 0) {
+        APP_LOGE("set enp flag failed");
+        resultReceiver_.append("set enp flag failed " + std::to_string(errno) + "\n");
+    } else {
+        resultReceiver_.append("set enp success\n");
+    }
+    APP_LOGI("end");
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsGrantPermissionCommand()
+{
+    ReloadNativeTokenInfo();
+    return OHOS::ERR_OK;
+}
+
+bool BundleTestTool::CheckInstallEnterpriseResignCertOption(int32_t option, const std::string &commandName,
+    std::string& certAlias, std::string& certPath, int32_t& userId)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'a': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            certAlias = optarg;
+            break;
+        }
+        case 'f': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            certPath = optarg;
+            break;
+        }
+        case 'u': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            if (!StrToInt(optarg, userId)) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
+{
+    APP_LOGI("start");
+    std::string certAlias;
+    std::string certPath;
+    int32_t userId = -1;
+    int32_t result = OHOS::ERR_OK;
+    std::string commandName = "installEnterpriseResignCert";
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT.c_str(),
+            LONG_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool installEnterpriseResignCert with no option.");
+                resultReceiver_.append(HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = !CheckInstallEnterpriseResignCertOption(option, commandName, certAlias, certPath, userId)
+            ? OHOS::ERR_INVALID_VALUE : result;
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT);
+    } else {
+        int32_t fd = open(certPath.c_str(), O_RDONLY);
+        auto res = bundleInstallerProxy_->InstallEnterpriseReSignatureCert(certAlias, fd, userId);
+        if (res != OHOS::ERR_OK) {
+            resultReceiver_.append("ErrCode is " + std::to_string(res) + "\n");
+        } else {
+            resultReceiver_.append("Success\n");
+        }
     }
     return result;
 }
