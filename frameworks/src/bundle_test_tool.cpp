@@ -217,7 +217,9 @@ static const std::string HELP_MSG =
     "  setAppDistributionTypes          set white list of appDistributionType\n"
     "  setEnpDevice                     set ENP device\n"
     "  grantPermission                  grant permission to bundle_test_tool\n"
-    "  installEnterpriseResignCert      install an enterprise resign cert\n";
+    "  installEnterpriseResignCert      install an enterprise resign cert\n"
+    "  uninstallEnterpriseReSignatureCert    uninstall enterprise re sign cert\n"
+    "  getEnterpriseReSignatureCert          get enterprise re sign cert\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -738,6 +740,27 @@ const std::string HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT =
     "  -f, --file <certFilePath>            indicates the chert path\n"
     "  -u, --user-id <userId>               indicates the target user\n";
 
+const std::string HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT =
+    "usage: bundle_test_tool uninstallEnterpriseReSignatureCert <options>\n"
+    "eg:bundle_test_tool uninstallEnterpriseReSignatureCert\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -c, --cert-alias <cert-alias>        re sign cert alias\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_GET_ENTERPRISE_RE_SIGN_CERT =
+    "usage: bundle_test_tool getEnterpriseReSignatureCert <options>\n"
+    "eg:bundle_test_tool getEnterpriseReSignatureCert\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_OK = "uninstallEnterpriseReSignCert successfully \n";
+const std::string STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_NG = "uninstallEnterpriseReSignCert failed \n";
+
+const std::string STRING_GET_ENTERPRISE_RE_SIGN_CERT_OK = "getEnterpriseReSignatureCert successfully \n";
+const std::string STRING_GET_ENTERPRISE_RE_SIGN_CERT_NG = "getEnterpriseReSignatureCert failed \n";
+
 const std::string STRING_GET_ASSET_GROUPS_INFO_OK = "getAssetGroupsInfo successfully \n";
 const std::string STRING_GET_ASSET_GROUPS_INFO_NG = "error: failed to getAssetGroupsInfo \n";
 
@@ -931,6 +954,21 @@ const struct option LONG_OPTIONS_SANDBOX[] = {
     {"user-id", required_argument, nullptr, 'u'},
     {"dlp-type", required_argument, nullptr, 'd'},
     {"app-index", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_UNINSTALL_RE_SIGN_CERT = "hc:u:";
+const struct option LONG_OPTIONS_UNINSTALL_RE_SIGN_CERT[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"cert-alias", required_argument, nullptr, 'c'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_RE_SIGN_CERT = "hu:";
+const struct option LONG_OPTIONS_GET_RE_SIGN_CERT[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"user-id", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1417,6 +1455,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"setEnpDevice", std::bind(&BundleTestTool::RunAsSetEnpDeviceCommand, this)},
         {"grantPermission", std::bind(&BundleTestTool::RunAsGrantPermissionCommand, this)},
         {"installEnterpriseResignCert", std::bind(&BundleTestTool::RunAsInstallEnterpriseResignCertCommand, this)},
+        {"uninstallEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsUninstallEnterpriseReSignCert, this)},
+        {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)}
     };
 
     return OHOS::ERR_OK;
@@ -2095,6 +2135,112 @@ ErrCode BundleTestTool::RunAsDumpSandboxCommand()
         resultReceiver_.append(dumpRes + "\n");
     } else {
         resultReceiver_.append(STRING_DUMP_SANDBOX_FAILED + "errCode is "+ std::to_string(ret) + "\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
+{
+    APP_LOGI("UninstallEnterpriseReSignCert begin");
+    ReloadNativeTokenInfo();
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "uninstallEnterpriseReSignCert";
+    std::string name = "";
+    std::string certificateAlias = "";
+    int32_t userId = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_UNINSTALL_RE_SIGN_CERT.c_str(),
+            LONG_OPTIONS_UNINSTALL_RE_SIGN_CERT, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                // 'GetStringById' with no option: GetStringById
+                // 'GetStringById' with a wrong argument: GetStringById
+                APP_LOGD("bundle_test_tool getStr with no option.");
+                resultReceiver_.append(HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        certificateAlias = option == 'c' ? name : certificateAlias;
+        userId = option == 'u' ? temp : userId;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT);
+    } else {
+        APP_LOGI("UninstallEnterpriseReSignatureCert -c:%{public}s -u:%{public}d", certificateAlias.c_str(), userId);
+        auto results = bundleInstallerProxy_->UninstallEnterpriseReSignatureCert(certificateAlias, userId);
+        if (results == ERR_OK) {
+            resultReceiver_.append(STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_OK);
+            return result;
+        }
+        resultReceiver_.append(STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_NG);
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
+{
+    APP_LOGI("GetEnterpriseReSignCert begin");
+    ReloadNativeTokenInfo();
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getEnterpriseReSignCert";
+    std::string name = "";
+    int32_t userId = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_RE_SIGN_CERT.c_str(),
+            LONG_OPTIONS_GET_RE_SIGN_CERT, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                // 'GetStringById' with no option: GetStringById
+                // 'GetStringById' with a wrong argument: GetStringById
+                APP_LOGD("bundle_test_tool getStr with no option.");
+                resultReceiver_.append(HELP_MSG_GET_ENTERPRISE_RE_SIGN_CERT);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        userId = option == 'u' ? temp : userId;
+    }
+
+    std::vector<std::string> certificateAlias;
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_ENTERPRISE_RE_SIGN_CERT);
+    } else {
+        APP_LOGI("GetEnterpriseReSignatureCert -u:%{public}d", userId);
+        auto results = bundleInstallerProxy_->GetEnterpriseReSignatureCert(userId, certificateAlias);
+        if (results == ERR_OK) {
+            resultReceiver_.append(STRING_GET_ENTERPRISE_RE_SIGN_CERT_OK);
+            std::string msg = "certificateAlias:{";
+            for (const auto &cert : certificateAlias) {
+                msg += cert;
+                msg += ",";
+            }
+            msg += "}\n";
+            resultReceiver_.append(msg);
+            return result;
+        }
+        resultReceiver_.append(STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_NG);
     }
     return result;
 }
