@@ -1265,12 +1265,13 @@ const struct option LONG_OPTIONS_GET_ASSET_GROUPS_INFO[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT = "ha:f:u:";
+const std::string SHORT_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT = "ha:f:u:p";
 const struct option LONG_OPTIONS_INSTALL_ENTERPRISE_RESIGN_CERT[] = {
     {"help", no_argument, nullptr, 'h'},
     {"alias", required_argument, nullptr, 'a'},
     {"file", required_argument, nullptr, 'f'},
     {"user-id", required_argument, nullptr, 'u'},
+    {"with-permission", no_argument, nullptr, 'p'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1453,7 +1454,6 @@ ErrCode BundleTestTool::CreateCommandMap()
                 std::bind(&BundleTestTool::RunAsGetAssetGroupsInfo, this)},
         {"getBundleNamesForUidExt", std::bind(&BundleTestTool::RunAsGetBundleNamesForUidExtCommand, this)},
         {"setEnpDevice", std::bind(&BundleTestTool::RunAsSetEnpDeviceCommand, this)},
-        {"grantPermission", std::bind(&BundleTestTool::RunAsGrantPermissionCommand, this)},
         {"installEnterpriseResignCert", std::bind(&BundleTestTool::RunAsInstallEnterpriseResignCertCommand, this)},
         {"uninstallEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsUninstallEnterpriseReSignCert, this)},
         {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)}
@@ -6659,14 +6659,8 @@ ErrCode BundleTestTool::RunAsSetEnpDeviceCommand()
     return ret;
 }
 
-ErrCode BundleTestTool::RunAsGrantPermissionCommand()
-{
-    ReloadNativeTokenInfo();
-    return OHOS::ERR_OK;
-}
-
 bool BundleTestTool::CheckInstallEnterpriseResignCertOption(int32_t option, const std::string &commandName,
-    std::string& certAlias, std::string& certPath, int32_t& userId)
+    std::string& certAlias, std::string& certPath, int32_t& userId, bool& withPermission)
 {
     bool ret = true;
     switch (option) {
@@ -6692,6 +6686,11 @@ bool BundleTestTool::CheckInstallEnterpriseResignCertOption(int32_t option, cons
             }
             break;
         }
+        case 'p': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            withPermission = true;
+            break;
+        }
         default: {
             std::string unknownOption = "";
             std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
@@ -6710,6 +6709,7 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
     std::string certAlias;
     std::string certPath;
     int32_t userId = -1;
+    bool withPermission;
     int32_t result = OHOS::ERR_OK;
     std::string commandName = "installEnterpriseResignCert";
     int32_t counter = 0;
@@ -6730,12 +6730,14 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
             }
             break;
         }
-        result = !CheckInstallEnterpriseResignCertOption(option, commandName, certAlias, certPath, userId)
+        result = !CheckInstallEnterpriseResignCertOption(
+            option, commandName, certAlias, certPath, userId, withPermission)
             ? OHOS::ERR_INVALID_VALUE : result;
     }
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT);
     } else {
+        withPermission ? ReloadNativeTokenInfo();
         int32_t fd = open(certPath.c_str(), O_RDONLY);
         auto res = bundleInstallerProxy_->InstallEnterpriseReSignatureCert(certAlias, fd, userId);
         if (res != OHOS::ERR_OK) {
