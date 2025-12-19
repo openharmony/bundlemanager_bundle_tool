@@ -738,7 +738,8 @@ const std::string HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT =
     "options list:\n"
     "  -a, --alias <certAlias>              indicates the cert alias\n"
     "  -f, --file <certFilePath>            indicates the chert path\n"
-    "  -u, --user-id <userId>               indicates the target user\n";
+    "  -u, --user-id <userId>               indicates the target user\n"
+    "  -p, --with-permission                indicates whether to call with permission\n";
 
 const std::string HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT =
     "usage: bundle_test_tool uninstallEnterpriseReSignatureCert <options>\n"
