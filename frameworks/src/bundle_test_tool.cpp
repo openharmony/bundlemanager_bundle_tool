@@ -6737,7 +6737,9 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT);
     } else {
-        withPermission ? ReloadNativeTokenInfo();
+        if (withPermission) {
+            ReloadNativeTokenInfo();
+        }
         int32_t fd = open(certPath.c_str(), O_RDONLY);
         auto res = bundleInstallerProxy_->InstallEnterpriseReSignatureCert(certAlias, fd, userId);
         if (res != OHOS::ERR_OK) {
