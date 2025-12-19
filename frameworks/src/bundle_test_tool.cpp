@@ -216,7 +216,6 @@ static const std::string HELP_MSG =
     "  getAssetGroupsInfo               get asset groups info by uid\n"
     "  setAppDistributionTypes          set white list of appDistributionType\n"
     "  setEnpDevice                     set ENP device\n"
-    "  grantPermission                  grant permission to bundle_test_tool\n"
     "  installEnterpriseResignCert      install an enterprise resign cert\n"
     "  uninstallEnterpriseReSignatureCert    uninstall enterprise re sign cert\n"
     "  getEnterpriseReSignatureCert          get enterprise re sign cert\n";
