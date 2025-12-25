@@ -746,14 +746,17 @@ const std::string HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -c, --cert-alias <cert-alias>        re sign cert alias\n"
-    "  -u, --user-id <user-id>                specify a user id\n";
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -p, --with-permission <with-permission> with permission\n";
 
 const std::string HELP_MSG_GET_ENTERPRISE_RE_SIGN_CERT =
     "usage: bundle_test_tool getEnterpriseReSignatureCert <options>\n"
     "eg:bundle_test_tool getEnterpriseReSignatureCert\n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -u, --user-id <user-id>                specify a user id\n";
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -p, --with-permission <with-permission> with permission\n";
+
 
 const std::string STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_OK = "uninstallEnterpriseReSignCert successfully \n";
 const std::string STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_NG = "uninstallEnterpriseReSignCert failed \n";
@@ -957,18 +960,20 @@ const struct option LONG_OPTIONS_SANDBOX[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_UNINSTALL_RE_SIGN_CERT = "hc:u:";
+const std::string SHORT_OPTIONS_UNINSTALL_RE_SIGN_CERT = "hc:u:p:";
 const struct option LONG_OPTIONS_UNINSTALL_RE_SIGN_CERT[] = {
     {"help", no_argument, nullptr, 'h'},
     {"cert-alias", required_argument, nullptr, 'c'},
     {"user-id", required_argument, nullptr, 'u'},
+    {"with-permission", required_argument, nullptr, 'p'},
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_GET_RE_SIGN_CERT = "hu:";
+const std::string SHORT_OPTIONS_GET_RE_SIGN_CERT = "hu:p:";
 const struct option LONG_OPTIONS_GET_RE_SIGN_CERT[] = {
     {"help", no_argument, nullptr, 'h'},
     {"user-id", required_argument, nullptr, 'u'},
+    {"with-permission", required_argument, nullptr, 'p'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -2142,13 +2147,13 @@ ErrCode BundleTestTool::RunAsDumpSandboxCommand()
 ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
 {
     APP_LOGI("UninstallEnterpriseReSignCert begin");
-    ReloadNativeTokenInfo();
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "uninstallEnterpriseReSignCert";
     std::string name = "";
     std::string certificateAlias = "";
     int32_t userId = 0;
+    bool withPermission = false;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_UNINSTALL_RE_SIGN_CERT.c_str(),
@@ -2158,10 +2163,7 @@ ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
             return OHOS::ERR_INVALID_VALUE;
         }
         if (option == -1) {
-            // When scanning the first argument
             if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
-                // 'GetStringById' with no option: GetStringById
-                // 'GetStringById' with a wrong argument: GetStringById
                 APP_LOGD("bundle_test_tool getStr with no option.");
                 resultReceiver_.append(HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT);
                 return OHOS::ERR_INVALID_VALUE;
@@ -2173,11 +2175,15 @@ ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
             ? OHOS::ERR_INVALID_VALUE : result;
         certificateAlias = option == 'c' ? name : certificateAlias;
         userId = option == 'u' ? temp : userId;
+        withPermission = option == 'p' ? temp : withPermission;
     }
 
     if (result != OHOS::ERR_OK) {
         resultReceiver_.append(HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT);
     } else {
+        if (withPermission) {
+            ReloadNativeTokenInfo();
+        }
         APP_LOGI("UninstallEnterpriseReSignatureCert -c:%{public}s -u:%{public}d", certificateAlias.c_str(), userId);
         auto results = bundleInstallerProxy_->UninstallEnterpriseReSignatureCert(certificateAlias, userId);
         if (results == ERR_OK) {
@@ -2185,6 +2191,7 @@ ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
             return result;
         }
         resultReceiver_.append(STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_NG);
+        resultReceiver_.append("ErrCode is " + std::to_string(results) + ".\n");
     }
     return result;
 }
@@ -2192,12 +2199,12 @@ ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
 ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
 {
     APP_LOGI("GetEnterpriseReSignCert begin");
-    ReloadNativeTokenInfo();
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "getEnterpriseReSignCert";
     std::string name = "";
     int32_t userId = 0;
+    bool withPermission = false;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_RE_SIGN_CERT.c_str(),
@@ -2207,10 +2214,7 @@ ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
             return OHOS::ERR_INVALID_VALUE;
         }
         if (option == -1) {
-            // When scanning the first argument
             if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
-                // 'GetStringById' with no option: GetStringById
-                // 'GetStringById' with a wrong argument: GetStringById
                 APP_LOGD("bundle_test_tool getStr with no option.");
                 resultReceiver_.append(HELP_MSG_GET_ENTERPRISE_RE_SIGN_CERT);
                 return OHOS::ERR_INVALID_VALUE;
@@ -2221,6 +2225,7 @@ ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
         result = !CheckGetStringCorrectOption(option, commandName, temp, name)
             ? OHOS::ERR_INVALID_VALUE : result;
         userId = option == 'u' ? temp : userId;
+        withPermission = option == 'p' ? temp : withPermission;
     }
 
     std::vector<std::string> certificateAlias;
@@ -2228,6 +2233,9 @@ ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
         resultReceiver_.append(HELP_MSG_GET_ENTERPRISE_RE_SIGN_CERT);
     } else {
         APP_LOGI("GetEnterpriseReSignatureCert -u:%{public}d", userId);
+        if (withPermission) {
+            ReloadNativeTokenInfo();
+        }
         auto results = bundleInstallerProxy_->GetEnterpriseReSignatureCert(userId, certificateAlias);
         if (results == ERR_OK) {
             resultReceiver_.append(STRING_GET_ENTERPRISE_RE_SIGN_CERT_OK);
@@ -2240,7 +2248,8 @@ ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
             resultReceiver_.append(msg);
             return result;
         }
-        resultReceiver_.append(STRING_UNINSTALL_ENTERPRISE_RE_SIGN_CERT_NG);
+        resultReceiver_.append(STRING_GET_ENTERPRISE_RE_SIGN_CERT_NG);
+        resultReceiver_.append("ErrCode is " + std::to_string(results) + ".\n");
     }
     return result;
 }
