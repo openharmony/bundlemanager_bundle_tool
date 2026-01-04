@@ -183,6 +183,7 @@ static const std::string HELP_MSG =
     "  setDebugMode                     enable signature debug mode\n"
     "  getBundleStats                   get bundle stats\n"
     "  batchGetBundleStats              batch get bundle stats\n"
+    "  getAllBundleStats                get all bundle stats\n"
     "  getAppProvisionInfo              get appProvisionInfo\n"
     "  getDistributedBundleName         get distributedBundleName\n"
     "  eventCB                          register then unregister bundle event callback\n"
@@ -476,6 +477,13 @@ const std::string HELP_MSG_BATCH_GET_BUNDLE_STATS =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_GET_ALL_BUNDLE_STATS =
+    "usage: bundle_test_tool getAllBundleStats <options>\n"
+    "eg:bundle_test_tool getAllBundleStats -u <user-id>"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
 const std::string HELP_MSG_GET_APP_PROVISION_INFO =
@@ -823,6 +831,9 @@ const std::string STRING_GET_BUNDLE_STATS_NG = "get bundle stats failed\n";
 const std::string STRING_BATCH_GET_BUNDLE_STATS_OK = "batch get bundle stats successfully\n";
 const std::string STRING_BATCH_GET_BUNDLE_STATS_NG = "batch get bundle stats failed\n";
 
+const std::string STRING_GET_ALL_BUNDLE_STATS_OK = "get all bundle stats successfully\n";
+const std::string STRING_GET_ALL_BUNDLE_STATS_NG = "get all bundle stats failed\n";
+
 const std::string STRING_GET_APP_PROVISION_INFO_OK = "get appProvisionInfo successfully\n";
 const std::string STRING_GET_APP_PROVISION_INFO_NG = "get appProvisionInfo failed\n";
 
@@ -1057,6 +1068,13 @@ const std::string SHORT_OPTIONS_BATCH_GET_BUNDLE_STATS = "hn:u:s:";
 const struct option LONG_OPTIONS_BATCH_GET_BUNDLE_STATS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_ALL_BUNDLE_STATS = "hu:";
+const struct option LONG_OPTIONS_GET_ALL_BUNDLE_STATS[] = {
+    {"help", no_argument, nullptr, 'h'},
     {"user-id", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
@@ -1401,6 +1419,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"setDebugMode", std::bind(&BundleTestTool::RunAsSetDebugMode, this)},
         {"getBundleStats", std::bind(&BundleTestTool::RunAsGetBundleStats, this)},
         {"batchGetBundleStats", std::bind(&BundleTestTool::RunAsBatchGetBundleStats, this)},
+        {"getAllBundleStats", std::bind(&BundleTestTool::RunAsGetAllBundleStats, this)},
         {"getAppProvisionInfo", std::bind(&BundleTestTool::RunAsGetAppProvisionInfo, this)},
         {"getDistributedBundleName", std::bind(&BundleTestTool::RunAsGetDistributedBundleName, this)},
         {"eventCB", std::bind(&BundleTestTool::HandleBundleEventCallback, this)},
@@ -4521,6 +4540,99 @@ bool BundleTestTool::BatchGetBundleStats(const std::vector<std::string> &bundleN
         return true;
     }
     return false;
+}
+
+ErrCode BundleTestTool::UserIdCommonFunc(int32_t &userId)
+{
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    userId = Constants::UNSPECIFIED_USERID;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ALL_BUNDLE_STATS.c_str(),
+            LONG_OPTIONS_GET_ALL_BUNDLE_STATS, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'u': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+bool BundleTestTool::GetAllBundleStats(int32_t userId, std::string &msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return false;
+    }
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+    std::vector<std::int64_t> bundleStats;
+    bool ret = bundleMgrProxy_->GetAllBundleStats(userId, bundleStats);
+    if (ret) {
+        for (size_t index = 0; index < bundleStats.size(); ++index) {
+            msg += GET_BUNDLE_STATS_ARRAY[index] + std::to_string(bundleStats[index]) + "\n";
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetAllBundleStats()
+{
+    int32_t userId = 0;
+    int32_t result = UserIdCommonFunc(userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_ALL_BUNDLE_STATS);
+    } else {
+        std::string msg;
+        bool ret = GetAllBundleStats(userId, msg);
+        if (ret) {
+            resultReceiver_ = STRING_GET_ALL_BUNDLE_STATS_OK + msg;
+        } else {
+            resultReceiver_ = STRING_GET_ALL_BUNDLE_STATS_NG + "\n";
+        }
+    }
+    return result;
 }
 
 ErrCode BundleTestTool::RunAsGetAppProvisionInfo()
