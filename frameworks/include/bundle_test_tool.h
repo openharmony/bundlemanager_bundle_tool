@@ -83,6 +83,7 @@ private:
     ErrCode RunAsSetDebugMode();
     ErrCode RunAsGetBundleStats();
     ErrCode RunAsBatchGetBundleStats();
+    ErrCode RunAsGetAllBundleStats();
     ErrCode RunAsGetAppProvisionInfo();
     ErrCode RunAsGetContinueBundleName();
     ErrCode RunAsGetDistributedBundleName();
@@ -189,10 +190,12 @@ private:
     ErrCode SetDebugMode(int32_t debugMode);
     bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string &msg, int32_t appIndex);
     bool BatchGetBundleStats(const std::vector<std::string> &bundleNames, int32_t userId, std::string &msg);
+    bool GetAllBundleStats(int32_t userId, std::string &msg);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string &msg);
     ErrCode GetDistributedBundleName(const std::string &networkId, int32_t accessTokenId, std::string &msg);
     ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex);
     ErrCode BatchBundleNameAndUserIdCommonFunc(std::vector<std::string> &bundleNames, int32_t &userId);
+    ErrCode UserIdCommonFunc(int32_t &userId);
     ErrCode BatchBundleNameCommonFunc(std::string short_option,
                                       const struct option *long_options,
                                       std::vector<std::string> &bundleNames);
