@@ -213,7 +213,7 @@ private:
     bool GetGroupDir(const std::string &dataGroupId, std::string& msg);
     ErrCode CheckGetBundleNameOption(int32_t option, std::string &bundleName);
     ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
-        uint64_t &cacheSize);
+        uint64_t &cacheSize, int32_t &cleanType);
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
     bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
         std::string &bundleName);
