@@ -202,6 +202,7 @@ static const std::string HELP_MSG =
     "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
     "  getAllBundleDirs                 obtain all bundle dirs \n"
     "  getAllJsonProfile                obtain all json profile\n"
+    "  setApplicationDisableForbidden   set whether a specified application is forbidden to be disabled\n"
     "  getAllBundleCacheStat            obtain all bundle cache size \n"
     "  cleanAllBundleCache              clean all bundle cache \n"
     "  deleteDisposedRules              delete disposed rules \n"
@@ -608,6 +609,17 @@ const std::string HELP_MSG_GET_ALL_JSON_PROFILE =
     "  -p, --profile-type <profile-type>      specify a profile-type\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_SET_APPLICATION_DISABLE_FORBIDDEN =
+    "usage: bundle_test_tool setApplicationDisableForbidden <options>\n"
+    "eg:bundle_test_tool setApplicationDisableForbidden\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify an app index\n"
+    "  -f, --forbidden <forbidden>            specify whether the app is forbidden to be disabled\n"
+    "  -c, --caller-uid <caller-uid>          specify a caller uid\n";
+
 const std::string HELP_MSG_GET_DISPOSED_RULES =
     "usage: bundle_test_tool getDisposedRules <options>\n"
     "eg:bundle_test_tool getDisposedRules -u <user-id>\n"
@@ -863,6 +875,9 @@ const std::string STRING_GET_ALL_BUNDLE_DIRS_NG = "getAllBundleDirs failed\n";
 
 const std::string STRING_GET_ALL_JSON_PROFILE_OK = "getAllJsonProfile successfully\n";
 const std::string STRING_GET_ALL_JSON_PROFILE_NG = "getAllJsonProfile failed\n";
+
+const std::string STRING_SET_APPLICATION_DISABLE_FORBIDDEN_OK = "setApplicationDisableForbidden successfully\n";
+const std::string STRING_SET_APPLICATION_DISABLE_FORBIDDEN_NG = "setApplicationDisableForbidden failed\n";
 
 const std::string STRING_GET_DISPOSED_RULES_OK = "getDisposedRules successfully\n";
 const std::string STRING_GET_DISPOSED_RULES_NG = "getDisposedRules failed\n";
@@ -1213,6 +1228,17 @@ const struct option LONG_OPTIONS_GET_ALL_JSON_PROFILE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_SET_APPLICATION_DISABLE_FORBIDDEN = "hn:u:a:f:c:";
+const struct option LONG_OPTIONS_SET_APPLICATION_DISABLE_FORBIDDEN[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
+    {"forbidden", required_argument, nullptr, 'f'},
+    {"caller-uid", required_argument, nullptr, 'c'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DISPOSED_RULES = "hu:c:";
 const struct option LONG_OPTIONS_GET_DISPOSED_RULES[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1451,6 +1477,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetAllBundleDirs, this)},
         {"getAllJsonProfile",
             std::bind(&BundleTestTool::RunAsGetAllJsonProfile, this)},
+        {"setApplicationDisableForbidden",
+            std::bind(&BundleTestTool::RunAsSetApplicationDisableForbidden, this)},
         {"getDisposedRules",
             std::bind(&BundleTestTool::RunAsGetDisposedRules, this)},
         {"getAllBundleCacheStat",
@@ -5940,6 +5968,110 @@ ErrCode BundleTestTool::GetAllJsonProfile(ProfileType profileType, int32_t userI
         msg += "}\n";
     }
     return ret;
+}
+
+bool BundleTestTool::CheckSetAppDisableForbiddenCorrectOption(int32_t option, const std::string &commandName,
+    std::string &bundleName, int32_t &userId, int32_t &appIndex, int32_t &forbidden, int32_t &callerUid)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return false;
+        }
+        case 'n': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            bundleName = optarg;
+            break;
+        }
+        case 'u': {
+            StringToInt(optarg, commandName, userId, ret);
+            break;
+        }
+        case 'a': {
+            StringToInt(optarg, commandName, appIndex, ret);
+            break;
+        }
+        case 'f': {
+            StringToInt(optarg, commandName, forbidden, ret);
+            break;
+        }
+        case 'c': {
+            StringToInt(optarg, commandName, callerUid, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return false;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsSetApplicationDisableForbidden()
+{
+    std::string commandName = "setApplicationDisableForbidden";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    std::string bundleName = "";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    int32_t forbidden = 0;
+    int32_t callerUid = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_SET_APPLICATION_DISABLE_FORBIDDEN.c_str(),
+            LONG_OPTIONS_SET_APPLICATION_DISABLE_FORBIDDEN, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool setApplicationDisableForbidden with no option.");
+                resultReceiver_.append(HELP_MSG_SET_APPLICATION_DISABLE_FORBIDDEN);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        bool ret = CheckSetAppDisableForbiddenCorrectOption(
+            option, commandName, bundleName, userId, appIndex, forbidden, callerUid);
+        if (!ret) {
+            resultReceiver_.append(HELP_MSG_SET_APPLICATION_DISABLE_FORBIDDEN);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    APP_LOGI("-n: %{public}s -u: %{public}d -a: %{public}d -f: %{public}d -c: %{public}d",
+        bundleName.c_str(), userId, appIndex, forbidden, callerUid);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_SET_APPLICATION_DISABLE_FORBIDDEN);
+    } else {
+        setuid(callerUid);
+        result = SetApplicationDisableForbidden(bundleName, userId, appIndex, static_cast<bool>(forbidden));
+        setuid(Constants::ROOT_UID);
+        if (result == ERR_OK) {
+            resultReceiver_.append(STRING_SET_APPLICATION_DISABLE_FORBIDDEN_OK);
+        } else {
+            resultReceiver_.append(STRING_SET_APPLICATION_DISABLE_FORBIDDEN_NG +
+                "errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::SetApplicationDisableForbidden(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    bool forbidden)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    return bundleMgrProxy_->SetApplicationDisableForbidden(bundleName, userId, appIndex, forbidden);
 }
 
 ErrCode BundleTestTool::RunAsGetDisposedRules()
