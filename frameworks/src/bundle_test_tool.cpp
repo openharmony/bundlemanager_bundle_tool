@@ -81,6 +81,8 @@ const int32_t MAX_WAITING_TIME = 600;
 const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
 // system param
 constexpr const char* IS_ENTERPRISE_DEVICE = "const.edm.is_enterprise_device";
+// test param
+constexpr const char* ENABLE_DEBUG_MODE_PARMA = "param.bms.test.enable_debug_mode";
 // quick fix error message
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR = "error: quick fix internal error.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_PARAM_ERROR = "error: param error.\n";
@@ -4209,7 +4211,15 @@ ErrCode BundleTestTool::SetDebugMode(int32_t debugMode)
         APP_LOGE("bundleMgrProxy_ is nullptr");
         return ERR_BUNDLEMANAGER_SET_DEBUG_MODE_INTERNAL_ERROR;
     }
-    return bundleMgrProxy_->SetDebugMode(enable);
+    auto ret = bundleMgrProxy_->SetDebugMode(enable);
+    if (ret == ERR_OK) {
+        if (enable) {
+            OHOS::system::SetParameter(ENABLE_DEBUG_MODE_PARMA, "true");
+        } else {
+            OHOS::system::SetParameter(ENABLE_DEBUG_MODE_PARMA, "false");
+        }
+    }
+    return ret;
 }
 
 ErrCode BundleTestTool::BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex)
