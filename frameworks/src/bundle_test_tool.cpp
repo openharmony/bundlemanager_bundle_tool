@@ -6770,6 +6770,7 @@ ErrCode BundleTestTool::RunAsSetEnpDeviceCommand()
         return -1;
     }
     int ret = ioctl(fd, CODESIGN_SET_ENP_DEVICE_FLAG, 1);
+    close(fd);
     if (ret != 0) {
         APP_LOGE("set enp flag failed");
         resultReceiver_.append("set enp flag failed " + std::to_string(errno) + "\n");
@@ -6863,6 +6864,7 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
         }
         int32_t fd = open(certPath.c_str(), O_RDONLY);
         auto res = bundleInstallerProxy_->InstallEnterpriseReSignatureCert(certAlias, fd, userId);
+        close(fd);
         if (res != OHOS::ERR_OK) {
             resultReceiver_.append("ErrCode is " + std::to_string(res) + "\n");
         } else {
