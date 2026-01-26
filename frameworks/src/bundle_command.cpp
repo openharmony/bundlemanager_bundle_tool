@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@ const std::string DEPENDENCIES = "dependencies";
 const char* IS_ROOT_MODE_PARAM = "const.debuggable";
 const std::string IS_DEVELOPER_MODE_PARAM = "const.security.developermode.state";
 const char* BMS_PARA_INSTALL_ALLOW_DOWNGRADE = "ohos.bms.param.installAllowDowngrade";
+const char* BMS_PARA_INSTALL_GRANT_PERMISSION = "ohos.bms.param.installAddPermission";
 const int32_t ROOT_MODE = 1;
 const int32_t USER_MODE = 0;
 const int32_t INDEX_OFFSET = 2;
@@ -94,7 +95,7 @@ const struct option LONG_OPTIONS_UNINSTALL_PLUGIN[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:i:";
+const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:i:g";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-path", required_argument, nullptr, 'p'},
@@ -111,6 +112,7 @@ const struct option LONG_OPTIONS[] = {
     {"keep-data", no_argument, nullptr, 'k'},
     {"shared-bundle-dir-path", required_argument, nullptr, 's'},
     {"app-index", required_argument, nullptr, 'i'},
+    {"grant-permission", no_argument, nullptr, 'g'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -346,7 +348,8 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
         argList_[index - INDEX_OFFSET] == "-u" || argList_[index - INDEX_OFFSET] == "--user-id" ||
         argList_[index - INDEX_OFFSET] == "-w" || argList_[index - INDEX_OFFSET] == "--waitting-time" ||
         argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path" ||
-        argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--downgrade") {
+        argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--downgrade" ||
+        argList_[index - INDEX_OFFSET] == "-g" || argList_[index - INDEX_OFFSET] == "--add-permission") {
         return true;
     }
     return false;
@@ -594,6 +597,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     int32_t waittingTime = MINIMUM_WAITTING_TIME;
     std::string warning;
     bool isDowngrade = false;
+    bool grantPermission = false;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -722,6 +726,10 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 isDowngrade = true;
                 break;
             }
+            case 'g': {
+                grantPermission = true;
+                break;
+            }
             default: {
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -781,6 +789,10 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         if (isDowngrade) {
             APP_LOGI("install allow downgrade");
             installParam.parameters[BMS_PARA_INSTALL_ALLOW_DOWNGRADE] = "true";
+        }
+        if (grantPermission) {
+            APP_LOGI("install allow grantPermission");
+            installParam.parameters[BMS_PARA_INSTALL_GRANT_PERMISSION] = "true";
         }
         std::string resultMsg;
         int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime, resultMsg);

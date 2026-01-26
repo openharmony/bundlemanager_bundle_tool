@@ -51,7 +51,7 @@ bm help
 #### 安装命令（install）
 
 ```bash
-bm install [-h] [-p filePath] [-r] [-w waitingTime] [-s hspDirPath] [-u userId] [-d]
+bm install [-h] [-p filePath] [-r] [-w waitingTime] [-s hspDirPath] [-u userId] [-d] [-g]
 ```
 
   **安装命令参数列表**
@@ -66,7 +66,7 @@ bm install [-h] [-p filePath] [-r] [-w waitingTime] [-s hspDirPath] [-u userId] 
 | -w | 可选参数，安装HAP时指定bm工具等待时间，最小的等待时长为5s，最大的等待时长为600s,&nbsp;默认缺省为180s。 |
 | -u | 可选参数，指定[用户](#userid)，默认在当前活跃用户下安装应用。仅支持在当前活跃用户或0用户下安装。<br>**说明：**<br> 如果当前活跃用户是100，使用命令`bm install -p /data/local/tmp/ohos.app.hap -u 102`安装时，只会在当前活跃用户100下安装应用。 |
 | -d | 可选参数，允许应用降级安装，即设备已安装较高版本的应用，也可以覆盖安装较低版本的应用。仅支持三方应用降级安装。从API version 23开始支持。 |
-
+| -g | 可选参数，安装调试包时支持授予[user_grant权限]和[manual_settings权限]。仅对开发者模式下的调试包生效。debug应用更新为release应用时取消授予的[user_grant权限]和[manual_settings权限] |
 
 示例：
 ```bash
@@ -86,6 +86,8 @@ bm install -p /data/local/tmp/hapPath/
 bm install -p /data/local/tmp/ohos.app.hap -w 180
 # 设备已安装了一个高版本的应用，覆盖安装一个同包名低版本的hap
 bm install -p /data/local/tmp/ohos.app.hap -d
+# 安装调试包时自动授予[user_grant权限]和[manual_settings权限]
+bm install -p /data/local/tmp/ohos.app.hap -g
 ```
 
 #### 卸载命令（uninstall）

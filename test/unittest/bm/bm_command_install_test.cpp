@@ -1101,4 +1101,115 @@ HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4500, Function | MediumTest | 
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_REQUIRE_CORRECT_VALUE);
 }
+
+/**
+ * @tc.number: Bm_Command_Install_4600
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm install -p <bundle-path> -g" command.
+ */
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4600, Function | MediumTest | TestSize.Level1)
+{
+    // install a bundle
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("-p"),
+        const_cast<char*>(STRING_BUNDLE_PATH.c_str()),
+        const_cast<char*>("-g"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    SetMockObjects(cmd);
+
+    EXPECT_EQ(cmd.ExecCommand(), STRING_INSTALL_BUNDLE_OK + "\n");
+}
+
+/**
+ * @tc.number: Bm_Command_Install_4700
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "bm install -g" command.
+ */
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4700, Function | MediumTest | TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("-g"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+
+    SetMockObjects(cmd);
+
+    EXPECT_EQ(
+        cmd.ExecCommand(), "error: you must specify a bundle path with '-p' or '--bundle-path'.\n" + HELP_MSG_INSTALL);
+}
+
+/**
+ * @tc.number: Bm_Command_Install_4800
+ * @tc.name: ExecCommand
+ * @tc.desc: 1.Test the IsInstallOption.
+ */
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4800, Function | MediumTest | TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("-g"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    int index = 2;
+    auto ret = cmd.IsInstallOption(index);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: Bm_Command_Install_4900
+ * @tc.name: ExecCommand
+ * @tc.desc: 1.Test the IsInstallOption.
+ */
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_4900, Function | MediumTest | TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("--add-permission"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    int index = 2;
+    auto ret = cmd.IsInstallOption(index);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: Bm_Command_Install_5000
+ * @tc.name: ExecCommand
+ * @tc.desc: 1.Test the IsInstallOption.
+ */
+HWTEST_F(BmCommandInstallTest, Bm_Command_Install_5000, Function | MediumTest | TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>(TOOL_NAME.c_str()),
+        const_cast<char*>(cmd_.c_str()),
+        const_cast<char*>("failed"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    BundleManagerShellCommand cmd(argc, argv);
+    int index = 2;
+    auto ret = cmd.IsInstallOption(index);
+    EXPECT_FALSE(ret);
+}
 } // OHOS
