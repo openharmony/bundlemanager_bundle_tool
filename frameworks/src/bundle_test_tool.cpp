@@ -386,10 +386,11 @@ const std::string HELP_MSG_GET_APP_RUNNING_RESULT_RULE =
 
 const std::string HELP_MSG_AUTO_CLEAN_CACHE_RULE =
     "usage: bundle_test_tool <options>\n"
-    "eg:bundle_test_tool cleanBundleCacheFilesAutomatic -s <cache-size> \n"
+    "eg:bundle_test_tool cleanBundleCacheFilesAutomatic -s <cache-size> -t <clean-type> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -s, --cache-size <cache-size>          specify the cache size that needs to be cleaned\n";
+    "  -s, --cache-size <cache-size>          specify the cache size that needs to be cleaned\n"
+    "  -t, --clean-type <clean-type>          specify the cleanup type (0=cache-space, 1=inode-count)\n";
 
 const std::string HELP_MSG_NO_ADD_INSTALL_RULE_OPTION =
     "error: you must specify a app id with '-a' or '--app-id' \n"
@@ -1024,10 +1025,11 @@ const struct option LONG_OPTIONS_DELETES_RULES[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_AUTO_CLEAN_CACHE = "hs:";
+const std::string SHORT_OPTIONS_AUTO_CLEAN_CACHE = "hs:t:";
 const struct option LONG_OPTIONS_AUTO_CLEAN_CACHE[] = {
     {"help", no_argument, nullptr, 'h'},
     {"cache-size", required_argument, nullptr, 's'},
+    {"clean-type", required_argument, nullptr, 't'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -3709,7 +3711,7 @@ ErrCode BundleTestTool::RunAsGetAppRunningControlRuleResultCommand()
 }
 
 ErrCode BundleTestTool::CheckCleanBundleCacheFilesAutomaticOption(
-    int option, const std::string &commandName, uint64_t &cacheSize)
+    int option, const std::string &commandName, uint64_t &cacheSize, int32_t &cleanType)
 {
     bool ret = true;
     switch (option) {
@@ -3720,6 +3722,25 @@ ErrCode BundleTestTool::CheckCleanBundleCacheFilesAutomaticOption(
         case 's': {
             APP_LOGI("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
             StringToUnsignedLongLong(optarg, commandName, cacheSize, ret);
+            break;
+        }
+        case 't': {
+            APP_LOGI("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            if (optarg == nullptr) {
+                resultReceiver_.append("Error: -t option requires a value\n");
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            StringToInt(optarg, commandName, cleanType, ret);
+            if (!ret) {
+                resultReceiver_.append("Error: invalid clean type format\n");
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            if (cleanType != 0 && cleanType != 1) {
+                APP_LOGE("Invalid clean type: %{public}d, only support: 0 (cache-space) or 1 (inode-count)", cleanType);
+                resultReceiver_.append("Error: clean type must be 0 or 1\n");
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            APP_LOGI("cleanType set to: %d", cleanType);
             break;
         }
         default: {
@@ -3738,8 +3759,12 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
     ErrCode result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "cleanBundleCacheFilesAutomatic";
-    uint64_t cacheSize;
+    uint64_t cacheSize = 0;
+    int32_t type = 0;
+    std::optional<uint64_t> cleanedSize;
     APP_LOGI("RunAsCleanBundleCacheFilesAutomaticCommand is start");
+
+    bool hasTypeOption = false;
     while (true) {
         counter++;
         int option = getopt_long(argc_, argv_, SHORT_OPTIONS_AUTO_CLEAN_CACHE.c_str(),
@@ -3756,22 +3781,39 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
             }
             break;
         }
-        result = CheckCleanBundleCacheFilesAutomaticOption(option, commandName, cacheSize);
+        if (option == 't') {
+            hasTypeOption = true;
+        }
+        result = CheckCleanBundleCacheFilesAutomaticOption(option, commandName, cacheSize, type);
         if (result != OHOS::ERR_OK) {
             resultReceiver_.append(HELP_MSG_AUTO_CLEAN_CACHE_RULE);
             return OHOS::ERR_INVALID_VALUE;
         }
     }
-
-    ErrCode res = bundleMgrProxy_->CleanBundleCacheFilesAutomatic(cacheSize);
+    CleanType cleanType = static_cast<CleanType>(type);
+    ErrCode res = bundleMgrProxy_->CleanBundleCacheFilesAutomatic(cacheSize, cleanType, cleanedSize);
     if (res == ERR_OK) {
-        resultReceiver_.append("clean fixed size cache successfully\n");
+        std::string cleanTypeStr = (cleanType == CleanType::INODE_COUNT) ? "1 (inode-count)" : "0 (cache-space)";
+        std::string unit = (cleanType == CleanType::INODE_COUNT) ? " files" : " bytes";
+        std::string resultMsg = "clean fixed size cache successfully\n";
+        resultMsg += "Clean type: " + cleanTypeStr;
+        if (!hasTypeOption) {
+            resultMsg += " (default)";
+        }
+        resultMsg += "\n";
+        resultMsg += "Requested cache size: " + std::to_string(cacheSize) + unit + "\n";
+        
+        if (cleanedSize.has_value()) {
+            resultMsg += "Actually cleaned size: " + std::to_string(cleanedSize.value()) + unit + "\n";
+        } else {
+            resultMsg += "Actually cleaned size: not available\n";
+        }
+        resultReceiver_.append(resultMsg);
     } else {
-        resultReceiver_.append("clean fixed size cache failed, errCode is "+ std::to_string(res) + "\n");
+        resultReceiver_.append("clean fixed size cache failed, errCode is " + std::to_string(res) + "\n");
         APP_LOGE("CleanBundleCacheFilesAutomatic failed, result: %{public}d", res);
         return res;
     }
-
     return res;
 }
 
