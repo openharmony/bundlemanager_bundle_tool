@@ -189,6 +189,7 @@ static const std::string HELP_MSG =
     "  getAppProvisionInfo              get appProvisionInfo\n"
     "  getDistributedBundleName         get distributedBundleName\n"
     "  eventCB                          register then unregister bundle event callback\n"
+    "  pluginCallback                   register then unregister plugin event callback\n"
     "  resetAOTCompileStatus            reset AOTCompileStatus\n"
     "  sendCommonEvent                  send common event\n"
     "  queryDataGroupInfos              obtain the data group infos of the application\n"
@@ -507,6 +508,13 @@ const std::string HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME =
 
 const std::string HELP_MSG_BUNDLE_EVENT_CALLBACK =
     "usage: bundle_test_tool eventCB <options>\n"
+    "options list:\n"
+    "  -h, --help           list available commands\n"
+    "  -o, --onlyUnregister only call unregister, default will call register then unregister\n"
+    "  -u, --uid            specify a uid, default is foundation uid\n";
+
+const std::string HELP_MSG_PLUGIN_EVENT_CALLBACK =
+    "usage: bundle_test_tool pluginCallback <options>\n"
     "options list:\n"
     "  -h, --help           list available commands\n"
     "  -o, --onlyUnregister only call unregister, default will call register then unregister\n"
@@ -1385,6 +1393,7 @@ void BundleEventCallbackImpl::OnReceiveEvent(const EventFwk::CommonEventData eve
     const Want &want = eventData.GetWant();
     std::string bundleName = want.GetElement().GetBundleName();
     std::string moduleName = want.GetElement().GetModuleName();
+    std::cout << "OnReceiveEvent " << bundleName << ", " << moduleName << std::endl;
     APP_LOGI("OnReceiveEvent, bundleName:%{public}s, moduleName:%{public}s", bundleName.c_str(), moduleName.c_str());
 }
 
@@ -1427,6 +1436,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getAppProvisionInfo", std::bind(&BundleTestTool::RunAsGetAppProvisionInfo, this)},
         {"getDistributedBundleName", std::bind(&BundleTestTool::RunAsGetDistributedBundleName, this)},
         {"eventCB", std::bind(&BundleTestTool::HandleBundleEventCallback, this)},
+        {"pluginCallback", std::bind(&BundleTestTool::HandlePluginEventCallback, this)},
         {"resetAOTCompileStatus", std::bind(&BundleTestTool::ResetAOTCompileStatus, this)},
         {"sendCommonEvent", std::bind(&BundleTestTool::SendCommonEvent, this)},
         {"getProxyDataInfos", std::bind(&BundleTestTool::RunAsGetProxyDataCommand, this)},
@@ -4875,6 +4885,41 @@ bool BundleTestTool::ParseEventCallbackOptions(bool &onlyUnregister, int32_t &ui
     return true;
 }
 
+bool BundleTestTool::ParsePluginEventCallbackOptions(bool &onlyUnregister, int32_t &uid)
+{
+    int32_t opt;
+    while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_BUNDLE_EVENT_CALLBACK.c_str(),
+        LONG_OPTIONS_BUNDLE_EVENT_CALLBACK, nullptr)) != -1) {
+        switch (opt) {
+            case 'o': {
+                onlyUnregister = true;
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, uid)) {
+                    std::string msg = "invalid param, uid should be int";
+                    resultReceiver_.append(msg).append(LINE_BREAK);
+                    APP_LOGE("%{public}s", msg.c_str());
+                    return false;
+                }
+                break;
+            }
+            case 'h': {
+                resultReceiver_.append(HELP_MSG_PLUGIN_EVENT_CALLBACK);
+                return false;
+            }
+            default: {
+                std::string msg = "unsupported option";
+                resultReceiver_.append(msg).append(LINE_BREAK);
+                APP_LOGE("%{public}s", msg.c_str());
+                return false;
+            }
+        }
+    }
+    APP_LOGI("ParsePluginEventCallbackOptions success");
+    return true;
+}
+
 bool BundleTestTool::ParseResetAOTCompileStatusOptions(std::string &bundleName, std::string &moduleName,
     int32_t &triggerMode, int32_t &uid)
 {
@@ -4998,6 +5043,57 @@ ErrCode BundleTestTool::HandleBundleEventCallback()
     if (ret != OHOS::ERR_OK) {
         return ret;
     }
+    Sleep(SLEEP_SECONDS);
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::HandlePluginEventCallback()
+{
+    APP_LOGI("begin to HandlePluginEventCallback");
+    bool onlyUnregister = false;
+    int32_t uid = Constants::FOUNDATION_UID;
+    if (!ParsePluginEventCallbackOptions(onlyUnregister, uid)) {
+        APP_LOGE("ParsePluginEventCallbackOptions failed");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    APP_LOGI("onlyUnregister : %{public}d, uid : %{public}d", onlyUnregister, uid);
+    if (bundleMgrProxy_ == nullptr) {
+        std::string msg = "bundleMgrProxy_ is nullptr";
+        resultReceiver_.append(msg).append(LINE_BREAK);
+        APP_LOGE("%{public}s", msg.c_str());
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    seteuid(uid);
+    ErrCode ret;
+    sptr<BundleEventCallbackImpl> bundleEventCallback = new (std::nothrow) BundleEventCallbackImpl();
+    BundleMgrClient client;
+    if (onlyUnregister) {
+        // only call CallUnRegisterPluginEventCallback
+        return client.UnregisterPluginEventCallback(bundleEventCallback);
+    }
+    // call CallRegisterPluginEventCallback then call CallUnRegisterPluginEventCallback
+    ret = client.RegisterPluginEventCallback(bundleEventCallback);
+    std::string msg;
+    if (ret != OHOS::ERR_OK) {
+        msg = "RegisterPluginEventCallback failed";
+        resultReceiver_.append(msg).append(LINE_BREAK);
+        APP_LOGE("%{public}s", msg.c_str());
+        return ret;
+    }
+    msg = "RegisterPluginEventCallback success";
+    resultReceiver_.append(msg).append(LINE_BREAK);
+    APP_LOGI("%{public}s", msg.c_str());
+    Sleep(SLEEP_SECONDS);
+    ret = client.UnregisterPluginEventCallback(bundleEventCallback);
+    if (ret != OHOS::ERR_OK) {
+        msg = "UnregisterPluginEventCallback failed";
+        resultReceiver_.append(msg).append(LINE_BREAK);
+        APP_LOGE("%{public}s", msg.c_str());
+        return ret;
+    }
+    msg = "UnregisterPluginEventCallback success";
+    resultReceiver_.append(msg).append(LINE_BREAK);
+    APP_LOGI("%{public}s", msg.c_str());
     Sleep(SLEEP_SECONDS);
     return OHOS::ERR_OK;
 }
