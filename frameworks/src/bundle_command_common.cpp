@@ -712,10 +712,6 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: Bundle cannot be installed because the appId is not same with preinstalled bundle."
     },
     {
-        IStatusReceiver::ERR_INSTALL_BUNDLE_NOT_ALLOWED_FOR_SHELL_IN_OOBE,
-        "error: Bundle cannot be installed in oobe phase."
-    },
-    {
         IStatusReceiver::ERR_APPEXECFWK_INSTALL_OS_INTEGRATION_BUNDLE_NOT_ALLOWED_FOR_SHELL,
         "error: os_integration Bundle is not allowed to install for shell."
     },
