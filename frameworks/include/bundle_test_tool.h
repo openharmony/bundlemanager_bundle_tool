@@ -114,6 +114,11 @@ private:
     ErrCode GetAllBundleDirs(int32_t userId, std::string& msg);
     ErrCode RunAsGetAllJsonProfile();
     ErrCode GetAllJsonProfile(ProfileType profileType, int32_t userId, std::string& msg);
+    bool CheckSetAppDisableForbiddenCorrectOption(int32_t option, const std::string &commandName,
+        std::string &bundleName, int32_t &userId, int32_t &appIndex, int32_t &forbidden, int32_t &callerUid);
+    ErrCode RunAsSetApplicationDisableForbidden();
+    ErrCode SetApplicationDisableForbidden(const std::string &bundleName, int32_t userId, int32_t appIndex,
+        bool forbidden);
     ErrCode RunAsGetDisposedRules();
     ErrCode GetDisposedRules(int32_t userId, std::string &msg);
     ErrCode CheckGetDisposedRulesCorrectOption(
