@@ -184,6 +184,7 @@ static const std::string HELP_MSG =
     "  deleteQuickFix                   delete a quick fix patch of an already installed bundle\n"
     "  setDebugMode                     enable signature debug mode\n"
     "  getBundleStats                   get bundle stats\n"
+    "  getBundleInodeCount              get bundle inode count\n"
     "  batchGetBundleStats              batch get bundle stats\n"
     "  getAllBundleStats                get all bundle stats\n"
     "  getAppProvisionInfo              get appProvisionInfo\n"
@@ -475,6 +476,15 @@ const std::string HELP_MSG_GET_BUNDLE_STATS =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n"
     "  -a, --app-index <app-index>            specify a app index\n";
+
+const std::string HELP_MSG_GET_BUNDLE_INODE_COUNT =
+    "usage: bundle_test_tool getBundleInodeCount <options>\n"
+    "eg:bundle_test_tool getBundleInodeCount -n <bundle-name> -a <app-index> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id (default: 100)\n"
+    "  -a, --app-index <app-index>            specify a app index (default: 0)\n";
 
 const std::string HELP_MSG_BATCH_GET_BUNDLE_STATS =
     "usage: bundle_test_tool batchGetBundleStats <options>\n"
@@ -850,6 +860,9 @@ const std::string STRING_SET_DEBUG_MODE_NG = "set debug mode failed\n";
 
 const std::string STRING_GET_BUNDLE_STATS_OK = "get bundle stats successfully\n";
 const std::string STRING_GET_BUNDLE_STATS_NG = "get bundle stats failed\n";
+
+const std::string STRING_GET_BUNDLE_INODE_COUNT_OK = "get bundle inode count successfully\n";
+const std::string STRING_GET_BUNDLE_INODE_COUNT_NG = "get bundle inode count failed\n";
 
 const std::string STRING_BATCH_GET_BUNDLE_STATS_OK = "batch get bundle stats successfully\n";
 const std::string STRING_BATCH_GET_BUNDLE_STATS_NG = "batch get bundle stats failed\n";
@@ -1457,6 +1470,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"deleteQuickFix", std::bind(&BundleTestTool::RunAsDeleteQuickFix, this)},
         {"setDebugMode", std::bind(&BundleTestTool::RunAsSetDebugMode, this)},
         {"getBundleStats", std::bind(&BundleTestTool::RunAsGetBundleStats, this)},
+        {"getBundleInodeCount", std::bind(&BundleTestTool::RunAsGetBundleInodeCount, this)},
         {"batchGetBundleStats", std::bind(&BundleTestTool::RunAsBatchGetBundleStats, this)},
         {"getAllBundleStats", std::bind(&BundleTestTool::RunAsGetAllBundleStats, this)},
         {"getAppProvisionInfo", std::bind(&BundleTestTool::RunAsGetAppProvisionInfo, this)},
@@ -4584,6 +4598,44 @@ bool BundleTestTool::GetBundleStats(const std::string &bundleName, int32_t userI
         }
     }
     return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetBundleInodeCount()
+{
+    std::string bundleName;
+    int32_t userId;
+    int32_t appIndex = 0;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_BUNDLE_INODE_COUNT);
+    } else {
+        std::string msg;
+        bool ret = GetBundleInodeCount(bundleName, appIndex, userId, msg);
+        if (ret) {
+            resultReceiver_ = STRING_GET_BUNDLE_INODE_COUNT_OK + msg;
+        } else {
+            resultReceiver_ = STRING_GET_BUNDLE_INODE_COUNT_NG + "\n";
+        }
+    }
+
+    return result;
+}
+
+bool BundleTestTool::GetBundleInodeCount(const std::string &bundleName, int32_t appIndex, int32_t userId,
+    std::string& msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return false;
+    }
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+    uint64_t inodeCount = 0;
+    ErrCode ret = bundleMgrProxy_->GetBundleInodeCount(bundleName, appIndex, userId, inodeCount);
+    if (ret == ERR_OK) {
+        msg = "inode count: " + std::to_string(inodeCount) + "\n";
+        return true;
+    }
+    return false;
 }
 
 ErrCode BundleTestTool::RunAsBatchGetBundleStats()
