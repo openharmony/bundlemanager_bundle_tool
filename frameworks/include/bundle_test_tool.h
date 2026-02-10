@@ -82,6 +82,7 @@ private:
     ErrCode RunAsDeleteQuickFix();
     ErrCode RunAsSetDebugMode();
     ErrCode RunAsGetBundleStats();
+    ErrCode RunAsGetBundleInodeCount();
     ErrCode RunAsBatchGetBundleStats();
     ErrCode RunAsGetAllBundleStats();
     ErrCode RunAsGetAppProvisionInfo();
@@ -195,6 +196,7 @@ private:
     ErrCode GetQuickFixPath(int32_t index, std::vector<std::string> &quickFixPaths) const;
     ErrCode SetDebugMode(int32_t debugMode);
     bool GetBundleStats(const std::string &bundleName, int32_t userId, std::string &msg, int32_t appIndex);
+    bool GetBundleInodeCount(const std::string &bundleName, int32_t appIndex, int32_t userId, std::string &msg);
     bool BatchGetBundleStats(const std::vector<std::string> &bundleNames, int32_t userId, std::string &msg);
     bool GetAllBundleStats(int32_t userId, std::string &msg);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string &msg);
