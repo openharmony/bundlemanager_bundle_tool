@@ -787,6 +787,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_VERIFY_APP_SIGNATURE_FAILED,
         "error: verify app signature failed."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_CHECK_BIN_FILE_FAILED,
+        "error: check bin file failed."
     }
 };
 } // AppExecFwk
