@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,8 @@ const std::string HELP_MSG_INSTALL =
     "  -w, --waitting-time <waitting-time>                            specify waitting time for installation,\n"
     "                                                                    the minimum waitting time is 180s,\n"
     "                                                                    the maximum waitting time is 600s\n"
-    "  -d, --downgrade                                                install allow downgrade\n";
+    "  -d, --downgrade                                                install allow downgrade\n"
+    "  -g, --grant-permission                                         grant permissions for installation\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: bm uninstall <options>\n"
