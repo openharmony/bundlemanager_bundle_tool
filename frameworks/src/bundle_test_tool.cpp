@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,9 @@
 #include "status_receiver_impl.h"
 #include "string_ex.h"
 #include "json_util.h"
+#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
+#include "distributed_bundle_mgr_client.h"
+#endif
 
 #define CODE_SIGN_PATH "/dev/code_sign\0"
 #define HM_CODESIGN_IOCTL_BASE 'k'
@@ -1566,12 +1569,6 @@ ErrCode BundleTestTool::Init()
         (bundleInstallerProxy_->AsObject() == nullptr)) {
         result = OHOS::ERR_INVALID_VALUE;
     }
-
-#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
-    if (distributedBmsProxy_ == nullptr) {
-        distributedBmsProxy_ = BundleCommandCommon::GetDistributedBundleMgrService();
-    }
-#endif
 
     return result;
 }
@@ -4906,12 +4903,9 @@ ErrCode BundleTestTool::GetDistributedBundleName(const std::string &networkId,
     int32_t accessTokenId, std::string& msg)
 {
 #ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
-    if (distributedBmsProxy_ == nullptr) {
-        APP_LOGE("distributedBmsProxy_ is nullptr");
-        return OHOS::ERR_INVALID_VALUE;
-    }
     std::string bundleName;
-    auto ret = distributedBmsProxy_->GetDistributedBundleName(networkId, accessTokenId, bundleName);
+    auto ret = DistributedBundleMgrClient::GetInstance()->GetDistributedBundleName(
+        networkId, accessTokenId, bundleName);
     if (ret == OHOS::NO_ERROR) {
         msg = "\n";
         if (bundleName.size() == 0) {
@@ -4921,7 +4915,7 @@ ErrCode BundleTestTool::GetDistributedBundleName(const std::string &networkId,
         }
         msg += "\n";
     } else {
-        APP_LOGE("distributedBmsProxy_ GetDistributedBundleName fail errcode %{public}d.", ret);
+        APP_LOGE("d-bms GetDistributedBundleName fail errcode %{public}d", ret);
         return OHOS::ERR_INVALID_VALUE;
     }
     return OHOS::ERR_OK;
