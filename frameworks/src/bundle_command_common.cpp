@@ -84,6 +84,21 @@ int32_t BundleCommandCommon::GetCurrentUserId(int32_t userId)
     return userId;
 }
 
+bool BundleCommandCommon::IsUserForeground(int32_t userId)
+{
+#ifdef ACCOUNT_ENABLE
+    bool isForeground = false;
+    int32_t ret = AccountSA::OsAccountManager::IsOsAccountForeground(userId, isForeground);
+    if (ret != 0) {
+        APP_LOGW("IsOsAccountForeground failed! ret = %{public}d, userId = %{public}d.", ret, userId);
+        return false;
+    }
+    return isForeground;
+#else
+    return true;
+#endif
+}
+
 std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     //  error + message
     {

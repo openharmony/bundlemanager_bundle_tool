@@ -36,6 +36,7 @@ public:
 #endif
 
     static int32_t GetCurrentUserId(int32_t userId);
+    static bool IsUserForeground(int32_t userId);
 
     static std::map<int32_t, std::string> bundleMessageMap_;
 };

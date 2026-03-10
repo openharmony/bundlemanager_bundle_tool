@@ -694,7 +694,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != Constants::DEFAULT_USERID && userId != currentUser) {
+                if (userId != Constants::DEFAULT_USERID && !BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
@@ -968,7 +968,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != Constants::DEFAULT_USERID && userId != currentUser) {
+                if (userId != Constants::DEFAULT_USERID && !BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = currentUser;
                 }
@@ -1175,7 +1175,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != Constants::DEFAULT_USERID && userId != currentUser) {
+                if (userId != Constants::DEFAULT_USERID && !BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
@@ -1360,7 +1360,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != currentUser) {
+                if (!BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
@@ -1528,7 +1528,7 @@ ErrCode BundleManagerShellCommand::RunAsEnableCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != currentUser) {
+                if (!BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
@@ -1674,7 +1674,7 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != currentUser) {
+                if (!BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
@@ -1994,7 +1994,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpOverlay()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != currentUser) {
+                if (!BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
@@ -2129,7 +2129,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpTargetOverlay()
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                if (userId != currentUser) {
+                if (!BundleCommandCommon::IsUserForeground(userId)) {
                     warning = GetWaringString(currentUser, userId);
                     userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
                 }
