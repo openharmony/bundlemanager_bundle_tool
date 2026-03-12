@@ -140,6 +140,7 @@ private:
     ErrCode RunAsGetAssetGroupsInfo();
     ErrCode RunAsSetEnpDeviceCommand();
     ErrCode RunAsInstallEnterpriseResignCertCommand();
+    ErrCode RunAsGetOdidResetCount();
 
     std::condition_variable cv_;
     std::mutex mutex_;
