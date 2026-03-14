@@ -207,6 +207,7 @@ static const std::string HELP_MSG =
     "  getAllBundleDirs                 obtain all bundle dirs \n"
     "  getAllJsonProfile                obtain all json profile\n"
     "  setApplicationDisableForbidden   set whether a specified application is forbidden to be disabled\n"
+    "  setDefaultApplicationForCustom   set default application for enterprise customization\n"
     "  getAllBundleCacheStat            obtain all bundle cache size \n"
     "  cleanAllBundleCache              clean all bundle cache \n"
     "  deleteDisposedRules              delete disposed rules \n"
@@ -641,6 +642,18 @@ const std::string HELP_MSG_SET_APPLICATION_DISABLE_FORBIDDEN =
     "  -f, --forbidden <forbidden>            specify whether the app is forbidden to be disabled\n"
     "  -c, --caller-uid <caller-uid>          specify a caller uid\n";
 
+const std::string HELP_MSG_SET_DEFAULT_APPLICATION_FOR_CUSTOM =
+    "usage: bundle_test_tool setDefaultApplicationForCustom <options>\n"
+    "eg:bundle_test_tool setDefaultApplicationForCustom\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -t, --type <type>                      specify the default application type\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -m, --module-name <module-name>        specify module name of the application\n"
+    "  -a, --ability-name <ability-name>      specify ability name of the application\n" 
+    "  -c, --caller-uid <caller-uid>          specify a caller uid\n";
+
 const std::string HELP_MSG_GET_DISPOSED_RULES =
     "usage: bundle_test_tool getDisposedRules <options>\n"
     "eg:bundle_test_tool getDisposedRules -u <user-id>\n"
@@ -902,6 +915,9 @@ const std::string STRING_GET_ALL_JSON_PROFILE_NG = "getAllJsonProfile failed\n";
 
 const std::string STRING_SET_APPLICATION_DISABLE_FORBIDDEN_OK = "setApplicationDisableForbidden successfully\n";
 const std::string STRING_SET_APPLICATION_DISABLE_FORBIDDEN_NG = "setApplicationDisableForbidden failed\n";
+
+const std::string STRING_SET_DEFAULT_APPLICATION_FOR_CUSTOM_OK = "setDefaultApplicationForCustom successfully\n";
+const std::string STRING_SET_DEFAULT_APPLICATION_FOR_CUSTOM_NG = "setDefaultApplicationForCustom failed\n";
 
 const std::string STRING_GET_DISPOSED_RULES_OK = "getDisposedRules successfully\n";
 const std::string STRING_GET_DISPOSED_RULES_NG = "getDisposedRules failed\n";
@@ -1264,6 +1280,18 @@ const struct option LONG_OPTIONS_SET_APPLICATION_DISABLE_FORBIDDEN[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_SET_DEFAULT_APPLICATION_FOR_CUSTOM = "hu:t:n:m:a:c:";
+const struct option LONG_OPTIONS_SET_DEFAULT_APPLICATION_FOR_CUSTOM[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"type", required_argument, nullptr, 't'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"ability-name", required_argument, nullptr, 'a'},
+    {"caller-uid", required_argument, nullptr, 'c'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DISPOSED_RULES = "hu:c:";
 const struct option LONG_OPTIONS_GET_DISPOSED_RULES[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1507,6 +1535,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetAllJsonProfile, this)},
         {"setApplicationDisableForbidden",
             std::bind(&BundleTestTool::RunAsSetApplicationDisableForbidden, this)},
+        {"setDefaultApplicationForCustom",
+            std::bind(&BundleTestTool::RunAsSetDefaultApplicationForCustom, this)},
         {"getDisposedRules",
             std::bind(&BundleTestTool::RunAsGetDisposedRules, this)},
         {"getAllBundleCacheStat",
@@ -5510,13 +5540,14 @@ bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> ap
 
 void BundleTestTool::ReloadNativeTokenInfo()
 {
-    const int32_t permsNum = 4;
+    const int32_t permsNum = 5;
     uint64_t tokenId;
     const char *perms[permsNum];
     perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
     perms[1] = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
     perms[2] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
     perms[3] = "ohos.permission.GET_INSTALLED_BUNDLE_LIST";
+    perms[4] = "ohos.permission.SET_DEFAULT_APPLICATION";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
@@ -6272,6 +6303,130 @@ ErrCode BundleTestTool::SetApplicationDisableForbidden(const std::string &bundle
         return ERR_APPEXECFWK_NULL_PTR;
     }
     return bundleMgrProxy_->SetApplicationDisableForbidden(bundleName, userId, appIndex, forbidden);
+}
+
+bool BundleTestTool::CheckSetDefaultAppForCustomOption(int32_t option, const std::string &commandName,
+    int32_t &userId, std::string &type, std::string &bundleName, std::string &moduleName,
+    std::string &abilityName, int32_t &callerUid)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return false;
+        }
+        case 'u': {
+            StringToInt(optarg, commandName, userId, ret);
+            break;
+        }
+        case 't': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            type = optarg;
+            break;
+        }
+        case 'n': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            bundleName = optarg;
+            break;
+        }
+        case 'm': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            moduleName = optarg;
+            break;
+        }
+        case 'a': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            abilityName = optarg;
+            break;
+        }
+        case 'c': {
+            StringToInt(optarg, commandName, callerUid, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return false;
+        }
+    }
+    return ret;
+}
+
+ErrCode BundleTestTool::RunAsSetDefaultApplicationForCustom()
+{
+    APP_LOGI("RunAsSetDefaultApplicationForCustom start");
+    ReloadNativeTokenInfo();
+    std::string commandName = "setDefaultApplicationForCustom";
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string name = "";
+    int32_t userId = 100;
+    std::string type = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+    std::string abilityName = "";
+    int32_t callerUid = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_SET_DEFAULT_APPLICATION_FOR_CUSTOM.c_str(),
+            LONG_OPTIONS_SET_DEFAULT_APPLICATION_FOR_CUSTOM, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool setDefaultApplicationForCustom with no option.");
+                resultReceiver_.append(HELP_MSG_SET_DEFAULT_APPLICATION_FOR_CUSTOM);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        bool ret = CheckSetDefaultAppForCustomOption(
+            option, commandName, userId, type, bundleName, moduleName, abilityName, callerUid);
+        if (!ret) {
+            resultReceiver_.append(HELP_MSG_SET_DEFAULT_APPLICATION_FOR_CUSTOM);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    APP_LOGI("-u: %{public}d -t: %{public}s -n: %{public}s -m: %{public}s -a: %{public}s -c:%{public}d",
+        userId, type.c_str(), bundleName.c_str(), moduleName.c_str(), abilityName.c_str(), callerUid);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_SET_DEFAULT_APPLICATION_FOR_CUSTOM);
+    } else {
+        setuid(callerUid);
+        result = SetDefaultApplicationForCustom(userId, type, bundleName, moduleName, abilityName);
+        setuid(Constants::ROOT_UID);
+        if (result == ERR_OK) {
+            resultReceiver_.append(STRING_SET_DEFAULT_APPLICATION_FOR_CUSTOM_OK);
+        } else {
+            resultReceiver_.append(STRING_SET_DEFAULT_APPLICATION_FOR_CUSTOM_NG +
+                "errCode is "+ std::to_string(result) + "\n");
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::SetDefaultApplicationForCustom(int32_t userId,
+    const std::string& type, const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    auto defaultAppProxy = bundleMgrProxy_->GetDefaultAppProxy();
+    if (defaultAppProxy == nullptr) {
+        APP_LOGE("defaultAppProxy is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    ElementName elementName("", bundleName, abilityName, moduleName);
+    AAFwk::Want want;
+    want.SetElement(elementName);
+    return defaultAppProxy->SetDefaultApplicationForCustom(userId, type, want);
 }
 
 ErrCode BundleTestTool::RunAsGetDisposedRules()

@@ -120,6 +120,13 @@ private:
     ErrCode RunAsSetApplicationDisableForbidden();
     ErrCode SetApplicationDisableForbidden(const std::string &bundleName, int32_t userId, int32_t appIndex,
         bool forbidden);
+    bool CheckSetDefaultAppForCustomOption(int32_t option, const std::string &commandName,
+        int32_t &userId, std::string &type, std::string &bundleName, std::string &moduleName,
+        std::string &abilityName, int32_t &callerUid);
+    ErrCode RunAsSetDefaultApplicationForCustom();
+    ErrCode SetDefaultApplicationForCustom(int32_t userId,
+        const std::string& type, const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName);
     ErrCode RunAsGetDisposedRules();
     ErrCode GetDisposedRules(int32_t userId, std::string &msg);
     ErrCode CheckGetDisposedRulesCorrectOption(
