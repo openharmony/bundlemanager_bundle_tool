@@ -197,6 +197,7 @@ static const std::string HELP_MSG =
     "  getGroupDir                      obtain the data group dir path by data group id\n"
     "  getJsonProfile                   obtain the json string of the specified module\n"
     "  getOdid                          obtain the odid of the application\n"
+    "  getOdidResetCount                obtain the odid reset count of the application\n"
     "  getUidByBundleName               obtain the uid string of the specified bundle\n"
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
@@ -702,6 +703,13 @@ const std::string HELP_MSG_GET_ODID =
     "  -h, --help               list available commands\n"
     "  -u, --uid  <uid>         specify uid of the application\n";
 
+const std::string HELP_MSG_GET_ODID_RESET_COUNT =
+    "usage: bundle_test_tool getOdidResetCount <options>\n"
+    "eg:bundle_test_tool getOdidResetCount -n <bundle-name>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
+
 const std::string HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE =
     "usage: bundle_test_tool getCompatibleDeviceType <option>\n"
     "eg: bundle_test_tool getCompatibleDeviceType -n <bundle-name>\n"
@@ -903,6 +911,8 @@ const std::string STRING_BATCH_GET_COMPATIBLE_DEVICE_TYPE_NG = "batchGetCompatib
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
+const std::string STRING_GET_ODID_RESET_COUNT_OK = "getOdidResetCount successfully\n";
+const std::string STRING_GET_ODID_RESET_COUNT_NG = "getOdidResetCount failed\n";
 
 const std::string STRING_GET_DIR_OK = "getDirByBundleNameAndAppIndex successfully\n";
 const std::string STRING_GET_DIR_NG = "getDirByBundleNameAndAppIndex failed\n";
@@ -1225,6 +1235,12 @@ const std::string SHORT_OPTIONS_GET_ODID = "hu:";
 const struct option LONG_OPTIONS_GET_ODID[] = {
     {"help", no_argument, nullptr, 'h'},
     {"uid", required_argument, nullptr, 'u'},
+};
+
+const std::string SHORT_OPTIONS_GET_ODID_RESET_COUNT = "hn:";
+const struct option LONG_OPTIONS_GET_ODID_RESET_COUNT[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
 };
 
 const std::string SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO = "hn:a:e:u:t:";
@@ -1566,7 +1582,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"setEnpDevice", std::bind(&BundleTestTool::RunAsSetEnpDeviceCommand, this)},
         {"installEnterpriseResignCert", std::bind(&BundleTestTool::RunAsInstallEnterpriseResignCertCommand, this)},
         {"uninstallEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsUninstallEnterpriseReSignCert, this)},
-        {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)}
+        {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)},
+        {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)}
     };
 
     return OHOS::ERR_OK;
@@ -5795,6 +5812,47 @@ ErrCode BundleTestTool::RunAsGetOdid()
         resultReceiver_.append(STRING_GET_ODID_NG + "Please enter a valid uid\n");
     } else {
         resultReceiver_.append(STRING_GET_ODID_NG + "errCode is "+ std::to_string(result) + "\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetOdidResetCount()
+{
+    std::string commandName = "getOdidResetCount";
+    std::string bundleName;
+    int opt = 0;
+
+    const std::map<char, OptionHandler> optionHandlers = {
+        {'n', [&bundleName, &commandName, this](const std::string& value) {
+            bundleName = value; }}
+    };
+    while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ODID_RESET_COUNT.c_str(),
+        LONG_OPTIONS_GET_ODID_RESET_COUNT, nullptr)) != -1) {
+        auto it = optionHandlers.find(opt);
+        if (it != optionHandlers.end()) {
+            it->second(optarg);
+        } else {
+            resultReceiver_.append(HELP_MSG_GET_ODID_RESET_COUNT);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (bundleName.empty()) {
+        resultReceiver_.append(HELP_MSG_GET_ODID_RESET_COUNT);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    int32_t count = 0;
+    std::string odid;
+    auto result = bundleMgrProxy_->GetOdidResetCount(bundleName, odid, count);
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_GET_ODID_RESET_COUNT_OK);
+        resultReceiver_.append("odidResetCount: " + std::to_string(count) + "\n");
+        resultReceiver_.append("current odid: " + odid + "\n");
+    } else if (result == ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST) {
+        resultReceiver_.append(STRING_GET_ODID_RESET_COUNT_NG + "Bundle not found: " + bundleName + "\n");
+    } else {
+        resultReceiver_.append(STRING_GET_ODID_RESET_COUNT_NG + "errCode is " + std::to_string(result) + "\n");
     }
     return result;
 }
