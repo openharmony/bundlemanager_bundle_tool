@@ -83,6 +83,14 @@ const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
 constexpr const char* IS_ENTERPRISE_DEVICE = "const.edm.is_enterprise_device";
 // test param
 constexpr const char* ENABLE_DEBUG_MODE_PARMA = "param.bms.test.enable_debug_mode";
+constexpr const char* PERMISSION_GET_BUNDLE_INFO_PRIVILEGED = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
+const std::vector<std::string> BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED = {
+    "ohos.permission.MANAGE_EDM_POLICY",
+    "ohos.permission.MANAGE_DISPOSED_APP_STATUS",
+    "ohos.permission.GET_INSTALLED_BUNDLE_LIST",
+    PERMISSION_GET_BUNDLE_INFO_PRIVILEGED,
+    "ohos.permission.SET_DEFAULT_APPLICATION"
+};
 // quick fix error message
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR = "error: quick fix internal error.\n";
 const std::string MSG_ERR_BUNDLEMANAGER_QUICK_FIX_PARAM_ERROR = "error: param error.\n";
@@ -708,7 +716,8 @@ const std::string HELP_MSG_GET_ODID_RESET_COUNT =
     "eg:bundle_test_tool getOdidResetCount -n <bundle-name>\n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -p, --with-permission                  indicates whether to call with permission\n";
 
 const std::string HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE =
     "usage: bundle_test_tool getCompatibleDeviceType <option>\n"
@@ -1237,10 +1246,11 @@ const struct option LONG_OPTIONS_GET_ODID[] = {
     {"uid", required_argument, nullptr, 'u'},
 };
 
-const std::string SHORT_OPTIONS_GET_ODID_RESET_COUNT = "hn:";
+const std::string SHORT_OPTIONS_GET_ODID_RESET_COUNT = "hn:p";
 const struct option LONG_OPTIONS_GET_ODID_RESET_COUNT[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
+    {"with-permission", no_argument, nullptr, 'p'},
 };
 
 const std::string SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO = "hn:a:e:u:t:";
@@ -2304,7 +2314,7 @@ ErrCode BundleTestTool::RunAsUninstallEnterpriseReSignCert()
         resultReceiver_.append(HELP_MSG_UNINSTALL_ENTERPRISE_RE_SIGN_CERT);
     } else {
         if (withPermission) {
-            ReloadNativeTokenInfo();
+            ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
         }
         APP_LOGI("UninstallEnterpriseReSignatureCert -c:%{public}s -u:%{public}d", certificateAlias.c_str(), userId);
         auto results = bundleInstallerProxy_->UninstallEnterpriseReSignatureCert(certificateAlias, userId);
@@ -2356,7 +2366,7 @@ ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
     } else {
         APP_LOGI("GetEnterpriseReSignatureCert -u:%{public}d", userId);
         if (withPermission) {
-            ReloadNativeTokenInfo();
+            ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
         }
         auto results = bundleInstallerProxy_->GetEnterpriseReSignatureCert(userId, certificateAlias);
         if (results == ERR_OK) {
@@ -2992,7 +3002,7 @@ ErrCode BundleTestTool::CheckAddInstallRuleCorrectOption(int option, const std::
 
 ErrCode BundleTestTool::RunAsDeleteDisposedRulesCommand()
 {
-    ReloadNativeTokenInfo();
+    ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
     ErrCode result = OHOS::ERR_OK;
     std::string commandName = "DisposedRulesCommand";
     int counter = 0;
@@ -5555,22 +5565,23 @@ bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> ap
     return true;
 }
 
-void BundleTestTool::ReloadNativeTokenInfo()
+void BundleTestTool::ReloadNativeTokenInfo(const std::vector<std::string> &tokenPerms)
 {
-    const int32_t permsNum = 5;
     uint64_t tokenId;
-    const char *perms[permsNum];
-    perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
-    perms[1] = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
-    perms[2] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
-    perms[3] = "ohos.permission.GET_INSTALLED_BUNDLE_LIST";
-    perms[4] = "ohos.permission.SET_DEFAULT_APPLICATION";
+    std::vector<const char*> perms;
+    perms.reserve(tokenPerms.size());
+    for (const auto &perm : tokenPerms) {
+        if (perm.empty()) {
+            continue;
+        }
+        perms.emplace_back(perm.c_str());
+    }
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = permsNum,
+        .permsNum = static_cast<int32_t>(perms.size()),
         .aclsNum = 0,
         .dcaps = NULL,
-        .perms = perms,
+        .perms = perms.data(),
         .acls = NULL,
         .processName = "bundleTestToolProcess",
         .aplStr = "system_core",
@@ -5584,7 +5595,7 @@ void BundleTestTool::ReloadNativeTokenInfo()
 ErrCode BundleTestTool::RunAsSetAppDistributionTypes()
 {
     APP_LOGI("RunAsSetAppDistributionTypes start");
-    ReloadNativeTokenInfo();
+    ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "setAppDistributionTypes";
@@ -5820,11 +5831,15 @@ ErrCode BundleTestTool::RunAsGetOdidResetCount()
 {
     std::string commandName = "getOdidResetCount";
     std::string bundleName;
+    bool withPermission = false;
     int opt = 0;
+    ReloadNativeTokenInfo({});
 
     const std::map<char, OptionHandler> optionHandlers = {
         {'n', [&bundleName, &commandName, this](const std::string& value) {
-            bundleName = value; }}
+            bundleName = value; }},
+        {'p', [&withPermission](const std::string&) {
+            withPermission = true; }}
     };
     while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ODID_RESET_COUNT.c_str(),
         LONG_OPTIONS_GET_ODID_RESET_COUNT, nullptr)) != -1) {
@@ -5844,6 +5859,9 @@ ErrCode BundleTestTool::RunAsGetOdidResetCount()
 
     int32_t count = 0;
     std::string odid;
+    if (withPermission) {
+        ReloadNativeTokenInfo({PERMISSION_GET_BUNDLE_INFO_PRIVILEGED});
+    }
     auto result = bundleMgrProxy_->GetOdidResetCount(bundleName, odid, count);
     if (result == ERR_OK) {
         resultReceiver_.append(STRING_GET_ODID_RESET_COUNT_OK);
@@ -6415,7 +6433,7 @@ bool BundleTestTool::CheckSetDefaultAppForCustomOption(int32_t option, const std
 ErrCode BundleTestTool::RunAsSetDefaultApplicationForCustom()
 {
     APP_LOGI("RunAsSetDefaultApplicationForCustom start");
-    ReloadNativeTokenInfo();
+    ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
     std::string commandName = "setDefaultApplicationForCustom";
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
@@ -6490,7 +6508,7 @@ ErrCode BundleTestTool::SetDefaultApplicationForCustom(int32_t userId,
 ErrCode BundleTestTool::RunAsGetDisposedRules()
 {
     APP_LOGI("RunAsGetDisposedRules start");
-    ReloadNativeTokenInfo();
+    ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
     std::string commandName = "getDisposedRules";
     int32_t result = OHOS::ERR_OK;
     int32_t counter = 0;
@@ -6861,7 +6879,7 @@ ErrCode BundleTestTool::RunAsGetCompatibleDeviceType()
 ErrCode BundleTestTool::RunAsBatchGetCompatibleDeviceType()
 {
     APP_LOGI("RunAsBatchGetCompatibleDeviceType start");
-    ReloadNativeTokenInfo();
+    ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
     std::vector<std::string> bundleNames;
     int32_t result = BatchBundleNameCommonFunc(
         SHORT_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE,
@@ -7405,7 +7423,7 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
         resultReceiver_.append(HELP_MSG_INSTALL_ENTERPRISE_RESIGN_CERT);
     } else {
         if (withPermission) {
-            ReloadNativeTokenInfo();
+            ReloadNativeTokenInfo(BASE_NATIVE_TOKEN_PERMISSIONS_WITH_PRIVILEGED);
         }
         int32_t fd = open(certPath.c_str(), O_RDONLY);
         auto res = bundleInstallerProxy_->InstallEnterpriseReSignatureCert(certAlias, fd, userId);
