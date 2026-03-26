@@ -238,7 +238,7 @@ private:
         std::string &appDistributionTypes);
     bool ProcessAppDistributionTypeEnums(std::vector<std::string> appDistributionTypeStrings,
         std::set<AppDistributionTypeEnum> &appDistributionTypeEnums);
-    void ReloadNativeTokenInfo(const std::vector<std::string> &tokenPerms);
+    void ReloadNativeTokenInfo();
     ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
     ErrCode UninstallPreInstallBundleOperation(
         const std::string &bundleName, InstallParam &installParam) const;
