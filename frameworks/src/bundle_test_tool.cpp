@@ -708,7 +708,8 @@ const std::string HELP_MSG_GET_ODID_RESET_COUNT =
     "eg:bundle_test_tool getOdidResetCount -n <bundle-name>\n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n";
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -p, --with-permission                  indicates whether to call with permission\n";
 
 const std::string HELP_MSG_GET_COMPATIBLE_DEVICE_TYPE =
     "usage: bundle_test_tool getCompatibleDeviceType <option>\n"
@@ -1237,10 +1238,11 @@ const struct option LONG_OPTIONS_GET_ODID[] = {
     {"uid", required_argument, nullptr, 'u'},
 };
 
-const std::string SHORT_OPTIONS_GET_ODID_RESET_COUNT = "hn:";
+const std::string SHORT_OPTIONS_GET_ODID_RESET_COUNT = "hn:p";
 const struct option LONG_OPTIONS_GET_ODID_RESET_COUNT[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
+    {"with-permission", no_argument, nullptr, 'p'},
 };
 
 const std::string SHORT_OPTIONS_IMPLICIT_QUERY_SKILL_URI_INFO = "hn:a:e:u:t:";
@@ -5820,17 +5822,24 @@ ErrCode BundleTestTool::RunAsGetOdidResetCount()
 {
     std::string commandName = "getOdidResetCount";
     std::string bundleName;
+    bool withPermission = false;
     int opt = 0;
 
     const std::map<char, OptionHandler> optionHandlers = {
         {'n', [&bundleName, &commandName, this](const std::string& value) {
-            bundleName = value; }}
+            bundleName = value; }},
+        {'p', [&withPermission](const std::string&) {
+            withPermission = true; }}
     };
     while ((opt = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ODID_RESET_COUNT.c_str(),
         LONG_OPTIONS_GET_ODID_RESET_COUNT, nullptr)) != -1) {
         auto it = optionHandlers.find(opt);
         if (it != optionHandlers.end()) {
-            it->second(optarg);
+            if (opt == 'p') {
+                it->second("");
+            } else {
+                it->second(optarg);
+            }
         } else {
             resultReceiver_.append(HELP_MSG_GET_ODID_RESET_COUNT);
             return OHOS::ERR_INVALID_VALUE;
@@ -5844,6 +5853,9 @@ ErrCode BundleTestTool::RunAsGetOdidResetCount()
 
     int32_t count = 0;
     std::string odid;
+    if (withPermission) {
+        ReloadNativeTokenInfo();
+    }
     auto result = bundleMgrProxy_->GetOdidResetCount(bundleName, odid, count);
     if (result == ERR_OK) {
         resultReceiver_.append(STRING_GET_ODID_RESET_COUNT_OK);
