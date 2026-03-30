@@ -227,7 +227,8 @@ static const std::string HELP_MSG =
     "  setEnpDevice                     set ENP device\n"
     "  installEnterpriseResignCert      install an enterprise resign cert\n"
     "  uninstallEnterpriseReSignatureCert    uninstall enterprise re sign cert\n"
-    "  getEnterpriseReSignatureCert          get enterprise re sign cert\n";
+    "  getEnterpriseReSignatureCert          get enterprise re sign cert\n"
+    "  getApiTargetVersionByUid          get api target version by uid\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -955,6 +956,11 @@ const std::string STRING_CLEAN_ALL_BUNDLE_CACHE_NG = "cleanAllBundleCache failed
 
 const std::string STRING_GET_UID_BY_BUNDLENAME_NG = "getUidByBundleName failed\n";
 
+const std::string HELP_MSG_NO_GET_API_TARGET_VERSION =
+    "error: you must specify a uid with '-u' or '--uid' \n";
+const std::string STRING_GET_API_TARGET_VERSION_NG =
+    "error: failed to get apiTargetVersion by uid.\n";
+
 const std::string STRING_IMPLICIT_QUERY_SKILL_URI_INFO_NG =
     "implicitQuerySkillUriInfo failed\n";
 
@@ -1218,6 +1224,14 @@ const struct option LONG_OPTIONS_GET_UID_BY_BUNDLENAME[] = {
     {"bundle-name", required_argument, nullptr, 'n'},
     {"user-id", required_argument, nullptr, 'u'},
     {"app-index", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_API_TARGET_VERSION = "hu:p:";
+const struct option LONG_OPTIONS_GET_API_TARGET_VERSION[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"uid", required_argument, nullptr, 'u'},
+    {"with-permission", required_argument, nullptr, 'p'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1559,6 +1573,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getUninstalledBundleInfo", std::bind(&BundleTestTool::RunAsGetUninstalledBundleInfo, this)},
         {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)},
         {"getUidByBundleName", std::bind(&BundleTestTool::RunGetUidByBundleName, this)},
+        {"getApiTargetVersionByUid", std::bind(&BundleTestTool::RunGetApiTargetVersionByUid, this)},
         {"implicitQuerySkillUriInfo",
             std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
         {"queryAbilityInfoByContinueType",
@@ -5761,6 +5776,57 @@ ErrCode BundleTestTool::RunGetUidByBundleName()
         }
         resultReceiver_.append(std::to_string(res));
         resultReceiver_.append("\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunGetApiTargetVersionByUid()
+{
+    APP_LOGI("RunGetApiTargetVersionByUid start");
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "getApiTargetVersionByUid";
+    std::string name = "";
+    int32_t uid = -1;
+    bool withPermission = false;
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_API_TARGET_VERSION.c_str(),
+            LONG_OPTIONS_GET_API_TARGET_VERSION, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            // When scanning the first argument
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGD("bundle_test_tool getApiTargetVersionByUid with no option.");
+                resultReceiver_.append(HELP_MSG_NO_GET_API_TARGET_VERSION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        int temp = 0;
+        result = !CheckGetStringCorrectOption(option, commandName, temp, name)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        uid = option == 'u' ? temp : uid;
+        withPermission = option == 'p' ? temp : withPermission;
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_NO_GET_API_TARGET_VERSION);
+    } else {
+        if (withPermission) {
+            ReloadNativeTokenInfo();
+        }
+        int32_t apiTargetVersion = 0;
+        ErrCode ret = bundleMgrProxy_->GetApiTargetVersionByUid(uid, apiTargetVersion);
+        if (ret != ERR_OK) {
+            resultReceiver_.append(STRING_GET_API_TARGET_VERSION_NG + "errcode: " + std::to_string(ret) + "\n");
+            return result;
+        }
+        resultReceiver_.append("Api target version: " + std::to_string(apiTargetVersion) + "\n");
     }
     return result;
 }
