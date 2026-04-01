@@ -148,6 +148,7 @@ private:
     ErrCode RunAsSetEnpDeviceCommand();
     ErrCode RunAsInstallEnterpriseResignCertCommand();
     ErrCode RunAsGetOdidResetCount();
+    ErrCode RunAsSetBundleFirstLaunch();
 
     std::condition_variable cv_;
     std::mutex mutex_;

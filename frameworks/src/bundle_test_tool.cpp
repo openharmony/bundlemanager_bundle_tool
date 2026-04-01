@@ -198,6 +198,7 @@ static const std::string HELP_MSG =
     "  getJsonProfile                   obtain the json string of the specified module\n"
     "  getOdid                          obtain the odid of the application\n"
     "  getOdidResetCount                obtain the odid reset count of the application\n"
+    "  setBundleFirstLaunch             set bundle first launch status\n"
     "  getUidByBundleName               obtain the uid string of the specified bundle\n"
     "  implicitQuerySkillUriInfo        obtain the skill uri info of the implicit query ability\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
@@ -469,6 +470,16 @@ const std::string HELP_MSG_SET_DEBUG_MODE =
     "  -h, --help                             list available commands\n"
     "  -e, --enable  <enable>                 enable signature debug mode, 1 represents enable debug mode and 0\n"
     "                                         represents disable debug mode\n";
+
+const std::string HELP_MSG_SET_BUNDLE_FIRST_LAUNCH =
+    "usage: bundle_test_tool setBundleFirstLaunch <options>\n"
+    "eg:bundle_test_tool setBundleFirstLaunch -n <bundle-name> -u <user-id> -a <app-index> -i <0/1>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify a app index, 0 for normal app, > 0 for clone app\n"
+    "  -i, --is-first-launch <0/1>            set isBundleFirstLaunch, 1 for first launch, 0 for not first launch\n";
 
 const std::string HELP_MSG_GET_BUNDLE_STATS =
     "usage: bundle_test_tool getBundleStats <options>\n"
@@ -880,6 +891,9 @@ const std::string STRING_DELETE_QUICK_FIX_NG = "delete quick fix failed\n";
 const std::string STRING_SET_DEBUG_MODE_OK = "set debug mode successfully\n";
 const std::string STRING_SET_DEBUG_MODE_NG = "set debug mode failed\n";
 
+const std::string STRING_SET_BUNDLE_FIRST_LAUNCH_OK = "set bundle first launch successfully\n";
+const std::string STRING_SET_BUNDLE_FIRST_LAUNCH_NG = "set bundle first launch failed\n";
+
 const std::string STRING_GET_BUNDLE_STATS_OK = "get bundle stats successfully\n";
 const std::string STRING_GET_BUNDLE_STATS_NG = "get bundle stats failed\n";
 
@@ -1119,6 +1133,16 @@ const std::string SHORT_OPTIONS_DEBUG_MODE = "he:";
 const struct option LONG_OPTIONS_DEBUG_MODE[] = {
     {"help", no_argument, nullptr, 'h'},
     {"enable", required_argument, nullptr, 'e'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_SET_BUNDLE_FIRST_LAUNCH = "hn:u:a:i:";
+const struct option LONG_OPTIONS_SET_BUNDLE_FIRST_LAUNCH[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
+    {"is-first-launch", required_argument, nullptr, 'i'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1585,7 +1609,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"installEnterpriseResignCert", std::bind(&BundleTestTool::RunAsInstallEnterpriseResignCertCommand, this)},
         {"uninstallEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsUninstallEnterpriseReSignCert, this)},
         {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)},
-        {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)}
+        {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)},
+        {"setBundleFirstLaunch", std::bind(&BundleTestTool::RunAsSetBundleFirstLaunch, this)}
     };
 
     return OHOS::ERR_OK;
@@ -7429,6 +7454,107 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
         }
     }
     return result;
+}
+
+ErrCode BundleTestTool::RunAsSetBundleFirstLaunch()
+{
+    std::string bundleName;
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t appIndex = 0;
+    int32_t isFirstLaunch = -1;
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_SET_BUNDLE_FIRST_LAUNCH.c_str(),
+            LONG_OPTIONS_SET_BUNDLE_FIRST_LAUNCH, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+
+        if (option == -1 || option == '?') {
+            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                resultReceiver_.append(HELP_MSG_SET_BUNDLE_FIRST_LAUNCH);
+                return OHOS::ERR_OK;
+            }
+            case 'n': {
+                bundleName = optarg;
+                APP_LOGD("bundleName: %{public}s", bundleName.c_str());
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId)) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+                APP_LOGD("userId: %{public}d", userId);
+                break;
+            }
+            case 'a': {
+                if (!OHOS::StrToInt(optarg, appIndex)) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+                APP_LOGD("appIndex: %{public}d", appIndex);
+                break;
+            }
+            case 'i': {
+                if (!OHOS::StrToInt(optarg, isFirstLaunch)) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+                APP_LOGD("isFirstLaunch: %{public}d", isFirstLaunch);
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_SET_BUNDLE_FIRST_LAUNCH);
+        return result;
+    }
+
+    if (bundleName.empty()) {
+        resultReceiver_.append("error: bundle name is required.\n");
+        resultReceiver_.append(HELP_MSG_SET_BUNDLE_FIRST_LAUNCH);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    if (isFirstLaunch != 0 && isFirstLaunch != 1) {
+        resultReceiver_.append("error: is-first-launch must be 0 or 1.\n");
+        resultReceiver_.append(HELP_MSG_SET_BUNDLE_FIRST_LAUNCH);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        resultReceiver_.append(STRING_SET_BUNDLE_FIRST_LAUNCH_NG + "bundleMgrProxy is null\n");
+        return ERR_APPEXECFWK_SERVICE_NOT_READY;
+    }
+
+    bool isFirstLaunchBool = (isFirstLaunch == 1);
+    ErrCode ret = bundleMgrProxy_->SetBundleFirstLaunch(bundleName, userId, appIndex, isFirstLaunchBool);
+    if (ret == ERR_OK) {
+        resultReceiver_ = STRING_SET_BUNDLE_FIRST_LAUNCH_OK;
+    } else {
+        resultReceiver_ = STRING_SET_BUNDLE_FIRST_LAUNCH_NG + "error code: " + std::to_string(ret) + "\n";
+    }
+    return ret;
 }
 } // AppExecFwk
 } // OHOS
