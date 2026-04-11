@@ -481,6 +481,15 @@ const std::string HELP_MSG_SET_BUNDLE_FIRST_LAUNCH =
     "  -a, --app-index <app-index>            specify a app index, 0 for normal app, > 0 for clone app\n"
     "  -i, --is-first-launch <0/1>            set isBundleFirstLaunch, 1 for first launch, 0 for not first launch\n";
 
+const std::string HELP_MSG_BATCH_GET_BUNDLE_INFO =
+    "usage: bundle_test_tool batchGetBundleInfo <options>\n"
+    "eg:bundle_test_tool batchGetBundleInfo -n <bundle-name>,<bundle-name> -f <flags> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle names separated by commas\n"
+    "  -f, --flags <flags>                    specify bundle info flags (default: 1)\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
 const std::string HELP_MSG_GET_BUNDLE_STATS =
     "usage: bundle_test_tool getBundleStats <options>\n"
     "eg:bundle_test_tool getBundleStats -n <bundle-name>\n"
@@ -924,6 +933,9 @@ const std::string STRING_GET_COMPATIBLE_DEVICE_TYPE_NG = "getCompatibleDeviceTyp
 
 const std::string STRING_BATCH_GET_COMPATIBLE_DEVICE_TYPE_NG = "batchGetCompatibleDeviceType failed\n";
 
+const std::string STRING_BATCH_GET_BUNDLE_INFO_OK = "batchGetBundleInfo successfully\n";
+const std::string STRING_BATCH_GET_BUNDLE_INFO_NG = "batchGetBundleInfo failed\n";
+
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
 const std::string STRING_GET_ODID_RESET_COUNT_OK = "getOdidResetCount successfully\n";
@@ -1363,6 +1375,15 @@ const struct option LONG_OPTIONS_BATCH_GET_COMPATIBLE_DEVICE_TYPE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_BATCH_GET_BUNDLE_INFO = "hn:f:u:";
+const struct option LONG_OPTIONS_BATCH_GET_BUNDLE_INFO[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"flags", required_argument, nullptr, 'f'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1610,7 +1631,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"uninstallEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsUninstallEnterpriseReSignCert, this)},
         {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)},
         {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)},
-        {"setBundleFirstLaunch", std::bind(&BundleTestTool::RunAsSetBundleFirstLaunch, this)}
+        {"setBundleFirstLaunch", std::bind(&BundleTestTool::RunAsSetBundleFirstLaunch, this)},
+        {"batchGetBundleInfo", std::bind(&BundleTestTool::RunAsBatchGetBundleInfo, this)}
     };
 
     return OHOS::ERR_OK;
@@ -7555,6 +7577,133 @@ ErrCode BundleTestTool::RunAsSetBundleFirstLaunch()
         resultReceiver_ = STRING_SET_BUNDLE_FIRST_LAUNCH_NG + "error code: " + std::to_string(ret) + "\n";
     }
     return ret;
+}
+
+ErrCode BundleTestTool::RunAsBatchGetBundleInfo()
+{
+    APP_LOGI("RunAsBatchGetBundleInfo start");
+    std::vector<std::string> bundleNames;
+    int32_t flags = static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_BATCH_GET_BUNDLE_INFO.c_str(),
+            LONG_OPTIONS_BATCH_GET_BUNDLE_INFO, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'n': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'f': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'u': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                std::string names = optarg;
+                std::stringstream ss(names);
+                std::string name;
+                while (std::getline(ss, name, ',')) {
+                    if (!name.empty()) {
+                        APP_LOGD("bundleName: %{public}s", name.c_str());
+                        bundleNames.emplace_back(name);
+                    }
+                }
+                break;
+            }
+            case 'f': {
+                if (!OHOS::StrToInt(optarg, flags) || flags < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (bundleNames.empty()) {
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_BATCH_GET_BUNDLE_INFO);
+    } else {
+        std::vector<BundleInfo> bundleInfos;
+        userId = BundleCommandCommon::GetCurrentUserId(userId);
+        ErrCode ret = bundleMgrProxy_->BatchGetBundleInfo(bundleNames, flags, bundleInfos, userId);
+        if (ret == ERR_OK) {
+            nlohmann::json jsonResult = nlohmann::json::array();
+            for (const auto &bundleInfo : bundleInfos) {
+                nlohmann::json jsonObject = bundleInfo;
+                jsonObject["applicationInfo"] = bundleInfo.applicationInfo;
+                jsonResult.push_back(jsonObject);
+            }
+            std::string msg = jsonResult.dump(Constants::DUMP_INDENT);
+            resultReceiver_.append(STRING_BATCH_GET_BUNDLE_INFO_OK);
+            resultReceiver_.append(msg);
+            resultReceiver_.append("\n");
+        } else {
+            resultReceiver_.append(STRING_BATCH_GET_BUNDLE_INFO_NG +
+                                   "errCode is " + std::to_string(ret) + "\n");
+        }
+        result = ret;
+    }
+    APP_LOGI("RunAsBatchGetBundleInfo end");
+    return result;
 }
 } // AppExecFwk
 } // OHOS
