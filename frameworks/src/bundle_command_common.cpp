@@ -17,9 +17,6 @@
 #include "app_log_wrapper.h"
 #include "appexecfwk_errors.h"
 #include "bundle_mgr_proxy.h"
-#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
-#include "distributed_bms_proxy.h"
-#endif
 #ifdef ACCOUNT_ENABLE
 #include "os_account_info.h"
 #include "os_account_manager.h"
@@ -49,24 +46,6 @@ sptr<IBundleMgr> BundleCommandCommon::GetBundleMgrProxy()
     APP_LOGD("get bundle manager proxy success.");
     return iface_cast<IBundleMgr>(remoteObject);
 }
-
-#ifdef DISTRIBUTED_BUNDLE_FRAMEWORK
-sptr<IDistributedBms> BundleCommandCommon::GetDistributedBundleMgrService()
-{
-    auto saMgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (saMgr == nullptr) {
-        APP_LOGE("saMgr is nullptr");
-        return nullptr;
-    }
-    OHOS::sptr<OHOS::IRemoteObject> remoteObject =
-        saMgr->CheckSystemAbility(OHOS::DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (remoteObject == nullptr) {
-        APP_LOGE("failed to get distributed bms proxy.");
-        return nullptr;
-    }
-    return OHOS::iface_cast<IDistributedBms>(remoteObject);
-}
-#endif
 
 int32_t BundleCommandCommon::GetCurrentUserId(int32_t userId)
 {
