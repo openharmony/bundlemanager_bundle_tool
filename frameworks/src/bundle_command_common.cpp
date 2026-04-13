@@ -789,6 +789,10 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     {
         IStatusReceiver::ERR_INSTALL_GRANT_PERMISSION_NOT_DEBUG_BUNDLE,
         "error: Failed to install because the bundle must be debug type."
+    },
+    {
+        IStatusReceiver::ERR_INSTALL_FAILED_SET_SHARE_FILES_FAIL,
+        "error: shareFiles setting failed."
     }
 };
 } // AppExecFwk
