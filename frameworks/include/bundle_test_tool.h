@@ -99,6 +99,7 @@ private:
     ErrCode RunAsGetUninstalledBundleInfo();
     ErrCode RunAsGetOdid();
     ErrCode RunGetUidByBundleName();
+    ErrCode RunGetApiTargetVersionByUid();
     ErrCode CheckImplicitQueryWantOption(int option, std::string &value);
     ErrCode ImplicitQuerySkillUriInfo(const std::string &bundleName,
         const std::string &action, const std::string &entity, const std::string &uri,
