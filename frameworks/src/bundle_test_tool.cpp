@@ -82,6 +82,8 @@ const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 const int32_t CODE_PROTECT_UID = 7666;
 const int32_t MAX_WAITING_TIME = 600;
 const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
+constexpr size_t BUNDLE_STATS_CACHE_INDEX = 4;
+constexpr size_t BUNDLE_STATS_MIN_SIZE = 5;
 // system param
 constexpr const char* IS_ENTERPRISE_DEVICE = "const.edm.is_enterprise_device";
 // test param
@@ -214,6 +216,7 @@ static const std::string HELP_MSG =
     "  setApplicationDisableForbidden   set whether a specified application is forbidden to be disabled\n"
     "  setDefaultApplicationForCustom   set default application for enterprise customization\n"
     "  getAllBundleCacheStat            obtain all bundle cache size \n"
+    "  getEachBundleCacheStat           obtain each bundle cache size \n"
     "  cleanAllBundleCache              clean all bundle cache \n"
     "  deleteDisposedRules              delete disposed rules \n"
     "  isBundleInstalled                determine whether the bundle is installed based on bundleName user "
@@ -694,6 +697,13 @@ const std::string HELP_MSG_GET_ALL_BUNDLE_CACHE_STAT =
     "  -h, --help                             list available commands\n"
     "  -u, --uid <uid>                specify a uid\n";
 
+const std::string HELP_MSG_GET_EACH_BUNDLE_CACHE_STAT =
+    "usage: bundle_test_tool getEachBundleCacheStat <options>\n"
+    "eg:bundle_test_tool getEachBundleCacheStat -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
 const std::string HELP_MSG_CLEAN_ALL_BUNDLE_CACHE =
     "usage: bundle_test_tool cleanAllBundleCache <options>\n"
     "eg:bundle_test_tool cleanAllBundleCache\n"
@@ -965,6 +975,8 @@ const std::string STRING_GET_DISPOSED_RULES_NG = "getDisposedRules failed\n";
 
 const std::string STRING_GET_ALL_BUNDLE_CACHE_STAT_OK = "getAllBundleCacheStat successfully\n";
 const std::string STRING_GET_ALL_BUNDLE_CACHE_STAT_NG = "getAllBundleCacheStat failed\n";
+const std::string STRING_GET_EACH_BUNDLE_CACHE_STAT_OK = "getEachBundleCacheStat successfully\n";
+const std::string STRING_GET_EACH_BUNDLE_CACHE_STAT_NG = "getEachBundleCacheStat failed\n";
 
 const std::string STRING_CLEAN_ALL_BUNDLE_CACHE_OK = "cleanAllBundleCache successfully\n";
 const std::string STRING_CLEAN_ALL_BUNDLE_CACHE_NG = "cleanAllBundleCache failed\n";
@@ -1622,6 +1634,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsGetDisposedRules, this)},
         {"getAllBundleCacheStat",
             std::bind(&BundleTestTool::RunAsGetAllBundleCacheStat, this)},
+        {"getEachBundleCacheStat",
+            std::bind(&BundleTestTool::RunAsGetEachBundleCacheStat, this)},
         {"cleanAllBundleCache",
             std::bind(&BundleTestTool::RunAsCleanAllBundleCache, this)},
         {"isBundleInstalled",
@@ -4867,6 +4881,54 @@ bool BundleTestTool::GetAllBundleStats(int32_t userId, std::string &msg)
     return ret;
 }
 
+bool BundleTestTool::GetEachBundleCacheStat(int32_t userId, std::string &msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return false;
+    }
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+    std::vector<BundleInfo> bundleInfos;
+    bool ret = bundleMgrProxy_->GetBundleInfos(
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE), bundleInfos, userId);
+    if (!ret) {
+        msg += "error: get bundle infos failed\n";
+        return false;
+    }
+
+    uint32_t statFlag = Constants::NoGetBundleStatsFlag::GET_BUNDLE_WITHOUT_INSTALL_SIZE |
+        Constants::NoGetBundleStatsFlag::GET_BUNDLE_WITHOUT_DATA_SIZE;
+    bool allSucceeded = true;
+    int64_t totalCacheSize = 0;
+    size_t successCount = 0;
+    size_t failCount = 0;
+    for (const auto &bundleInfo : bundleInfos) {
+        std::vector<int64_t> bundleStats;
+        bool statRet = bundleMgrProxy_->GetBundleStats(
+            bundleInfo.name, userId, bundleStats, bundleInfo.appIndex, statFlag);
+        if (!statRet || bundleStats.size() < BUNDLE_STATS_MIN_SIZE) {
+            allSucceeded = false;
+            ++failCount;
+            msg += "bundleName: " + bundleInfo.name + ", appIndex: " + std::to_string(bundleInfo.appIndex) +
+                ", error: get bundle stats failed\n";
+            APP_LOGW("get bundle cache stat failed, bundleName: %{public}s, appIndex: %{public}d",
+                bundleInfo.name.c_str(), bundleInfo.appIndex);
+            continue;
+        }
+        int64_t cacheSize = bundleStats[BUNDLE_STATS_CACHE_INDEX];
+        totalCacheSize += cacheSize;
+        ++successCount;
+        msg += "bundleName: " + bundleInfo.name + ", appIndex: " + std::to_string(bundleInfo.appIndex) +
+            ", cache size: " + std::to_string(cacheSize) + "\n";
+        APP_LOGD("bundle cache stat, bundleName: %{public}s, appIndex: %{public}d, cacheSize: %{public}lld",
+            bundleInfo.name.c_str(), bundleInfo.appIndex, static_cast<long long>(cacheSize));
+    }
+    msg += "success count: " + std::to_string(successCount) + "\n";
+    msg += "fail count: " + std::to_string(failCount) + "\n";
+    msg += "total cache size: " + std::to_string(totalCacheSize) + "\n";
+    return allSucceeded;
+}
+
 ErrCode BundleTestTool::RunAsGetAllBundleStats()
 {
     int32_t userId = 0;
@@ -4880,6 +4942,24 @@ ErrCode BundleTestTool::RunAsGetAllBundleStats()
             resultReceiver_ = STRING_GET_ALL_BUNDLE_STATS_OK + msg;
         } else {
             resultReceiver_ = STRING_GET_ALL_BUNDLE_STATS_NG + "\n";
+        }
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetEachBundleCacheStat()
+{
+    int32_t userId = 0;
+    int32_t result = UserIdCommonFunc(userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_EACH_BUNDLE_CACHE_STAT);
+    } else {
+        std::string msg;
+        bool ret = GetEachBundleCacheStat(userId, msg);
+        if (ret) {
+            resultReceiver_ = STRING_GET_EACH_BUNDLE_CACHE_STAT_OK + msg;
+        } else {
+            resultReceiver_ = STRING_GET_EACH_BUNDLE_CACHE_STAT_NG + msg;
         }
     }
     return result;
