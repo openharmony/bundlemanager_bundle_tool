@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@ namespace OHOS {
 namespace AppExecFwk {
 class MockBundleMgrHost : public BundleMgrHost {
 public:
+    static void SetGetBundleInfosReturn(bool result);
+    static void SetGetBundleStatsFailSecondBundle(bool enable);
+
     ErrCode CleanBundleCacheFiles(const std::string &bundleName, const sptr<ICleanCacheCallback> cleanCacheCallback,
         int32_t userId = Constants::UNSPECIFIED_USERID, int32_t appIndex = 0) override;
     bool CleanBundleDataFiles(const std::string &bundleName, const int userId = 0,
@@ -36,6 +39,10 @@ public:
     ErrCode SetAbilityEnabled(const AbilityInfo &abilityInfo, bool isEnable,
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
     bool GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag, BundleInfo &bundleInfo) override;
+    bool GetBundleInfos(int32_t flags, std::vector<BundleInfo> &bundleInfos,
+        int32_t userId = Constants::UNSPECIFIED_USERID) override;
+    bool GetBundleStats(const std::string &bundleName, int32_t userId, std::vector<int64_t> &bundleStats,
+        int32_t appIndex = 0, uint32_t statFlag = 0) override;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

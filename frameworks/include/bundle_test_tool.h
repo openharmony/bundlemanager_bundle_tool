@@ -131,6 +131,7 @@ private:
         int option, const std::string &commandName, int &userId, int &callerUid);
     ErrCode RunAsGetAllBundleCacheStat();
     ErrCode GetAllBundleCacheStat(std::string& msg);
+    ErrCode RunAsGetEachBundleCacheStat();
     ErrCode RunAsCleanAllBundleCache();
     ErrCode CleanAllBundleCache(std::string& msg);
     ErrCode RunAsIsBundleInstalled();
@@ -205,6 +206,7 @@ private:
     bool GetBundleInodeCount(const std::string &bundleName, int32_t appIndex, int32_t userId, std::string &msg);
     bool BatchGetBundleStats(const std::vector<std::string> &bundleNames, int32_t userId, std::string &msg);
     bool GetAllBundleStats(int32_t userId, std::string &msg);
+    bool GetEachBundleCacheStat(int32_t userId, std::string &msg);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, std::string &msg);
     ErrCode GetDistributedBundleName(const std::string &networkId, int32_t accessTokenId, std::string &msg);
     ErrCode BundleNameAndUserIdCommonFunc(std::string &bundleName, int32_t &userId, int32_t &appIndex);
