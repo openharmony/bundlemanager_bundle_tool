@@ -44,7 +44,8 @@
         },
         "build": {
             "sub_component": [
-                "//foundation/bundlemanager/bundle_tool:bm"
+                "//foundation/bundlemanager/bundle_tool:bm",
+                "//foundation/bundlemanager/bundle_tool/ohos_bm:cli_tools_bm"
             ],
             "inner_kits": [],
             "test": [

@@ -1,0 +1,543 @@
+{
+    "name": "ohos-bm",
+    "version": "1.0.0",
+    "description": "ohos-bm包管理命令行工具",
+    "executable": "/system/bin/cli_tools/ohos_bm",
+    "requirePermission": [],
+    "hasSubcommands": true,
+    "timeout": 30000,
+    "output": {
+        "type": "object",
+        "description": "执行结果",
+        "properties": {
+            "success": {
+                "type": "boolean"
+            },
+            "message": {
+                "type": "string"
+            },
+            "code": {
+                "type": "string"
+            },
+            "cause": {
+                "type": "string"
+            },
+            "suggestion": {
+                "type": "string"
+            }
+        }
+    },
+    "events": ["result"],
+    "eventSchemas": {},
+    "subcommands": {
+        "help": {
+            "description": "查看ohos-bm相关子命令的信息",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {}
+            },
+            "argumentMapping": {},
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {}
+        },
+        "install": {
+            "description": "安装一个hap、hsp或app包",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundlePath": {
+                        "type": "string",
+                        "description": "安装包文件路径",
+                        "default": ""
+                    },
+                    "replace": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "sharedBundleDirPath": {
+                        "type": "string",
+                        "description": "安装跨应用hsp文件的目录路径",
+                        "default": ""
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "指定用户ID",
+                        "default": ""
+                    },
+                    "waittingTime": {
+                        "type": "string",
+                        "description": "指定安装等待时间（180-600秒）",
+                        "default": ""
+                    },
+                    "downgrade": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "grantPermission": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "bundlePath": "-p={value}",
+                    "replace": {
+                        "if_true": "-r",
+                        "if_false": ""
+                    },
+                    "sharedBundleDirPath": "-s={value}",
+                    "userId": "-u={value}",
+                    "waittingTime": "-w={value}",
+                    "downgrade": {
+                        "if_true": "-d",
+                        "if_false": ""
+                    },
+                    "grantPermission": {
+                        "if_true": "-g",
+                        "if_false": ""
+                    }
+                }
+            }
+        },
+        "uninstall": {
+            "description": "卸载一个应用包",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "要卸载的应用包名",
+                        "default": ""
+                    },
+                    "moduleName": {
+                        "type": "string",
+                        "description": "要卸载的模块名",
+                        "default": ""
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "指定用户ID",
+                        "default": ""
+                    },
+                    "keepData": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "shared": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "按版本号卸载跨应用共享库",
+                        "default": ""
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "bundleName": "-n={value}",
+                    "moduleName": "-m={value}",
+                    "userId": "-u={value}",
+                    "keepData": {
+                        "if_true": "-k",
+                        "if_false": ""
+                    },
+                    "shared": {
+                        "if_true": "-s",
+                        "if_false": ""
+                    },
+                    "version": "-v={value}"
+                }
+            }
+        },
+        "dump": {
+            "description": "查看应用包信息",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "all": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "debugBundle": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "指定应用包名",
+                        "default": ""
+                    },
+                    "shortcutInfo": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "deviceId": {
+                        "type": "string",
+                        "description": "指定设备ID",
+                        "default": ""
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "指定用户ID",
+                        "default": ""
+                    },
+                    "label": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "all": {
+                        "if_true": "-a",
+                        "if_false": ""
+                    },
+                    "debugBundle": {
+                        "if_true": "-g",
+                        "if_false": ""
+                    },
+                    "bundleName": "-n={value}",
+                    "shortcutInfo": {
+                        "if_true": "-s",
+                        "if_false": ""
+                    },
+                    "deviceId": "-d={value}",
+                    "userId": "-u={value}",
+                    "label": {
+                        "if_true": "-l",
+                        "if_false": ""
+                    }
+                }
+            }
+        },
+        "dump-dependencies": {
+            "description": "查看指定应用和模块的依赖信息",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "指定应用包名",
+                        "default": ""
+                    },
+                    "moduleName": {
+                        "type": "string",
+                        "description": "指定模块名",
+                        "default": ""
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "bundleName": "-n={value}",
+                    "moduleName": "-m={value}"
+                }
+            }
+        },
+        "dump-shared": {
+            "description": "查看跨应用共享库信息",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "all": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "指定应用包名",
+                        "default": ""
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "all": {
+                        "if_true": "-a",
+                        "if_false": ""
+                    },
+                    "bundleName": "-n={value}"
+                }
+            }
+        },
+        "clean": {
+            "description": "清理应用缓存或数据文件",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "指定应用包名",
+                        "default": ""
+                    },
+                    "cache": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "data": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "指定用户ID",
+                        "default": ""
+                    },
+                    "appIndex": {
+                        "type": "string",
+                        "description": "指定应用索引",
+                        "default": ""
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "bundleName": "-n={value}",
+                    "cache": {
+                        "if_true": "-c",
+                        "if_false": ""
+                    },
+                    "data": {
+                        "if_true": "-d",
+                        "if_false": ""
+                    },
+                    "userId": "-u={value}",
+                    "appIndex": "-i={value}"
+                }
+            }
+        }
+    }
+}
