@@ -14,5 +14,8 @@
 import("//build/ohos.gni")
 
 group("bm") {
-  deps = [ "frameworks:tools_bm" ]
+  deps = [
+    "frameworks:tools_bm",
+    "ohos_bm:cli_tools_bm",
+  ]
 }
