@@ -231,7 +231,8 @@ static const std::string HELP_MSG =
     "  installEnterpriseResignCert      install an enterprise resign cert\n"
     "  uninstallEnterpriseReSignatureCert    uninstall enterprise re sign cert\n"
     "  getEnterpriseReSignatureCert          get enterprise re sign cert\n"
-    "  getApiTargetVersionByUid          get api target version by uid\n";
+    "  getApiTargetVersionByUid          get api target version by uid\n"
+    "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -534,6 +535,15 @@ const std::string HELP_MSG_GET_APP_PROVISION_INFO =
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_GET_TOP_N_LARGEST_ITEMS =
+    "usage: bundle_test_tool getTopNLargestItemsInAppDataDir <options>\n"
+    "eg:bundle_test_tool getTopNLargestItemsInAppDataDir -n <bundle-name> -u <user-id> -a <app-index>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify a app index\n";
 
 const std::string HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME =
     "usage: bundle_test_tool getDistributedBundleName <options>\n"
@@ -1650,6 +1660,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)},
         {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)},
         {"setBundleFirstLaunch", std::bind(&BundleTestTool::RunAsSetBundleFirstLaunch, this)},
+        {"getTopNLargestItemsInAppDataDir", std::bind(&BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir, this)},
         {"batchGetBundleInfo", std::bind(&BundleTestTool::RunAsBatchGetBundleInfo, this)}
     };
 
@@ -7763,6 +7774,37 @@ ErrCode BundleTestTool::RunAsBatchGetBundleInfo()
         result = ret;
     }
     APP_LOGI("RunAsBatchGetBundleInfo end");
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir()
+{
+    std::string bundleName;
+    int32_t userId = 0;
+    int32_t appIndex = 0;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_TOP_N_LARGEST_ITEMS);
+    } else {
+        if (bundleMgrProxy_ == nullptr) {
+            APP_LOGE("bundleMgrProxy_ is nullptr");
+            resultReceiver_.append("error: bundleMgrProxy_ is nullptr\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+
+        userId = BundleCommandCommon::GetCurrentUserId(userId);
+        std::string resultPathsWithSize;
+        ErrCode ret = bundleMgrProxy_->GetTopNLargestItemsInAppDataDir(bundleName, appIndex, userId,
+            resultPathsWithSize);
+        if (ret == ERR_OK) {
+            resultReceiver_.append("Get top N largest items in app data dir success:\n");
+            resultReceiver_.append(resultPathsWithSize);
+            resultReceiver_.append("\n");
+        } else {
+            resultReceiver_.append("Get top N largest items in app data dir failed, errCode is " +
+                                   std::to_string(ret) + "\n");
+        }
+    }
     return result;
 }
 } // AppExecFwk

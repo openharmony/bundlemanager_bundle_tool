@@ -147,6 +147,7 @@ private:
     ErrCode RunAsInstallEnterpriseResignCertCommand();
     ErrCode RunAsGetOdidResetCount();
     ErrCode RunAsSetBundleFirstLaunch();
+    ErrCode RunAsGetTopNLargestItemsInAppDataDir();
     // eg: bundle_test_tool batchGetBundleInfo -n <bundle-name>,<bundle-name> -f <flags> -u <user-id>
     ErrCode RunAsBatchGetBundleInfo();
 
