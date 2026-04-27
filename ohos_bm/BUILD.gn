@@ -21,7 +21,7 @@ config("tools_ohos_bm_config") {
 
   defines = [
     "APP_LOG_TAG = \"OHOS_BMSTool\"",
-    "LOG_DOMAIN = 0xD001124",
+    "LOG_DOMAIN = 0xD001123",
   ]
 }
 
@@ -40,6 +40,7 @@ ohos_source_set("tools_ohos_bm_source_set") {
   sources = [
     "src/bundle_command.cpp",
     "src/bundle_command_common.cpp",
+    "src/error_code_utils.cpp",
     "src/main.cpp",
     "src/shell_command.cpp",
     "src/status_receiver_impl.cpp",
@@ -80,12 +81,11 @@ ohos_source_set("tools_ohos_bm_source_set") {
   part_name = "bundle_tool"
 }
 
-ohos_executable("ohos_bm") {
+ohos_executable("ohos-bm") {
   deps = [ ":tools_ohos_bm_source_set" ]
-
   external_deps = [ "hilog:libhilog" ]
 
-  install_enable = true
+  install_enable = false
 
   subsystem_name = "bundlemanager"
   part_name = "bundle_tool"
@@ -93,6 +93,6 @@ ohos_executable("ohos_bm") {
 
 group("cli_tools_bm") {
   deps = [
-    ":ohos_bm",
+    ":ohos-bm",
   ]
 }
