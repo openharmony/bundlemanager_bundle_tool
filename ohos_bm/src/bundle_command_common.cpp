@@ -14,6 +14,7 @@
  */
 #include "bundle_command_common.h"
 
+#include <unistd.h>
 #include "app_log_wrapper.h"
 #include "appexecfwk_errors.h"
 #include "bundle_mgr_proxy.h"
@@ -227,5 +228,25 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
         "error: Failed to install the HAP because the device is unauthorized, "
         "make sure the UDID of your device is configured in the signing profile." },
 };
+
+int32_t BundleCommandCommon::GetOsAccountLocalIdFromUid(const int32_t callingUid)
+{
+    int32_t localId = callingUid < Constants::DEFAULT_USERID ? Constants::INVALID_USERID :
+        callingUid / Constants::BASE_USER_RANGE;
+#ifdef ACCOUNT_ENABLE
+    if (localId <= Constants::DEFAULT_USERID) {
+        APP_LOGW("GetOsAccountLocalIdFromUid fail uid:%{public}d req from active userid", callingUid);
+        int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(localId);
+        if (ret != 0) {
+            APP_LOGW("GetForegroundOsAccountLocalId failed ret:%{public}d", ret);
+            return Constants::INVALID_USERID;
+        }
+    }
+    return localId;
+#else
+    APP_LOGI("ACCOUNT_ENABLE is false");
+    return localId;
+#endif
+}
 } // AppExecFwk
 } // OHOS
