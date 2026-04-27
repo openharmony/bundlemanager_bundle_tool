@@ -44,6 +44,7 @@
 #include "iservice_registry.h"
 #include "data_group_info.h"
 #include "directory_ex.h"
+#include "get_largest_items_callback_host.h"
 #include "module_info.h"
 #include "parameter.h"
 #include "parameters.h"
@@ -1530,6 +1531,57 @@ bool ProcessCacheCallbackImpl::WaitForCleanCompletion()
 bool ProcessCacheCallbackImpl::WaitForStatCompletion()
 {
     if (statFuture_.wait_for(std::chrono::seconds(MAX_WAITING_TIME)) == std::future_status::ready) {
+        return true;
+    }
+    return false;
+}
+
+class GetLargestItemsCallbackImpl : public GetLargestItemsCallbackHost {
+public:
+    GetLargestItemsCallbackImpl() {}
+    ~GetLargestItemsCallbackImpl() {}
+    void OnGetLargestItemsFinished(ErrCode errCode, const std::string &largestItems) override;
+    ErrCode GetResultCode();
+    std::string GetResultMsg();
+    bool WaitForGetCompletion();
+
+private:
+    std::mutex mutex_;
+    bool complete_ = false;
+    ErrCode errCode_ = 0;
+    std::string result_;
+    std::promise<void> get_;
+    std::future<void> getFuture_ = get_.get_future();
+    DISALLOW_COPY_AND_MOVE(GetLargestItemsCallbackImpl);
+};
+
+void GetLargestItemsCallbackImpl::OnGetLargestItemsFinished(
+    ErrCode errCode, const std::string &largestItems)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!complete_) {
+        complete_ = true;
+        errCode_ = errCode;
+        result_ = largestItems;
+        get_.set_value();
+    }
+}
+
+ErrCode GetLargestItemsCallbackImpl::GetResultCode()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return errCode_;
+}
+
+std::string GetLargestItemsCallbackImpl::GetResultMsg()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return result_;
+}
+
+bool GetLargestItemsCallbackImpl::WaitForGetCompletion()
+{
+    if (getFuture_.wait_for(std::chrono::seconds(MAX_WAITING_TIME)) == std::future_status::ready) {
         return true;
     }
     return false;
@@ -7793,13 +7845,26 @@ ErrCode BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir()
         }
 
         userId = BundleCommandCommon::GetCurrentUserId(userId);
-        std::string resultPathsWithSize;
+        sptr<GetLargestItemsCallbackImpl> getCallBack(new (std::nothrow) GetLargestItemsCallbackImpl());
+        if (getCallBack == nullptr) {
+            APP_LOGE("getCallBack is null");
+            return OHOS::ERR_INVALID_VALUE;
+        }
         ErrCode ret = bundleMgrProxy_->GetTopNLargestItemsInAppDataDir(bundleName, appIndex, userId,
-            resultPathsWithSize);
+            getCallBack);
         if (ret == ERR_OK) {
-            resultReceiver_.append("Get top N largest items in app data dir success:\n");
-            resultReceiver_.append(resultPathsWithSize);
-            resultReceiver_.append("\n");
+            if (getCallBack->WaitForGetCompletion()) {
+                ErrCode code = getCallBack->GetResultCode();
+                std::string result = getCallBack->GetResultMsg();
+                if (code == ERR_OK) {
+                    resultReceiver_.append("Get top N largest items in app data dir success:\n");
+                    resultReceiver_.append(result);
+                    resultReceiver_.append("\n");
+                } else {
+                    resultReceiver_.append("Get top N largest items in app data dir failed, errCode is " +
+                    std::to_string(code) + "\n");
+                }
+            }
         } else {
             resultReceiver_.append("Get top N largest items in app data dir failed, errCode is " +
                                    std::to_string(ret) + "\n");
