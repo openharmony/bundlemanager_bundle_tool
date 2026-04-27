@@ -21,6 +21,7 @@
 #include "bundle_installer_interface.h"
 #include "app_control_interface.h"
 #include "disposed_rule.h"
+#include "status_receiver_interface.h"
 #include "nlohmann/json.hpp"
 
 namespace OHOS {
@@ -44,30 +45,30 @@ const std::string HELP_MSG_INSTALL =
     "usage: ohos-bm install <options>\n"
     "options list:\n"
     "  -h, --help                                                     list available commands\n"
-    "  -p, --bundle-path <file-path>                                  install a hap or hsp or app by a specified path\n"
-    "  -p, --bundle-path <file-path> <file-path> ...                  install one bundle by some hap or hsp paths\n"
-    "  -p, --bundle-path <bundle-direction>                           install one bundle by a direction,\n"
+    "  -p, --bundlePath <file-path>                                  install a hap or hsp or app by a specified path\n"
+    "  -p, --bundlePath <file-path> <file-path> ...                  install one bundle by some hap or hsp paths\n"
+    "  -p, --bundlePath <bundle-direction>                           install one bundle by a direction,\n"
     "                                                                    under which are some hap or hsp\n"
     "                                                                    or one app files\n"
     "  -r -p <bundle-file-path>                                       replace an existing bundle\n"
-    "  -r --bundle-path <bundle-file-path>                            replace an existing bundle\n"
-    "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>          install inter-application hsp files\n"
-    "  -u, --user-id <user-id>                                        specify a user id,\n"
+    "  -r --bundlePath <bundle-file-path>                            replace an existing bundle\n"
+    "  -s, --sharedBundleDirPath <shared-bundle-dir-path>          install inter-application hsp files\n"
+    "  -u, --userId <user-id>                                        specify a user id,\n"
     "                                                                   only supports current user or userId is 0\n"
-    "  -w, --waitting-time <waitting-time>                            specify waitting time for installation,\n"
+    "  -w, --waittingTime <waitting-time>                            specify waitting time for installation,\n"
     "                                                                    the minimum waitting time is 180s,\n"
     "                                                                    the maximum waitting time is 600s\n"
     "  -d, --downgrade                                                install allow downgrade\n"
-    "  -g, --grant-permission                                         grant permissions for installation\n";
+    "  -g, --grantPermission                                         grant permissions for installation\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: ohos-bm uninstall <options>\n"
     "options list:\n"
     "  -h, --help                           list available commands\n"
-    "  -n, --bundle-name <bundle-name>      uninstall a bundle by bundle name\n"
-    "  -m, --module-name <module-name>      uninstall a module by module name\n"
-    "  -u, --user-id <user-id>              specify a user id,only supports current user or userId is 0\n"
-    "  -k, --keep-data                      keep the user data after uninstall\n"
+    "  -n, --bundleName <bundle-name>      uninstall a bundle by bundle name\n"
+    "  -m, --moduleName <module-name>      uninstall a module by module name\n"
+    "  -u, --userId <user-id>              specify a user id,only supports current user or userId is 0\n"
+    "  -k, --keepData                      keep the user data after uninstall\n"
     "  -s, --shared                         uninstall inter-application shared library\n"
     "  -v, --version                        uninstall a inter-application shared library by versionCode\n";
 
@@ -76,22 +77,22 @@ const std::string HELP_MSG_DUMP =
     "options list:\n"
     "  -h, --help                           list available commands\n"
     "  -a, --all                            list all bundles in system\n"
-    "  -g, --debug-bundle                   list debug bundles in system\n"
-    "  -n, --bundle-name <bundle-name>      list the bundle info by a bundle name\n"
-    "  -s, --shortcut-info                  list the shortcut info\n"
-    "  -d, --device-id <device-id>          specify a device id\n"
-    "  -u, --user-id <user-id>              specify a user id,only supports current user or userId is 0\n"
+    "  -g, --debugBundle                   list debug bundles in system\n"
+    "  -n, --bundleName <bundle-name>      list the bundle info by a bundle name\n"
+    "  -s, --shortcutInfo                  list the shortcut info\n"
+    "  -d, --deviceId <device-id>          specify a device id\n"
+    "  -u, --userId <user-id>              specify a user id,only supports current user or userId is 0\n"
     "  -l, --label                          list the label info\n";
 
 const std::string HELP_MSG_CLEAN =
     "usage: ohos-bm clean <options>\n"
     "options list:\n"
     "  -h, --help                                      list available commands\n"
-    "  -n, --bundle-name  <bundle-name>                bundle name\n"
+    "  -n, --bundleName  <bundle-name>                bundle name\n"
     "  -c, --cache                                     clean bundle cache files by bundle name\n"
     "  -d, --data                                      clean bundle data files by bundle name\n"
-    "  -u, --user-id <user-id>                         specify a user id,only supports current user or userId is 0\n"
-    "  -i, --app-index <app-index>                     specify a app index\n";
+    "  -u, --userId <user-id>                         specify a user id,only supports current user or userId is 0\n"
+    "  -i, --appIndex <app-index>                     specify a app index\n";
 
 const std::string HELP_MSG_DUMP_SHARED =
     "usage: ohos-bm dump-shared <options>\n"
@@ -99,22 +100,25 @@ const std::string HELP_MSG_DUMP_SHARED =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -a, --all                              list all inter-application shared library name in system\n"
-    "  -n, --bundle-name  <bundle-name>       dump inter-application shared library information by bundleName\n";
+    "  -n, --bundleName  <bundle-name>       dump inter-application shared library information by bundleName\n";
 
 const std::string HELP_MSG_DUMP_SHARED_DEPENDENCIES =
     "usage: ohos-bm dump-dependencies <options>\n"
     "eg:ohos-bm dump-dependencies -n <bundle-name> -m <module-name> \n"
     "options list:\n"
     "  -h, --help                             list available commands\n"
-    "  -n, --bundle-name  <bundle-name>       dump dependencies by bundleName and moduleName\n"
-    "  -m, --module-name  <module-name>       dump dependencies by bundleName and moduleName\n";
+    "  -n, --bundleName  <bundle-name>       dump dependencies by bundleName and moduleName\n"
+    "  -m, --moduleName  <module-name>       dump dependencies by bundleName and moduleName\n";
 
 const std::string STRING_INCORRECT_OPTION = "error: incorrect option";
 const std::string HELP_MSG_NO_BUNDLE_PATH_OPTION =
-    "error: you must specify a bundle path with '-p' or '--bundle-path'.";
+    "error: you must specify a bundle path with '-p' or '--bundlePath'.";
+
+const std::string HELP_MSG_NO_OPTION =
+    "error: no option specified. Use -h for help.";
 
 const std::string HELP_MSG_NO_BUNDLE_NAME_OPTION =
-    "error: you must specify a bundle name with '-n' or '--bundle-name'.";
+    "error: you must specify a bundle name with '-n' or '--bundleName'.";
 
 const std::string STRING_INSTALL_BUNDLE_OK = "install bundle successfully.";
 const std::string STRING_INSTALL_BUNDLE_NG = "error: failed to install bundle.";
@@ -135,8 +139,8 @@ const std::string STRING_REQUIRE_CORRECT_VALUE = "error: option requires a corre
 const std::string HELP_MSG_DUMP_FAILED = "error: failed to get information and the parameters may be wrong.";
 
 const std::string HELP_MSG_NO_REMOVABLE_OPTION =
-    "error: you must specify a bundle name with '-n' or '--bundle-name' \n"
-    "and a module name with '-m' or '--module-name' \n";
+    "error: you must specify a bundle name with '-n' or '--bundleName' \n"
+    "and a module name with '-m' or '--moduleName' \n";
 
 const std::string BUNDLE_NAME_EMPTY = "";
 const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
@@ -152,27 +156,27 @@ const std::string HELP_MSG_SET_DISPOSED_RULE =
     "usage: ohos-bm set-disposed-rule <options> "
     "options list: "
     "-h, --help: list available commands. "
-    "--app-id <app-id>: application appId or appIdentifier (required). "
-    "--app-index <app-index>: clone app index, a positive integer. "
+    "--appId <app-id>: application appId or appIdentifier (required). "
+    "--appIndex <app-index>: clone app index, a positive integer. "
     "--priority <priority>: priority of the disposed rule, a non-negative integer (required). "
-    "--component-type <type>: component type to control (required): 1=UI_ABILITY, 2=UI_EXTENSION. "
-    "--disposed-type <type>: disposal type (required): 1=BLOCK_APPLICATION, 2=BLOCK_ABILITY, 3=NON_BLOCK. "
-    "--control-type <type>: control type for elementList (required): 1=ALLOWED_LIST, 2=DISALLOWED_LIST. "
-    "--element <element-uri>: element to control, format: /bundleName/moduleName/abilityName, "
+    "--componentType <type>: component type to control (required): 1=UI_ABILITY, 2=UI_EXTENSION. "
+    "--disposedType <type>: disposal type (required): 1=BLOCK_APPLICATION, 2=BLOCK_ABILITY, 3=NON_BLOCK. "
+    "--controlType <type>: control type for elementList (required): 1=ALLOWED_LIST, 2=DISALLOWED_LIST. "
+    "--elements <element-uri>: element to control, format: /bundleName/moduleName/abilityName, "
     "multiple elements can be added by repeating this option. "
-    "--want-bundle-name <name>: bundleName of the Want for redirection (required). "
-    "--want-module-name <name>: moduleName of the Want for redirection. "
-    "--want-ability-name <name>: abilityName of the Want for redirection (required). "
-    "--want-ps <key> <value>: Want string parameter (repeatable). "
-    "--want-pi <key> <value>: Want int parameter (repeatable). "
-    "--want-pb <key> <value>: Want bool parameter, true/false (repeatable).";
+    "--wantBundleName <name>: bundleName of the Want for redirection (required). "
+    "--wantModuleName <name>: moduleName of the Want for redirection. "
+    "--wantAbilityName <name>: abilityName of the Want for redirection (required). "
+    "--wantParamsStrings <key> <value>: Want string parameter (repeatable). "
+    "--wantParamsInts <key> <value>: Want int parameter (repeatable). "
+    "--wantParamsBools <key> <value>: Want bool parameter, true/false (repeatable).";
 
 const std::string HELP_MSG_DELETE_DISPOSED_RULE =
     "usage: ohos-bm delete-disposed-rule <options> "
     "options list: "
     "-h, --help: list available commands. "
-    "--app-id <app-id>: application appId or appIdentifier (required). "
-    "--app-index <app-index>: clone app index, a positive integer.";
+    "--appId <app-id>: application appId or appIdentifier (required). "
+    "--appIndex <app-index>: clone app index, a positive integer.";
 
 const std::string STRING_SET_DISPOSED_RULE_OK = "set disposed rule successfully.";
 const std::string STRING_SET_DISPOSED_RULE_NG = "error: failed to set disposed rule.";
@@ -205,6 +209,8 @@ private:
     ErrCode CreateCommandMap() override;
     ErrCode CreateMessageMap() override;
     ErrCode Init() override;
+    ErrCode InitInstaller();
+    ErrCode InitAppControlProxy();
 
     ErrCode RunAsHelpCommand();
     ErrCode RunAsInstallCommand();
@@ -246,9 +252,10 @@ private:
 
     // JSON output helper methods
     std::string CreateSuccessResult(const std::string &message, const std::string &data = "") const;
-    std::string CreateErrorResult(const std::string &code, const std::string &message,
-        const std::string &cause = "", const std::string &suggestion = "") const;
-    std::string GetMessageFromCode(int32_t code) const;
+    std::string CreateErrorResult(int32_t code, const std::string &message,
+        const std::string &suggestion = "") const;
+    std::string CreateErrorResult(const std::string &errCode, const std::string &message,
+        const std::string &suggestion = "") const;
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;

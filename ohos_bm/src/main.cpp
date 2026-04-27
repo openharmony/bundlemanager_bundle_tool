@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 {
     APP_LOGI("ohos-bm exec start");
     OHOS::AppExecFwk::BundleManagerShellCommand cmd(argc, argv);
-    std::cout << cmd.ExecCommand();
+    std::cout << cmd.ExecCommand() << std::endl;
     APP_LOGI("ohos-bm exec end");
-    quick_exit(0);
+    return 0;
 }
