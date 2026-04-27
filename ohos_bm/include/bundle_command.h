@@ -19,6 +19,8 @@
 #include "shell_command.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_installer_interface.h"
+#include "app_control_interface.h"
+#include "disposed_rule.h"
 #include "nlohmann/json.hpp"
 
 namespace OHOS {
@@ -34,7 +36,9 @@ const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
                              "  dump              dump the bundle info\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"
                              "  dump-shared       dump inter-application shared library information by bundle name\n"
-                             "  clean             clean the bundle data\n";
+                             "  clean             clean the bundle data\n"
+                             "  set-disposed-rule set disposed rule for clone app\n"
+                             "  delete-disposed-rule delete disposed rule for clone app\n";
 
 const std::string HELP_MSG_INSTALL =
     "usage: ohos-bm install <options>\n"
@@ -143,6 +147,52 @@ const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 
 const std::string WARNING_USER =
     "Warning: The current user is %. If you want to set the userId as $, please switch to $.\n";
+
+const std::string HELP_MSG_SET_DISPOSED_RULE =
+    "usage: ohos-bm set-disposed-rule <options> "
+    "options list: "
+    "-h, --help: list available commands. "
+    "--app-id <app-id>: application appId or appIdentifier (required). "
+    "--app-index <app-index>: clone app index, a positive integer. "
+    "--priority <priority>: priority of the disposed rule, a non-negative integer (required). "
+    "--component-type <type>: component type to control (required): 1=UI_ABILITY, 2=UI_EXTENSION. "
+    "--disposed-type <type>: disposal type (required): 1=BLOCK_APPLICATION, 2=BLOCK_ABILITY, 3=NON_BLOCK. "
+    "--control-type <type>: control type for elementList (required): 1=ALLOWED_LIST, 2=DISALLOWED_LIST. "
+    "--element <element-uri>: element to control, format: /bundleName/moduleName/abilityName, "
+    "multiple elements can be added by repeating this option. "
+    "--want-bundle-name <name>: bundleName of the Want for redirection (required). "
+    "--want-module-name <name>: moduleName of the Want for redirection. "
+    "--want-ability-name <name>: abilityName of the Want for redirection (required). "
+    "--want-ps <key> <value>: Want string parameter (repeatable). "
+    "--want-pi <key> <value>: Want int parameter (repeatable). "
+    "--want-pb <key> <value>: Want bool parameter, true/false (repeatable).";
+
+const std::string HELP_MSG_DELETE_DISPOSED_RULE =
+    "usage: ohos-bm delete-disposed-rule <options> "
+    "options list: "
+    "-h, --help: list available commands. "
+    "--app-id <app-id>: application appId or appIdentifier (required). "
+    "--app-index <app-index>: clone app index, a positive integer.";
+
+const std::string STRING_SET_DISPOSED_RULE_OK = "set disposed rule successfully.";
+const std::string STRING_SET_DISPOSED_RULE_NG = "error: failed to set disposed rule.";
+const std::string STRING_DELETE_DISPOSED_RULE_OK = "delete disposed rule successfully.";
+const std::string STRING_DELETE_DISPOSED_RULE_NG = "error: failed to delete disposed rule.";
+const std::string STRING_USER_ID_INVALID = "error: userId is invalid, cannot call this command.";
+
+constexpr int32_t OPTION_APP_ID = 1000;
+constexpr int32_t OPTION_APP_INDEX = 1001;
+constexpr int32_t OPTION_PRIORITY = 1002;
+constexpr int32_t OPTION_COMPONENT_TYPE = 1003;
+constexpr int32_t OPTION_DISPOSED_TYPE = 1004;
+constexpr int32_t OPTION_CONTROL_TYPE = 1005;
+constexpr int32_t OPTION_ELEMENT = 1006;
+constexpr int32_t OPTION_WANT_BUNDLE_NAME = 1007;
+constexpr int32_t OPTION_WANT_MODULE_NAME = 1008;
+constexpr int32_t OPTION_WANT_ABILITY_NAME = 1009;
+constexpr int32_t OPTION_WANT_PS = 1010;
+constexpr int32_t OPTION_WANT_PI = 1011;
+constexpr int32_t OPTION_WANT_PB = 1012;
 } // namespace
 
 class BundleManagerShellCommand : public ShellCommand {
@@ -163,6 +213,8 @@ private:
     ErrCode RunAsDumpSharedDependenciesCommand();
     ErrCode RunAsDumpSharedCommand();
     ErrCode RunAsCleanCommand();
+    ErrCode RunAsSetDisposedRuleCommand();
+    ErrCode RunAsDeleteDisposedRuleCommand();
 
     int32_t InstallOperation(const std::vector<std::string> &bundlePaths, InstallParam &installParam,
         int32_t waittingTime, std::string &resultMsg) const;
@@ -200,6 +252,7 @@ private:
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
+    sptr<IAppControlMgr> appControlProxy_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

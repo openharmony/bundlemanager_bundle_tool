@@ -30,6 +30,7 @@ public:
 
     static int32_t GetCurrentUserId(int32_t userId);
     static bool IsUserForeground(int32_t userId);
+    static int32_t GetOsAccountLocalIdFromUid(const int32_t callingUid);
 
     static std::map<int32_t, std::string> bundleMessageMap_;
 };

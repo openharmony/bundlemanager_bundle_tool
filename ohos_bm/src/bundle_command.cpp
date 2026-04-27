@@ -29,6 +29,7 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_proxy.h"
 #include "clean_cache_callback_host.h"
+#include "ipc_skeleton.h"
 #include "json_serializer.h"
 #include "nlohmann/json.hpp"
 #include "status_receiver_impl.h"
@@ -200,6 +201,8 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"dump-dependencies", [this] { return this->RunAsDumpSharedDependenciesCommand(); } },
         {"dump-shared", [this] { return this->RunAsDumpSharedCommand(); } },
         {"clean", [this] { return this->RunAsCleanCommand(); } },
+        {"set-disposed-rule", [this] { return this->RunAsSetDisposedRuleCommand(); } },
+        {"delete-disposed-rule", [this] { return this->RunAsDeleteDisposedRuleCommand(); } },
     };
     return OHOS::ERR_OK;
 }
@@ -219,6 +222,9 @@ ErrCode BundleManagerShellCommand::Init()
         if (bundleMgrProxy_) {
             if (bundleInstallerProxy_ == nullptr) {
                 bundleInstallerProxy_ = bundleMgrProxy_->GetBundleInstaller();
+            }
+            if (appControlProxy_ == nullptr) {
+                appControlProxy_ = bundleMgrProxy_->GetAppControlProxy();
             }
         }
     }
@@ -1475,6 +1481,391 @@ std::string BundleManagerShellCommand::GetWaringString(int32_t currentUserId, in
     warning.replace(warning.find_first_of('$'), 1, std::to_string(specifedUserId));
     warning.replace(warning.find_first_of('$'), 1, std::to_string(specifedUserId));
     return warning;
+}
+
+ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
+{
+    APP_LOGI("begin to RunAsSetDisposedRuleCommand");
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string appId;
+    int32_t appIndex = 0;
+    bool hasAppId = false;
+    bool hasPriority = false;
+    bool hasComponentType = false;
+    bool hasDisposedType = false;
+    bool hasControlType = false;
+    bool hasWantBundleName = false;
+    bool hasWantAbilityName = false;
+    DisposedRule disposedRule;
+    std::string wantBundleName;
+    std::string wantModuleName;
+    std::string wantAbilityName;
+    std::vector<std::pair<std::string, std::string>> wantParamsString;
+    std::vector<std::pair<std::string, int32_t>> wantParamsInt;
+    std::vector<std::pair<std::string, bool>> wantParamsBool;
+
+    const std::string setDisposedRuleOptions = "h";
+    const struct option setDisposedRuleLongOptions[] = {
+        {"help",               no_argument,       nullptr, 'h'},
+        {"app-id",             required_argument, nullptr, OPTION_APP_ID},
+        {"app-index",          required_argument, nullptr, OPTION_APP_INDEX},
+        {"priority",           required_argument, nullptr, OPTION_PRIORITY},
+        {"component-type",     required_argument, nullptr, OPTION_COMPONENT_TYPE},
+        {"disposed-type",      required_argument, nullptr, OPTION_DISPOSED_TYPE},
+        {"control-type",       required_argument, nullptr, OPTION_CONTROL_TYPE},
+        {"element",            required_argument, nullptr, OPTION_ELEMENT},
+        {"want-bundle-name",   required_argument, nullptr, OPTION_WANT_BUNDLE_NAME},
+        {"want-module-name",   required_argument, nullptr, OPTION_WANT_MODULE_NAME},
+        {"want-ability-name",  required_argument, nullptr, OPTION_WANT_ABILITY_NAME},
+        {"want-ps",            required_argument, nullptr, OPTION_WANT_PS},
+        {"want-pi",            required_argument, nullptr, OPTION_WANT_PI},
+        {"want-pb",            required_argument, nullptr, OPTION_WANT_PB},
+        {nullptr, 0, nullptr, 0},
+    };
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, setDisposedRuleOptions.c_str(),
+            setDisposedRuleLongOptions, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    APP_LOGD("'ohos-bm set-disposed-rule' with no option.");
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_NO_OPTION);
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", unknownOptionMsg);
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'ohos-bm set-disposed-rule %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case OPTION_APP_ID: {
+                appId = optarg;
+                hasAppId = true;
+                break;
+            }
+            case OPTION_APP_INDEX: {
+                if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
+                    APP_LOGE("ohos-bm set-disposed-rule with error appIndex %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case OPTION_PRIORITY: {
+                if (!OHOS::StrToInt(optarg, disposedRule.priority)) {
+                    APP_LOGE("ohos-bm set-disposed-rule with error priority %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                hasPriority = true;
+                break;
+            }
+            case OPTION_COMPONENT_TYPE: {
+                int32_t typeValue = 0;
+                if (!OHOS::StrToInt(optarg, typeValue) ||
+                    typeValue < static_cast<int32_t>(ComponentType::UI_ABILITY) ||
+                    typeValue > static_cast<int32_t>(ComponentType::UI_EXTENSION)) {
+                    APP_LOGE("ohos-bm set-disposed-rule with error componentType %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                disposedRule.componentType = static_cast<ComponentType>(typeValue);
+                hasComponentType = true;
+                break;
+            }
+            case OPTION_DISPOSED_TYPE: {
+                int32_t typeValue = 0;
+                if (!OHOS::StrToInt(optarg, typeValue) ||
+                    typeValue < static_cast<int32_t>(DisposedType::BLOCK_APPLICATION) ||
+                    typeValue > static_cast<int32_t>(DisposedType::NON_BLOCK)) {
+                    APP_LOGE("ohos-bm set-disposed-rule with error disposedType %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                disposedRule.disposedType = static_cast<DisposedType>(typeValue);
+                hasDisposedType = true;
+                break;
+            }
+            case OPTION_CONTROL_TYPE: {
+                int32_t typeValue = 0;
+                if (!OHOS::StrToInt(optarg, typeValue) ||
+                    typeValue < static_cast<int32_t>(ControlType::ALLOWED_LIST) ||
+                    typeValue > static_cast<int32_t>(ControlType::DISALLOWED_LIST)) {
+                    APP_LOGE("ohos-bm set-disposed-rule with error controlType %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                disposedRule.controlType = static_cast<ControlType>(typeValue);
+                hasControlType = true;
+                break;
+            }
+            case OPTION_ELEMENT: {
+                std::string elementUri = optarg;
+                // Ensure URI starts with '/' for empty deviceId: /bundleName/moduleName/abilityName
+                if (elementUri.empty() || elementUri[0] != '/') {
+                    elementUri = "/" + elementUri;
+                }
+                ElementName elementName;
+                if (!elementName.ParseURI(elementUri)) {
+                    APP_LOGE("parse elementName failed: %{public}s", elementUri.c_str());
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                        "error: --element format should be /bundleName/moduleName/abilityName.");
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                disposedRule.elementList.emplace_back(elementName);
+                break;
+            }
+            case OPTION_WANT_BUNDLE_NAME: {
+                wantBundleName = optarg;
+                hasWantBundleName = true;
+                break;
+            }
+            case OPTION_WANT_MODULE_NAME: {
+                wantModuleName = optarg;
+                break;
+            }
+            case OPTION_WANT_ABILITY_NAME: {
+                wantAbilityName = optarg;
+                hasWantAbilityName = true;
+                break;
+            }
+            case OPTION_WANT_PS: {
+                if (optind >= argc_ || argv_[optind] == nullptr ||
+                    std::string(argv_[optind]).substr(0, 1) == "-") {
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                        "error: --want-ps requires key and value.");
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                wantParamsString.emplace_back(std::make_pair(std::string(optarg),
+                    std::string(argv_[optind])));
+                optind++;
+                break;
+            }
+            case OPTION_WANT_PI: {
+                if (optind >= argc_ || argv_[optind] == nullptr ||
+                    std::string(argv_[optind]).substr(0, 1) == "-") {
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                        "error: --want-pi requires key and value.");
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                int32_t intValue = 0;
+                if (!OHOS::StrToInt(argv_[optind], intValue)) {
+                    APP_LOGE("ohos-bm set-disposed-rule --want-pi with error value");
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                wantParamsInt.emplace_back(std::make_pair(std::string(optarg), intValue));
+                optind++;
+                break;
+            }
+            case OPTION_WANT_PB: {
+                if (optind >= argc_ || argv_[optind] == nullptr ||
+                    std::string(argv_[optind]).substr(0, 1) == "-") {
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                        "error: --want-pb requires key and value.");
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                std::string boolStr = argv_[optind];
+                bool boolValue = (boolStr == "true" || boolStr == "1");
+                wantParamsBool.emplace_back(std::make_pair(std::string(optarg), boolValue));
+                optind++;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    // Check required parameters
+    if (result == OHOS::ERR_OK && resultReceiver_ == "") {
+        if (!hasAppId || !hasPriority || !hasComponentType ||
+            !hasDisposedType || !hasControlType ||
+            !hasWantBundleName || !hasWantAbilityName) {
+            APP_LOGD("'ohos-bm set-disposed-rule' missing required options.");
+            resultReceiver_ = CreateErrorResult("ERR_MISSING_PARAM",
+                "error: --app-id, --priority, --component-type, "
+                "--disposed-type, --control-type, --want-bundle-name, "
+                "--want-ability-name are required.");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_SET_DISPOSED_RULE);
+        return result;
+    }
+
+    // Get userId from uid
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingTokenID());
+    if (userId == Constants::DEFAULT_USERID) {
+        APP_LOGE("userId is 0, forbidden to call set-disposed-rule");
+        resultReceiver_ = CreateErrorResult("ERR_INVALID_USERID", STRING_USER_ID_INVALID);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    // Build Want (want-bundle-name, want-module-name, want-ability-name are required)
+    auto want = std::make_shared<AAFwk::Want>();
+    ElementName elementName("", wantBundleName, wantAbilityName, wantModuleName);
+    want->SetElement(elementName);
+    for (const auto &param : wantParamsString) {
+        want->SetParam(param.first, param.second);
+    }
+    for (const auto &param : wantParamsInt) {
+        want->SetParam(param.first, param.second);
+    }
+    for (const auto &param : wantParamsBool) {
+        want->SetParam(param.first, param.second);
+    }
+    disposedRule.want = want;
+
+    // Call IPC interface
+    if (appControlProxy_ == nullptr) {
+        APP_LOGE("appControlProxy_ is null");
+        resultReceiver_ = CreateErrorResult("ERR_SERVICE_UNAVAILABLE", "error: failed to get app control proxy.");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    ErrCode res = appControlProxy_->SetDisposedRuleForCloneApp(appId, disposedRule, appIndex, userId);
+    if (res == OHOS::ERR_OK) {
+        resultReceiver_ = CreateSuccessResult(STRING_SET_DISPOSED_RULE_OK);
+    } else {
+        resultReceiver_ = CreateErrorResult(std::to_string(res), STRING_SET_DISPOSED_RULE_NG);
+    }
+
+    APP_LOGI("end");
+    return res;
+}
+
+ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
+{
+    APP_LOGI("begin to RunAsDeleteDisposedRuleCommand");
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    std::string appId;
+    int32_t appIndex = 0;
+    bool hasAppId = false;
+
+    const std::string deleteDisposedRuleOptions = "h";
+    const struct option deleteDisposedRuleLongOptions[] = {
+        {"help",      no_argument,       nullptr, 'h'},
+        {"app-id",    required_argument, nullptr, OPTION_APP_ID},
+        {"app-index", required_argument, nullptr, OPTION_APP_INDEX},
+        {nullptr, 0, nullptr, 0},
+    };
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, deleteDisposedRuleOptions.c_str(),
+            deleteDisposedRuleLongOptions, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    APP_LOGD("'ohos-bm delete-disposed-rule' with no option.");
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_NO_OPTION);
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", unknownOptionMsg);
+            result = OHOS::ERR_INVALID_VALUE;
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'ohos-bm delete-disposed-rule %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case OPTION_APP_ID: {
+                appId = optarg;
+                hasAppId = true;
+                break;
+            }
+            case OPTION_APP_INDEX: {
+                if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
+                    APP_LOGE("ohos-bm delete-disposed-rule with error appIndex %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    // Check required parameters
+    if (result == OHOS::ERR_OK && resultReceiver_ == "") {
+        if (!hasAppId) {
+            APP_LOGD("'ohos-bm delete-disposed-rule' missing required options.");
+            resultReceiver_ = CreateErrorResult("ERR_MISSING_PARAM",
+                "error: --app-id is required.");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_DELETE_DISPOSED_RULE);
+        return result;
+    }
+
+    // Get userId from uid
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingTokenID());
+    if (userId == Constants::DEFAULT_USERID) {
+        APP_LOGE("userId is 0, forbidden to call delete-disposed-rule");
+        resultReceiver_ = CreateErrorResult("ERR_INVALID_USERID", STRING_USER_ID_INVALID);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    // Call IPC interface
+    if (appControlProxy_ == nullptr) {
+        APP_LOGE("appControlProxy_ is null");
+        resultReceiver_ = CreateErrorResult("ERR_SERVICE_UNAVAILABLE", "error: failed to get app control proxy.");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    ErrCode res = appControlProxy_->DeleteDisposedRuleForCloneApp(appId, appIndex, userId);
+    if (res == OHOS::ERR_OK) {
+        resultReceiver_ = CreateSuccessResult(STRING_DELETE_DISPOSED_RULE_OK);
+    } else {
+        resultReceiver_ = CreateErrorResult(std::to_string(res), STRING_DELETE_DISPOSED_RULE_NG);
+    }
+
+    APP_LOGI("end");
+    return res;
 }
 
 }  // namespace AppExecFwk
