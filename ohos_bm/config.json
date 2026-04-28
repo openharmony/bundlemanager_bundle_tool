@@ -538,6 +538,188 @@
                     "appIndex": "-i={value}"
                 }
             }
+        },
+        "set-disposed-rule": {
+            "description": "设置分身应用的处置规则，用于控制应用组件的运行行为",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "required": ["appId", "priority", "componentType", "disposedType", "controlType", "wantBundleName", "wantAbilityName"],
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "appId": {
+                        "type": "string",
+                        "description": "应用的appId或appIdentifier"
+                    },
+                    "appIndex": {
+                        "type": "string",
+                        "description": "分身应用索引，正整数"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "description": "处置规则优先级，非负整数，数值越大优先级越高"
+                    },
+                    "componentType": {
+                        "type": "string",
+                        "description": "受控制的组件类型：1=UI_ABILITY，2=UI_EXTENSION",
+                        "enum": ["1", "2"]
+                    },
+                    "disposedType": {
+                        "type": "string",
+                        "description": "处置类型：1=BLOCK_APPLICATION(阻止应用)，2=BLOCK_ABILITY(阻止组件)，3=NON_BLOCK(非阻断)",
+                        "enum": ["1", "2", "3"]
+                    },
+                    "controlType": {
+                        "type": "string",
+                        "description": "控制类型：1=ALLOWED_LIST(允许名单)，2=DISALLOWED_LIST(阻止名单)",
+                        "enum": ["1", "2"]
+                    },
+                    "elements": {
+                        "type": "array",
+                        "description": "受控组件元素列表，格式为/bundleName/moduleName/abilityName，可指定多个",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "wantBundleName": {
+                        "type": "string",
+                        "description": "Want重定向目标的bundleName"
+                    },
+                    "wantModuleName": {
+                        "type": "string",
+                        "description": "Want重定向目标的moduleName"
+                    },
+                    "wantAbilityName": {
+                        "type": "string",
+                        "description": "Want重定向目标的abilityName"
+                    },
+                    "wantParamsStrings": {
+                        "type": "array",
+                        "description": "Want的string类型附加参数，格式为key value，可指定多组",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "wantParamsInts": {
+                        "type": "array",
+                        "description": "Want的int类型附加参数，格式为key value，可指定多组",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "wantParamsBools": {
+                        "type": "array",
+                        "description": "Want的bool类型附加参数，格式为key true/false，可指定多组",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "appId": "--app-id {value}",
+                    "appIndex": "--app-index {value}",
+                    "priority": "--priority {value}",
+                    "componentType": "--component-type {value}",
+                    "disposedType": "--disposed-type {value}",
+                    "controlType": "--control-type {value}",
+                    "elements": "--element {value}",
+                    "wantBundleName": "--want-bundle-name {value}",
+                    "wantModuleName": "--want-module-name {value}",
+                    "wantAbilityName": "--want-ability-name {value}",
+                    "wantParamsStrings": "--want-ps {value}",
+                    "wantParamsInts": "--want-pi {value}",
+                    "wantParamsBools": "--want-pb {value}"
+                }
+            }
+        },
+        "delete-disposed-rule": {
+            "description": "删除分身应用的处置规则",
+            "requiredPermission": [],
+            "input": {
+                "type": "object",
+                "required": ["appId"],
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "appId": {
+                        "type": "string",
+                        "description": "应用的appId或appIdentifier"
+                    },
+                    "appIndex": {
+                        "type": "string",
+                        "description": "分身应用索引，正整数"
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "description": "执行结果",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "cause": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "events": ["result"],
+            "eventSchemas": {},
+            "argumentMapping": {
+                "type": "flag",
+                "templates": {
+                    "help": {
+                        "if_true": "-h",
+                        "if_false": ""
+                    },
+                    "appId": "--app-id {value}",
+                    "appIndex": "--app-index {value}"
+                }
+            }
         }
     }
 }
