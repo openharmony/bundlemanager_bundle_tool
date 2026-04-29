@@ -44,6 +44,7 @@
 #include "iservice_registry.h"
 #include "data_group_info.h"
 #include "directory_ex.h"
+#include "get_largest_items_callback_host.h"
 #include "module_info.h"
 #include "parameter.h"
 #include "parameters.h"
@@ -231,7 +232,8 @@ static const std::string HELP_MSG =
     "  installEnterpriseResignCert      install an enterprise resign cert\n"
     "  uninstallEnterpriseReSignatureCert    uninstall enterprise re sign cert\n"
     "  getEnterpriseReSignatureCert          get enterprise re sign cert\n"
-    "  getApiTargetVersionByUid          get api target version by uid\n";
+    "  getApiTargetVersionByUid          get api target version by uid\n"
+    "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -534,6 +536,15 @@ const std::string HELP_MSG_GET_APP_PROVISION_INFO =
     "  -h, --help                             list available commands\n"
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_GET_TOP_N_LARGEST_ITEMS =
+    "usage: bundle_test_tool getTopNLargestItemsInAppDataDir <options>\n"
+    "eg:bundle_test_tool getTopNLargestItemsInAppDataDir -n <bundle-name> -u <user-id> -a <app-index>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify a app index\n";
 
 const std::string HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME =
     "usage: bundle_test_tool getDistributedBundleName <options>\n"
@@ -1525,6 +1536,57 @@ bool ProcessCacheCallbackImpl::WaitForStatCompletion()
     return false;
 }
 
+class GetLargestItemsCallbackImpl : public GetLargestItemsCallbackHost {
+public:
+    GetLargestItemsCallbackImpl() {}
+    ~GetLargestItemsCallbackImpl() {}
+    void OnGetLargestItemsFinished(ErrCode errCode, const std::string &largestItems) override;
+    ErrCode GetResultCode();
+    std::string GetResultMsg();
+    bool WaitForGetCompletion();
+
+private:
+    std::mutex mutex_;
+    bool complete_ = false;
+    ErrCode errCode_ = 0;
+    std::string result_;
+    std::promise<void> get_;
+    std::future<void> getFuture_ = get_.get_future();
+    DISALLOW_COPY_AND_MOVE(GetLargestItemsCallbackImpl);
+};
+
+void GetLargestItemsCallbackImpl::OnGetLargestItemsFinished(
+    ErrCode errCode, const std::string &largestItems)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!complete_) {
+        complete_ = true;
+        errCode_ = errCode;
+        result_ = largestItems;
+        get_.set_value();
+    }
+}
+
+ErrCode GetLargestItemsCallbackImpl::GetResultCode()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return errCode_;
+}
+
+std::string GetLargestItemsCallbackImpl::GetResultMsg()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return result_;
+}
+
+bool GetLargestItemsCallbackImpl::WaitForGetCompletion()
+{
+    if (getFuture_.wait_for(std::chrono::seconds(MAX_WAITING_TIME)) == std::future_status::ready) {
+        return true;
+    }
+    return false;
+}
+
 BundleEventCallbackImpl::BundleEventCallbackImpl()
 {
     APP_LOGI("create BundleEventCallbackImpl");
@@ -1650,6 +1712,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getEnterpriseReSignatureCert", std::bind(&BundleTestTool::RunAsGetEnterpriseReSignCert, this)},
         {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)},
         {"setBundleFirstLaunch", std::bind(&BundleTestTool::RunAsSetBundleFirstLaunch, this)},
+        {"getTopNLargestItemsInAppDataDir", std::bind(&BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir, this)},
         {"batchGetBundleInfo", std::bind(&BundleTestTool::RunAsBatchGetBundleInfo, this)}
     };
 
@@ -7763,6 +7826,50 @@ ErrCode BundleTestTool::RunAsBatchGetBundleInfo()
         result = ret;
     }
     APP_LOGI("RunAsBatchGetBundleInfo end");
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir()
+{
+    std::string bundleName;
+    int32_t userId = 0;
+    int32_t appIndex = 0;
+    int32_t result = BundleNameAndUserIdCommonFunc(bundleName, userId, appIndex);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_TOP_N_LARGEST_ITEMS);
+    } else {
+        if (bundleMgrProxy_ == nullptr) {
+            APP_LOGE("bundleMgrProxy_ is nullptr");
+            resultReceiver_.append("error: bundleMgrProxy_ is nullptr\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+
+        userId = BundleCommandCommon::GetCurrentUserId(userId);
+        sptr<GetLargestItemsCallbackImpl> getCallBack(new (std::nothrow) GetLargestItemsCallbackImpl());
+        if (getCallBack == nullptr) {
+            APP_LOGE("getCallBack is null");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        ErrCode ret = bundleMgrProxy_->GetTopNLargestItemsInAppDataDir(bundleName, appIndex, userId,
+            getCallBack);
+        if (ret == ERR_OK) {
+            if (getCallBack->WaitForGetCompletion()) {
+                ErrCode code = getCallBack->GetResultCode();
+                std::string result = getCallBack->GetResultMsg();
+                if (code == ERR_OK) {
+                    resultReceiver_.append("Get top N largest items in app data dir success:\n");
+                    resultReceiver_.append(result);
+                    resultReceiver_.append("\n");
+                } else {
+                    resultReceiver_.append("Get top N largest items in app data dir failed, errCode is " +
+                    std::to_string(code) + "\n");
+                }
+            }
+        } else {
+            resultReceiver_.append("Get top N largest items in app data dir failed, errCode is " +
+                                   std::to_string(ret) + "\n");
+        }
+    }
     return result;
 }
 } // AppExecFwk
