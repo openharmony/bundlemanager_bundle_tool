@@ -51,10 +51,14 @@ ErrCode ShellCommand::OnCommand()
         respond = commandMap_["help"];
     }
 
-    if (Init() == OHOS::ERR_OK) {
+    // help no need Init()
+    if (cmd_ == "help" || Init() == OHOS::ERR_OK) {
         respond();
     } else {
         result = OHOS::ERR_INVALID_VALUE;
+        if (resultReceiver_ == "") {
+            resultReceiver_ = "error: failed to connect to bundle manager service.\n";
+        }
     }
 
     return result;
@@ -75,10 +79,10 @@ std::string ShellCommand::ExecCommand()
     result = OnCommand();
     if (result != OHOS::ERR_OK) {
         APP_LOGE("failed to execute your command.\n");
-
-        resultReceiver_ = "error: failed to execute your command.\n";
+        if (resultReceiver_ == "") {
+            resultReceiver_ = "error: failed to execute your command.\n";
+        }
     }
-
     return resultReceiver_;
 }
 
