@@ -1,25 +1,29 @@
 {
     "name": "ohos-bm",
     "version": "1.0.0",
-    "description": "ohos-bm包管理命令行工具",
-    "executable": "/system/bin/cli_tools/ohos_bm",
-    "requirePermission": [],
+    "description": "ohos-bm bundle management CLI tool",
+    "executablePath": "/system/bin/cli_tools/ohos-bm",
+    "requirePermissions": [],
     "hasSubcommands": true,
     "timeout": 30000,
-    "output": {
+    "outputSchema": {
         "type": "object",
-        "description": "执行结果",
+        "description": "Execution result",
         "properties": {
-            "success": {
-                "type": "boolean"
-            },
-            "message": {
+            "type": {
                 "type": "string"
             },
-            "code": {
+            "status": {
                 "type": "string"
             },
-            "cause": {
+            "data": {
+                "type": "object",
+                "properties": {}
+            },
+            "errCode": {
+                "type": "string"
+            },
+            "errMsg": {
                 "type": "string"
             },
             "suggestion": {
@@ -27,31 +31,61 @@
             }
         }
     },
-    "events": ["result"],
-    "eventSchemas": {},
+    "eventTypes": [
+        "result"
+    ],
+    "eventSchemas": {
+        "result": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "errCode": {
+                    "type": "string"
+                },
+                "errMsg": {
+                    "type": "string"
+                },
+                "suggestion": {
+                    "type": "string"
+                }
+            }
+        }
+    },
     "subcommands": {
         "help": {
-            "description": "查看ohos-bm相关子命令的信息",
-            "requiredPermission": [],
-            "input": {
+            "description": "View information about ohos-bm subcommands",
+            "requirePermissions": [],
+            "inputSchema": {
                 "type": "object",
                 "properties": {}
             },
-            "argumentMapping": {},
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
@@ -59,13 +93,42 @@
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {}
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         },
         "install": {
-            "description": "安装一个hap、hsp或app包",
-            "requiredPermission": [],
-            "input": {
+            "description": "Install a hap, hsp or app package",
+            "requirePermissions": [
+                "ohos.permission.cli.INSTALL_BUNDLE"
+            ],
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "help": {
@@ -74,7 +137,7 @@
                     },
                     "bundlePath": {
                         "type": "string",
-                        "description": "安装包文件路径",
+                        "description": "Installation package file path",
                         "default": ""
                     },
                     "replace": {
@@ -83,17 +146,17 @@
                     },
                     "sharedBundleDirPath": {
                         "type": "string",
-                        "description": "安装跨应用hsp文件的目录路径",
+                        "description": "Directory path for installing inter-application hsp files",
                         "default": ""
                     },
                     "userId": {
                         "type": "string",
-                        "description": "指定用户ID",
+                        "description": "Specify user ID",
                         "default": ""
                     },
                     "waittingTime": {
                         "type": "string",
-                        "description": "指定安装等待时间（180-600秒）",
+                        "description": "Specify installation waiting time (180-600 seconds)",
                         "default": ""
                     },
                     "downgrade": {
@@ -106,20 +169,24 @@
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
@@ -127,38 +194,42 @@
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "bundlePath": "-p={value}",
-                    "replace": {
-                        "if_true": "-r",
-                        "if_false": ""
-                    },
-                    "sharedBundleDirPath": "-s={value}",
-                    "userId": "-u={value}",
-                    "waittingTime": "-w={value}",
-                    "downgrade": {
-                        "if_true": "-d",
-                        "if_false": ""
-                    },
-                    "grantPermission": {
-                        "if_true": "-g",
-                        "if_false": ""
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
                     }
                 }
             }
         },
         "uninstall": {
-            "description": "卸载一个应用包",
-            "requiredPermission": [],
-            "input": {
+            "description": "Uninstall an application package",
+            "requirePermissions": [
+                "ohos.permission.cli.UNINSTALL_BUNDLE"
+            ],
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "help": {
@@ -167,17 +238,17 @@
                     },
                     "bundleName": {
                         "type": "string",
-                        "description": "要卸载的应用包名",
+                        "description": "Bundle name to uninstall",
                         "default": ""
                     },
                     "moduleName": {
                         "type": "string",
-                        "description": "要卸载的模块名",
+                        "description": "Module name to uninstall",
                         "default": ""
                     },
                     "userId": {
                         "type": "string",
-                        "description": "指定用户ID",
+                        "description": "Specify user ID",
                         "default": ""
                     },
                     "keepData": {
@@ -190,25 +261,29 @@
                     },
                     "version": {
                         "type": "string",
-                        "description": "按版本号卸载跨应用共享库",
+                        "description": "Uninstall inter-application shared library by version code",
                         "default": ""
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
@@ -216,34 +291,42 @@
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "bundleName": "-n={value}",
-                    "moduleName": "-m={value}",
-                    "userId": "-u={value}",
-                    "keepData": {
-                        "if_true": "-k",
-                        "if_false": ""
-                    },
-                    "shared": {
-                        "if_true": "-s",
-                        "if_false": ""
-                    },
-                    "version": "-v={value}"
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "dump": {
-            "description": "查看应用包信息",
-            "requiredPermission": [],
-            "input": {
+            "description": "View application package information",
+            "requirePermissions": [
+                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+            ],
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "help": {
@@ -260,7 +343,7 @@
                     },
                     "bundleName": {
                         "type": "string",
-                        "description": "指定应用包名",
+                        "description": "Specify bundle name",
                         "default": ""
                     },
                     "shortcutInfo": {
@@ -269,12 +352,12 @@
                     },
                     "deviceId": {
                         "type": "string",
-                        "description": "指定设备ID",
+                        "description": "Specify device ID",
                         "default": ""
                     },
                     "userId": {
                         "type": "string",
-                        "description": "指定用户ID",
+                        "description": "Specify user ID",
                         "default": ""
                     },
                     "label": {
@@ -283,65 +366,67 @@
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
                         "type": "string"
-                    },
-                    "data": {
-                        "type": "string"
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "all": {
-                        "if_true": "-a",
-                        "if_false": ""
-                    },
-                    "debugBundle": {
-                        "if_true": "-g",
-                        "if_false": ""
-                    },
-                    "bundleName": "-n={value}",
-                    "shortcutInfo": {
-                        "if_true": "-s",
-                        "if_false": ""
-                    },
-                    "deviceId": "-d={value}",
-                    "userId": "-u={value}",
-                    "label": {
-                        "if_true": "-l",
-                        "if_false": ""
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
                     }
                 }
             }
         },
         "dump-dependencies": {
-            "description": "查看指定应用和模块的依赖信息",
-            "requiredPermission": [],
-            "input": {
+            "description": "View dependency information of specified application and module",
+            "requirePermissions": [
+                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+            ],
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "help": {
@@ -350,58 +435,77 @@
                     },
                     "bundleName": {
                         "type": "string",
-                        "description": "指定应用包名",
+                        "description": "Specify bundle name",
                         "default": ""
                     },
                     "moduleName": {
                         "type": "string",
-                        "description": "指定模块名",
+                        "description": "Specify module name",
                         "default": ""
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
                         "type": "string"
-                    },
-                    "data": {
-                        "type": "string"
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "bundleName": "-n={value}",
-                    "moduleName": "-m={value}"
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "dump-shared": {
-            "description": "查看跨应用共享库信息",
-            "requiredPermission": [],
-            "input": {
+            "description": "View inter-application shared library information",
+            "requirePermissions": [
+                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+            ],
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "help": {
@@ -414,56 +518,72 @@
                     },
                     "bundleName": {
                         "type": "string",
-                        "description": "指定应用包名",
+                        "description": "Specify bundle name",
                         "default": ""
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
                         "type": "string"
-                    },
-                    "data": {
-                        "type": "string"
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "all": {
-                        "if_true": "-a",
-                        "if_false": ""
-                    },
-                    "bundleName": "-n={value}"
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "clean": {
-            "description": "清理应用缓存或数据文件",
-            "requiredPermission": [],
-            "input": {
+            "description": "Clean application cache or data files",
+            "requirePermissions": [
+                "ohos.permission.cli.REMOVE_CACHE_FILES"
+            ],
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "help": {
@@ -472,7 +592,7 @@
                     },
                     "bundleName": {
                         "type": "string",
-                        "description": "指定应用包名",
+                        "description": "Specify bundle name",
                         "default": ""
                     },
                     "cache": {
@@ -485,30 +605,34 @@
                     },
                     "userId": {
                         "type": "string",
-                        "description": "指定用户ID",
+                        "description": "Specify user ID",
                         "default": ""
                     },
                     "appIndex": {
                         "type": "string",
-                        "description": "指定应用索引",
+                        "description": "Specify application index",
                         "default": ""
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
@@ -516,35 +640,50 @@
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "bundleName": "-n={value}",
-                    "cache": {
-                        "if_true": "-c",
-                        "if_false": ""
-                    },
-                    "data": {
-                        "if_true": "-d",
-                        "if_false": ""
-                    },
-                    "userId": "-u={value}",
-                    "appIndex": "-i={value}"
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "set-disposed-rule": {
-            "description": "设置分身应用的处置规则，用于控制应用组件的运行行为",
-            "requiredPermission": [],
-            "input": {
+            "description": "Set disposed rule for clone app to control component behavior",
+            "requirePermissions": ["ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"],
+            "inputSchema": {
                 "type": "object",
-                "required": ["appId", "priority", "componentType", "disposedType", "controlType", "wantBundleName", "wantAbilityName"],
+                "required": [
+                    "appId",
+                    "priority",
+                    "componentType",
+                    "disposedType",
+                    "controlType",
+                    "wantBundleName",
+                    "wantAbilityName"
+                ],
                 "properties": {
                     "help": {
                         "type": "boolean",
@@ -552,87 +691,88 @@
                     },
                     "appId": {
                         "type": "string",
-                        "description": "应用的appId或appIdentifier"
+                        "description": "Application appId or appIdentifier"
                     },
                     "appIndex": {
                         "type": "string",
-                        "description": "分身应用索引，正整数"
+                        "description": "Clone app index, a positive integer"
                     },
                     "priority": {
                         "type": "string",
-                        "description": "处置规则优先级，非负整数，数值越大优先级越高"
+                        "description": "Disposed rule priority, non-negative integer, higher value means higher priority"
                     },
                     "componentType": {
                         "type": "string",
-                        "description": "受控制的组件类型：1=UI_ABILITY，2=UI_EXTENSION",
-                        "enum": ["1", "2"]
+                        "description": "Component type to control: 1=UI_ABILITY, 2=UI_EXTENSION"
                     },
                     "disposedType": {
                         "type": "string",
-                        "description": "处置类型：1=BLOCK_APPLICATION(阻止应用)，2=BLOCK_ABILITY(阻止组件)，3=NON_BLOCK(非阻断)",
-                        "enum": ["1", "2", "3"]
+                        "description": "Disposed type: 1=BLOCK_APPLICATION, 2=BLOCK_ABILITY, 3=NON_BLOCK"
                     },
                     "controlType": {
                         "type": "string",
-                        "description": "控制类型：1=ALLOWED_LIST(允许名单)，2=DISALLOWED_LIST(阻止名单)",
-                        "enum": ["1", "2"]
+                        "description": "Control type: 1=ALLOWED_LIST, 2=DISALLOWED_LIST"
                     },
                     "elements": {
                         "type": "array",
-                        "description": "受控组件元素列表，格式为/bundleName/moduleName/abilityName，可指定多个",
+                        "description": "Controlled component element list, format: /bundleName/moduleName/abilityName, multiple elements allowed",
                         "items": {
                             "type": "string"
                         }
                     },
                     "wantBundleName": {
                         "type": "string",
-                        "description": "Want重定向目标的bundleName"
+                        "description": "Want redirection target bundleName"
                     },
                     "wantModuleName": {
                         "type": "string",
-                        "description": "Want重定向目标的moduleName"
+                        "description": "Want redirection target moduleName"
                     },
                     "wantAbilityName": {
                         "type": "string",
-                        "description": "Want重定向目标的abilityName"
+                        "description": "Want redirection target abilityName"
                     },
                     "wantParamsStrings": {
                         "type": "array",
-                        "description": "Want的string类型附加参数，格式为key value，可指定多组",
+                        "description": "Want string type additional parameters, format: key value, multiple groups allowed",
                         "items": {
                             "type": "string"
                         }
                     },
                     "wantParamsInts": {
                         "type": "array",
-                        "description": "Want的int类型附加参数，格式为key value，可指定多组",
+                        "description": "Want int type additional parameters, format: key value, multiple groups allowed",
                         "items": {
                             "type": "string"
                         }
                     },
                     "wantParamsBools": {
                         "type": "array",
-                        "description": "Want的bool类型附加参数，格式为key true/false，可指定多组",
+                        "description": "Want bool type additional parameters, format: key true/false, multiple groups allowed",
                         "items": {
                             "type": "string"
                         }
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
@@ -640,37 +780,44 @@
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "appId": "--app-id {value}",
-                    "appIndex": "--app-index {value}",
-                    "priority": "--priority {value}",
-                    "componentType": "--component-type {value}",
-                    "disposedType": "--disposed-type {value}",
-                    "controlType": "--control-type {value}",
-                    "elements": "--element {value}",
-                    "wantBundleName": "--want-bundle-name {value}",
-                    "wantModuleName": "--want-module-name {value}",
-                    "wantAbilityName": "--want-ability-name {value}",
-                    "wantParamsStrings": "--want-ps {value}",
-                    "wantParamsInts": "--want-pi {value}",
-                    "wantParamsBools": "--want-pb {value}"
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "delete-disposed-rule": {
-            "description": "删除分身应用的处置规则",
-            "requiredPermission": [],
-            "input": {
+            "description": "Delete disposed rule for clone app",
+            "requirePermissions": ["ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"],
+            "inputSchema": {
                 "type": "object",
-                "required": ["appId"],
+                "required": [
+                    "appId"
+                ],
                 "properties": {
                     "help": {
                         "type": "boolean",
@@ -678,28 +825,32 @@
                     },
                     "appId": {
                         "type": "string",
-                        "description": "应用的appId或appIdentifier"
+                        "description": "Application appId or appIdentifier"
                     },
                     "appIndex": {
                         "type": "string",
-                        "description": "分身应用索引，正整数"
+                        "description": "Clone app index, a positive integer"
                     }
                 }
             },
-            "output": {
+            "outputSchema": {
                 "type": "object",
-                "description": "执行结果",
+                "description": "Execution result",
                 "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "message": {
+                    "type": {
                         "type": "string"
                     },
-                    "code": {
+                    "status": {
                         "type": "string"
                     },
-                    "cause": {
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
                         "type": "string"
                     },
                     "suggestion": {
@@ -707,17 +858,33 @@
                     }
                 }
             },
-            "events": ["result"],
-            "eventSchemas": {},
-            "argumentMapping": {
-                "type": "flag",
-                "templates": {
-                    "help": {
-                        "if_true": "-h",
-                        "if_false": ""
-                    },
-                    "appId": "--app-id {value}",
-                    "appIndex": "--app-index {value}"
+            "eventTypes": [
+                "result"
+            ],
+            "eventSchemas": {
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "errCode": {
+                            "type": "string"
+                        },
+                        "errMsg": {
+                            "type": "string"
+                        },
+                        "suggestion": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         }
