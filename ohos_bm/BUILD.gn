@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos/cli/ohos_cli_executable.gni")
 import("../bundletool.gni")
 
 config("tools_ohos_bm_config") {
@@ -81,12 +82,12 @@ ohos_source_set("tools_ohos_bm_source_set") {
   part_name = "bundle_tool"
 }
 
-ohos_executable("ohos-bm") {
+ohos_cli_executable("ohos-bm") {
   deps = [ ":tools_ohos_bm_source_set" ]
+  cli_config_file = "config.json"
   external_deps = [ "hilog:libhilog" ]
-
-  install_enable = false
-
+  install_enable = true
+  install_images = [ "system" ]
   subsystem_name = "bundlemanager"
   part_name = "bundle_tool"
 }

@@ -1822,7 +1822,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     }
 
     // Get userId from uid
-    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingTokenID());
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     if (userId == Constants::DEFAULT_USERID) {
         APP_LOGE("userId is 0, forbidden to call set-disposed-rule");
         resultReceiver_ = CreateErrorResult("ERR_INVALID_USERID", STRING_USER_ID_INVALID);
@@ -1954,7 +1954,7 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
     }
 
     // Get userId from uid
-    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingTokenID());
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     if (userId == Constants::DEFAULT_USERID) {
         APP_LOGE("userId is 0, forbidden to call delete-disposed-rule");
         resultReceiver_ = CreateErrorResult("ERR_INVALID_USERID", STRING_USER_ID_INVALID);
