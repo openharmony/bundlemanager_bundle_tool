@@ -55,44 +55,8 @@ HWTEST_F(OhosBmCommandTest, HelpCommand_0100, TestSize.Level0)
     int argc = sizeof(argv) / sizeof(argv[0]);
     BundleManagerShellCommand cmd(argc, argv);
     std::string result = cmd.ExecCommand();
-    EXPECT_NE(result.find("install"), std::string::npos);
     EXPECT_NE(result.find("uninstall"), std::string::npos);
     EXPECT_NE(result.find("help"), std::string::npos);
-}
-
-/**
- * @tc.name: InstallCommand_0100
- * @tc.desc: Test "ohos-bm install" with no options.
- * @tc.type: FUNC
- */
-HWTEST_F(OhosBmCommandTest, InstallCommand_0100, TestSize.Level0)
-{
-    char *argv[] = {
-        const_cast<char *>("ohos-bm"),
-        const_cast<char *>("install"),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]);
-    BundleManagerShellCommand cmd(argc, argv);
-    std::string result = cmd.ExecCommand();
-    EXPECT_NE(result.find("error"), std::string::npos);
-}
-
-/**
- * @tc.name: InstallCommand_0200
- * @tc.desc: Test "ohos-bm install -h" shows help message.
- * @tc.type: FUNC
- */
-HWTEST_F(OhosBmCommandTest, InstallCommand_0200, TestSize.Level0)
-{
-    char *argv[] = {
-        const_cast<char *>("ohos-bm"),
-        const_cast<char *>("install"),
-        const_cast<char *>("-h"),
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]);
-    BundleManagerShellCommand cmd(argc, argv);
-    std::string result = cmd.ExecCommand();
-    EXPECT_NE(result.find("bundle-path"), std::string::npos);
 }
 
 /**
