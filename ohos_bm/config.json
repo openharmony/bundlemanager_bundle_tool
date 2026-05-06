@@ -2,7 +2,7 @@
     "name": "ohos-bm",
     "version": "1.0.0",
     "description": "ohos-bm bundle management CLI tool",
-    "executablePath": "/system/bin/cli_tools/executable/ohos-bm",
+    "executablePath": "/system/bin/cli_tool/executable/ohos-bm",
     "requirePermissions": [],
     "hasSubCommand": true,
     "inputSchema": {
@@ -68,78 +68,6 @@
                 }
             }
         },
-        "install": {
-            "description": "Install a hap, hsp or app package",
-            "requirePermissions": [
-                "ohos.permission.cli.INSTALL_BUNDLE"
-            ],
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "help": {
-                        "type": "boolean",
-                        "default": false
-                    },
-                    "bundlePath": {
-                        "type": "string",
-                        "description": "Installation package file path",
-                        "default": ""
-                    },
-                    "replace": {
-                        "type": "boolean",
-                        "default": false
-                    },
-                    "sharedBundleDirPath": {
-                        "type": "string",
-                        "description": "Directory path for installing inter-application hsp files",
-                        "default": ""
-                    },
-                    "userId": {
-                        "type": "string",
-                        "description": "Specify user ID",
-                        "default": ""
-                    },
-                    "waittingTime": {
-                        "type": "string",
-                        "description": "Specify installation waiting time (180-600 seconds)",
-                        "default": ""
-                    },
-                    "downgrade": {
-                        "type": "boolean",
-                        "default": false
-                    },
-                    "grantPermission": {
-                        "type": "boolean",
-                        "default": false
-                    }
-                }
-            },
-            "outputSchema": {
-                "type": "object",
-                "description": "Execution result",
-                "properties": {
-                    "type": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    },
-                    "data": {
-                        "type": "object",
-                        "properties": {}
-                    },
-                    "errCode": {
-                        "type": "string"
-                    },
-                    "errMsg": {
-                        "type": "string"
-                    },
-                    "suggestion": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "uninstall": {
             "description": "Uninstall an application package",
             "requirePermissions": [
@@ -155,16 +83,6 @@
                     "bundleName": {
                         "type": "string",
                         "description": "Bundle name to uninstall",
-                        "default": ""
-                    },
-                    "moduleName": {
-                        "type": "string",
-                        "description": "Module name to uninstall",
-                        "default": ""
-                    },
-                    "userId": {
-                        "type": "string",
-                        "description": "Specify user ID",
                         "default": ""
                     },
                     "keepData": {
@@ -240,11 +158,6 @@
                     "deviceId": {
                         "type": "string",
                         "description": "Specify device ID",
-                        "default": ""
-                    },
-                    "userId": {
-                        "type": "string",
-                        "description": "Specify user ID",
                         "default": ""
                     },
                     "label": {
@@ -381,7 +294,8 @@
         "clean": {
             "description": "Clean application cache or data files",
             "requirePermissions": [
-                "ohos.permission.cli.REMOVE_CACHE_FILES"
+                "ohos.permission.cli.REMOVE_CACHE_FILES",
+                "ohos.permission.CLEAN_APPLICATION_DATA"
             ],
             "inputSchema": {
                 "type": "object",
@@ -403,15 +317,10 @@
                         "type": "boolean",
                         "default": false
                     },
-                    "userId": {
-                        "type": "string",
-                        "description": "Specify user ID",
-                        "default": ""
-                    },
                     "appIndex": {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Specify application index",
-                        "default": ""
+                        "default": 0
                     }
                 }
             },
@@ -467,7 +376,7 @@
                         "description": "Application appId or appIdentifier"
                     },
                     "appIndex": {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Clone app index, a positive integer"
                     },
                     "priority": {
@@ -574,7 +483,7 @@
                         "description": "Application appId or appIdentifier"
                     },
                     "appIndex": {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Clone app index, a positive integer"
                     }
                 }

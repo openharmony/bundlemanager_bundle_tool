@@ -32,7 +32,6 @@ const std::string TOOL_NAME = "ohos-bm";
 const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
                              "These are common ohos-bm commands list:\n"
                              "  help              list available commands\n"
-                             "  install           install a bundle with options\n"
                              "  uninstall         uninstall a bundle with options\n"
                              "  dump              dump the bundle info\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"
@@ -41,33 +40,11 @@ const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
                              "  set-disposed-rule set disposed rule for clone app\n"
                              "  delete-disposed-rule delete disposed rule for clone app\n";
 
-const std::string HELP_MSG_INSTALL =
-    "usage: ohos-bm install <options>\n"
-    "options list:\n"
-    "  -h, --help                                                     list available commands\n"
-    "  -p, --bundlePath <file-path>                                  install a hap or hsp or app by a specified path\n"
-    "  -p, --bundlePath <file-path> <file-path> ...                  install one bundle by some hap or hsp paths\n"
-    "  -p, --bundlePath <bundle-direction>                           install one bundle by a direction,\n"
-    "                                                                    under which are some hap or hsp\n"
-    "                                                                    or one app files\n"
-    "  -r -p <bundle-file-path>                                       replace an existing bundle\n"
-    "  -r --bundlePath <bundle-file-path>                            replace an existing bundle\n"
-    "  -s, --sharedBundleDirPath <shared-bundle-dir-path>          install inter-application hsp files\n"
-    "  -u, --userId <user-id>                                        specify a user id,\n"
-    "                                                                   only supports current user or userId is 0\n"
-    "  -w, --waittingTime <waitting-time>                            specify waitting time for installation,\n"
-    "                                                                    the minimum waitting time is 180s,\n"
-    "                                                                    the maximum waitting time is 600s\n"
-    "  -d, --downgrade                                                install allow downgrade\n"
-    "  -g, --grantPermission                                         grant permissions for installation\n";
-
 const std::string HELP_MSG_UNINSTALL =
     "usage: ohos-bm uninstall <options>\n"
     "options list:\n"
     "  -h, --help                           list available commands\n"
     "  -n, --bundleName <bundle-name>      uninstall a bundle by bundle name\n"
-    "  -m, --moduleName <module-name>      uninstall a module by module name\n"
-    "  -u, --userId <user-id>              specify a user id,only supports current user or userId is 0\n"
     "  -k, --keepData                      keep the user data after uninstall\n"
     "  -s, --shared                         uninstall inter-application shared library\n"
     "  -v, --version                        uninstall a inter-application shared library by versionCode\n";
@@ -81,7 +58,6 @@ const std::string HELP_MSG_DUMP =
     "  -n, --bundleName <bundle-name>      list the bundle info by a bundle name\n"
     "  -s, --shortcutInfo                  list the shortcut info\n"
     "  -d, --deviceId <device-id>          specify a device id\n"
-    "  -u, --userId <user-id>              specify a user id,only supports current user or userId is 0\n"
     "  -l, --label                          list the label info\n";
 
 const std::string HELP_MSG_CLEAN =
@@ -91,7 +67,6 @@ const std::string HELP_MSG_CLEAN =
     "  -n, --bundleName  <bundle-name>                bundle name\n"
     "  -c, --cache                                     clean bundle cache files by bundle name\n"
     "  -d, --data                                      clean bundle data files by bundle name\n"
-    "  -u, --userId <user-id>                         specify a user id,only supports current user or userId is 0\n"
     "  -i, --appIndex <app-index>                     specify a app index\n";
 
 const std::string HELP_MSG_DUMP_SHARED =
@@ -110,18 +85,11 @@ const std::string HELP_MSG_DUMP_SHARED_DEPENDENCIES =
     "  -n, --bundleName  <bundle-name>       dump dependencies by bundleName and moduleName\n"
     "  -m, --moduleName  <module-name>       dump dependencies by bundleName and moduleName\n";
 
-const std::string STRING_INCORRECT_OPTION = "error: incorrect option";
-const std::string HELP_MSG_NO_BUNDLE_PATH_OPTION =
-    "error: you must specify a bundle path with '-p' or '--bundlePath'.";
-
 const std::string HELP_MSG_NO_OPTION =
     "error: no option specified. Use -h for help.";
 
 const std::string HELP_MSG_NO_BUNDLE_NAME_OPTION =
     "error: you must specify a bundle name with '-n' or '--bundleName'.";
-
-const std::string STRING_INSTALL_BUNDLE_OK = "install bundle successfully.";
-const std::string STRING_INSTALL_BUNDLE_NG = "error: failed to install bundle.";
 
 const std::string STRING_UNINSTALL_BUNDLE_OK = "uninstall bundle successfully.";
 const std::string STRING_UNINSTALL_BUNDLE_NG = "error: failed to uninstall bundle.";
@@ -149,9 +117,6 @@ const std::string DEPENDENCIES = "dependencies";
 const int32_t MAX_WAITING_TIME = 3000;
 const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 
-const std::string WARNING_USER =
-    "Warning: The current user is %. If you want to set the userId as $, please switch to $.\n";
-
 const std::string HELP_MSG_SET_DISPOSED_RULE =
     "usage: ohos-bm set-disposed-rule <options> "
     "options list: "
@@ -167,9 +132,9 @@ const std::string HELP_MSG_SET_DISPOSED_RULE =
     "--wantBundleName <name>: bundleName of the Want for redirection (required). "
     "--wantModuleName <name>: moduleName of the Want for redirection. "
     "--wantAbilityName <name>: abilityName of the Want for redirection (required). "
-    "--wantParamsStrings <key> <value>: Want string parameter (repeatable). "
-    "--wantParamsInts <key> <value>: Want int parameter (repeatable). "
-    "--wantParamsBools <key> <value>: Want bool parameter, true/false (repeatable).";
+    "--wantParamsStrings \"<key> <value>\": Want string parameter (repeatable). "
+    "--wantParamsInts \"<key> <value>\": Want int parameter (repeatable). "
+    "--wantParamsBools \"<key> <true/false>\": Want bool parameter (repeatable).";
 
 const std::string HELP_MSG_DELETE_DISPOSED_RULE =
     "usage: ohos-bm delete-disposed-rule <options> "
@@ -213,7 +178,6 @@ private:
     ErrCode InitAppControlProxy();
 
     ErrCode RunAsHelpCommand();
-    ErrCode RunAsInstallCommand();
     ErrCode RunAsUninstallCommand();
     ErrCode RunAsDumpCommand();
     ErrCode RunAsDumpSharedDependenciesCommand();
@@ -222,16 +186,9 @@ private:
     ErrCode RunAsSetDisposedRuleCommand();
     ErrCode RunAsDeleteDisposedRuleCommand();
 
-    int32_t InstallOperation(const std::vector<std::string> &bundlePaths, InstallParam &installParam,
-        int32_t waittingTime, std::string &resultMsg) const;
-    int32_t UninstallOperation(const std::string &bundleName, const std::string &moduleName,
+    int32_t UninstallOperation(const std::string &bundleName,
                                InstallParam &installParam) const;
     int32_t UninstallSharedOperation(const UninstallParam &uninstallParam) const;
-    bool IsInstallOption(int index) const;
-    void GetAbsPaths(const std::vector<std::string> &paths, std::vector<std::string> &absPaths) const;
-
-    ErrCode GetBundlePath(const std::string& param, std::vector<std::string>& bundlePaths) const;
-    std::string GetWaringString(int32_t currentUserId, int32_t specifedUserId) const;
 
     std::string DumpBundleList(int32_t userId) const;
     std::string DumpDebugBundleList(int32_t userId) const;
