@@ -208,7 +208,7 @@ private:
     ErrCode ParseSharedCommand(int32_t option, std::string &bundleName, bool &dumpSharedAll);
 
     // JSON output helper methods
-    std::string CreateSuccessResult(const std::string &message, const std::string &data = "") const;
+    std::string CreateSuccessResult(const std::string &data = "") const;
     std::string CreateErrorResult(int32_t code, const std::string &message,
         const std::string &suggestion = "") const;
     std::string CreateErrorResult(const std::string &errCode, const std::string &message,

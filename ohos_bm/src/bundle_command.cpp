@@ -127,8 +127,7 @@ BundleManagerShellCommand::BundleManagerShellCommand(int argc, char *argv[])
     : ShellCommand(argc, argv, TOOL_NAME)
 {}
 
-std::string BundleManagerShellCommand::CreateSuccessResult(const std::string &message,
-    const std::string &data) const
+std::string BundleManagerShellCommand::CreateSuccessResult(const std::string &data) const
 {
     nlohmann::json result;
     result["type"] = "result";
@@ -250,13 +249,13 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
     // Return error when no arguments provided
     if (argc_ <= 2) {
         APP_LOGD("'ohos-bm uninstall' with no option.");
-        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
     // uninstall 命令需要 installer proxy
     if (InitInstaller() != OHOS::ERR_OK) {
-        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_INTERNAL_ERROR,
+        resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
             "error: failed to connect to bundle installer service.");
         return OHOS::ERR_INVALID_VALUE;
     }
@@ -277,7 +276,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
         }
 
         if (option == '?') {
-                resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
+                resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
                 result = OHOS::ERR_INVALID_VALUE;
             }
 
@@ -286,7 +285,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
                 case 'n': {
                     APP_LOGD("'ohos-bm uninstall -n' with no argument.");
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -300,7 +299,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
                 }
                 case 'v': {
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -308,7 +307,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
                     APP_LOGD("'ohos-bm uninstall' with an unknown option.");
-                    resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, unknownOptionMsg);
+                    resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -345,7 +344,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
                 if (!OHOS::StrToInt(optarg, versionCode) || versionCode < 0) {
                     APP_LOGE("ohos-bm uninstall with error versionCode %{private}s", optarg);
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 break;
@@ -367,7 +366,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
     }
     if (result != OHOS::ERR_OK) {
         if (resultReceiver_ == "") {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_UNINSTALL);
+            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, HELP_MSG_UNINSTALL);
         }
         return result;
     }
@@ -379,7 +378,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
         APP_LOGE("version code is %{public}d", versionCode);
         int32_t uninstallResult = UninstallSharedOperation(uninstallParam);
         if (uninstallResult == OHOS::ERR_OK) {
-            resultReceiver_ = CreateSuccessResult(STRING_UNINSTALL_BUNDLE_OK);
+            resultReceiver_ = CreateSuccessResult();
         } else {
             resultReceiver_ = CreateErrorResult(uninstallResult,
                 STRING_UNINSTALL_BUNDLE_NG);
@@ -392,7 +391,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
             Constants::VERIFY_UNINSTALL_RULE_VALUE);
         int32_t uninstallResult = UninstallOperation(bundleName, installParam);
         if (uninstallResult == OHOS::ERR_OK) {
-            resultReceiver_ = CreateSuccessResult(STRING_UNINSTALL_BUNDLE_OK);
+            resultReceiver_ = CreateSuccessResult();
         } else {
             resultReceiver_ = CreateErrorResult(uninstallResult,
                 STRING_UNINSTALL_BUNDLE_NG);
@@ -410,7 +409,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     // Return error when no arguments provided
     if (argc_ <= 2) {
         APP_LOGD("'ohos-bm dump' with no option.");
-        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(ERR_DUMP_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -436,14 +435,14 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                 case 'n': {
                     APP_LOGD("'ohos-bm dump -n' with no argument.");
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        ERR_DUMP_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
                 case 'd': {
                     APP_LOGD("'ohos-bm dump -d' with no argument.");
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        ERR_DUMP_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -451,7 +450,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
                     APP_LOGD("'ohos-bm dump' with an unknown option.");
-                    resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, unknownOptionMsg);
+                    resultReceiver_ = CreateErrorResult(ERR_DUMP_PARAM_ERROR, unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -507,19 +506,19 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
         if ((resultReceiver_ == "") && bundleDumpShortcut && (bundleName.size() == 0)) {
             APP_LOGD("'ohos-bm dump -s' with no bundle name option.");
             resultReceiver_ = CreateErrorResult(
-                IStatusReceiver::ERR_UNINSTALL_INVALID_NAME, HELP_MSG_NO_BUNDLE_NAME_OPTION);
+                ERR_DUMP_PARAM_ERROR, HELP_MSG_NO_BUNDLE_NAME_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
         }
         if ((resultReceiver_ == "") && bundleDumpDistributedBundleInfo && (bundleName.size() == 0)) {
             APP_LOGD("'ohos-bm dump -d' with no bundle name option.");
             resultReceiver_ = CreateErrorResult(
-                IStatusReceiver::ERR_UNINSTALL_INVALID_NAME, HELP_MSG_NO_BUNDLE_NAME_OPTION);
+                ERR_DUMP_PARAM_ERROR, HELP_MSG_NO_BUNDLE_NAME_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
         }
     }
     if (result != OHOS::ERR_OK) {
         if (resultReceiver_ == "") {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_DUMP);
+            resultReceiver_ = CreateErrorResult(ERR_DUMP_PARAM_ERROR, HELP_MSG_DUMP);
         }
     } else {
         std::string dumpResults = "";
@@ -539,9 +538,10 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             dumpResults = DumpBundleLabel(bundleName, userId);
         }
         if (dumpResults.empty()) {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARSE_FAILED, HELP_MSG_DUMP_FAILED);
+            resultReceiver_ = CreateErrorResult(
+                ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
         } else {
-            resultReceiver_ = CreateSuccessResult("dump successfully", dumpResults);
+            resultReceiver_ = CreateSuccessResult(dumpResults);
         }
     }
     APP_LOGI("end");
@@ -555,7 +555,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
 
     // Return error when no arguments provided
     if (argc_ <= 2) {
-        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(ERR_DUMP_DEPENDENCIES_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -576,21 +576,22 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
     }
     if (result == OHOS::ERR_OK) {
         if ((resultReceiver_ == "") && (bundleName.size() == 0 || moduleName.size() == 0)) {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_REMOVABLE_OPTION);
+            resultReceiver_ = CreateErrorResult(ERR_DUMP_DEPENDENCIES_PARAM_ERROR, HELP_MSG_NO_REMOVABLE_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
         }
     }
     if (result != OHOS::ERR_OK) {
         if (resultReceiver_ == "") {
             resultReceiver_ = CreateErrorResult(
-                IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_DUMP_SHARED_DEPENDENCIES);
+                ERR_DUMP_DEPENDENCIES_PARAM_ERROR, HELP_MSG_DUMP_SHARED_DEPENDENCIES);
         }
     } else {
         std::string dumpResults = DumpSharedDependencies(bundleName, moduleName);
         if (dumpResults.empty()) {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARSE_FAILED, HELP_MSG_DUMP_FAILED);
+            resultReceiver_ = CreateErrorResult(
+                ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
         } else {
-            resultReceiver_ = CreateSuccessResult("dump dependencies successfully", dumpResults);
+            resultReceiver_ = CreateSuccessResult(dumpResults);
         }
     }
     APP_LOGI("end");
@@ -605,20 +606,20 @@ ErrCode BundleManagerShellCommand::ParseSharedDependenciesCommand(int32_t option
         switch (optopt) {
             case 'n': {
                 resultReceiver_ = CreateErrorResult(
-                    IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    ERR_DUMP_DEPENDENCIES_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
             case 'm': {
                 resultReceiver_ = CreateErrorResult(
-                    IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    ERR_DUMP_DEPENDENCIES_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
             default: {
                 std::string unknownOption = "";
                 std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-                resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, unknownOptionMsg);
+                resultReceiver_ = CreateErrorResult(ERR_DUMP_DEPENDENCIES_PARAM_ERROR, unknownOptionMsg);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -654,7 +655,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
 
     // Return error when no arguments provided
     if (argc_ <= 2) {
-        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(ERR_DUMP_SHARED_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -675,22 +676,23 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
     }
     if (result != OHOS::ERR_OK) {
         if (resultReceiver_ == "") {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_DUMP_SHARED);
+            resultReceiver_ = CreateErrorResult(ERR_DUMP_SHARED_PARAM_ERROR, HELP_MSG_DUMP_SHARED);
         }
     } else if (dumpSharedAll) {
         std::string dumpResults = DumpSharedAll();
-        resultReceiver_ = CreateSuccessResult("dump shared all successfully", dumpResults);
+        resultReceiver_ = CreateSuccessResult(dumpResults);
     } else {
         if ((resultReceiver_ == "") && (bundleName.size() == 0)) {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_REMOVABLE_OPTION);
+            resultReceiver_ = CreateErrorResult(ERR_DUMP_SHARED_PARAM_ERROR, HELP_MSG_NO_REMOVABLE_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
             return result;
         }
         std::string dumpResults = DumpShared(bundleName);
         if (dumpResults.empty()) {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARSE_FAILED, HELP_MSG_DUMP_FAILED);
+            resultReceiver_ = CreateErrorResult(
+                ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
         } else {
-            resultReceiver_ = CreateSuccessResult("dump shared successfully", dumpResults);
+            resultReceiver_ = CreateSuccessResult(dumpResults);
         }
     }
     APP_LOGI("end");
@@ -704,14 +706,14 @@ ErrCode BundleManagerShellCommand::ParseSharedCommand(int32_t option, std::strin
         switch (optopt) {
             case 'n': {
                 resultReceiver_ = CreateErrorResult(
-                    IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    ERR_DUMP_SHARED_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
             default: {
                 std::string unknownOption = "";
                 std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-                resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, unknownOptionMsg);
+                resultReceiver_ = CreateErrorResult(ERR_DUMP_SHARED_PARAM_ERROR, unknownOptionMsg);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -748,7 +750,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     // Return error when no arguments provided
     if (argc_ <= 2) {
         APP_LOGD("'ohos-bm clean' with no option.");
-        resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(ERR_CLEAN_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -771,14 +773,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 case 'n': {
                     APP_LOGD("'ohos-bm clean -n' with no argument.");
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        ERR_CLEAN_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
                 case 'i': {
                     APP_LOGD("'ohos-bm clean -i' with no argument.");
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        ERR_CLEAN_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -786,7 +788,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
                     APP_LOGD("'ohos-bm clean' with an unknown option.");
-                    resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, unknownOptionMsg);
+                    resultReceiver_ = CreateErrorResult(ERR_CLEAN_PARAM_ERROR, unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
@@ -820,7 +822,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
                     APP_LOGE("ohos-bm clean with error appIndex %{private}s", optarg);
                     resultReceiver_ = CreateErrorResult(
-                        IStatusReceiver::ERR_INSTALL_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                        ERR_CLEAN_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 break;
@@ -836,48 +838,41 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
         if (resultReceiver_ == "" && bundleName.size() == 0) {
             APP_LOGD("'ohos-bm clean' with no bundle name option.");
             resultReceiver_ = CreateErrorResult(
-                IStatusReceiver::ERR_UNINSTALL_INVALID_NAME, HELP_MSG_NO_BUNDLE_NAME_OPTION);
+                ERR_CLEAN_PARAM_ERROR, HELP_MSG_NO_BUNDLE_NAME_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
         }
         if (!cleanCache && !cleanData) {
             APP_LOGD("'ohos-bm clean' with no '-c' or '-d' option.");
             resultReceiver_ = CreateErrorResult(
-                IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_NO_DATA_OR_CACHE_OPTION);
+                ERR_CLEAN_PARAM_ERROR, HELP_MSG_NO_DATA_OR_CACHE_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
         }
     }
 
     if (result != OHOS::ERR_OK) {
         if (resultReceiver_ == "") {
-            resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_INSTALL_PARAM_ERROR, HELP_MSG_CLEAN);
+            resultReceiver_ = CreateErrorResult(ERR_CLEAN_PARAM_ERROR, HELP_MSG_CLEAN);
         }
     } else {
-        nlohmann::json resultJson;
-        resultJson["status"] = true;
-        resultJson["data"] = "";
-        resultJson["error_code"] = IStatusReceiver::SUCCESS;
-        resultJson["error_message"] = "";
         nlohmann::json cleanResult;
         if (cleanCache) {
             if (CleanBundleCacheFilesOperation(bundleName, userId, appIndex)) {
                 cleanResult["cache"] = STRING_CLEAN_CACHE_BUNDLE_OK;
+                resultReceiver_ = CreateSuccessResult(cleanResult.dump());
             } else {
-                resultJson["status"] = false;
-                resultJson["error_code"] = IStatusReceiver::ERR_INSTALL_PARSE_FAILED;
-                cleanResult["cache"] = STRING_CLEAN_CACHE_BUNDLE_NG;
+                resultReceiver_ = CreateErrorResult(
+                    ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_CACHE_BUNDLE_NG);
             }
         }
         if (cleanData) {
             if (CleanBundleDataFilesOperation(bundleName, userId, appIndex)) {
                 cleanResult["data"] = STRING_CLEAN_DATA_BUNDLE_OK;
+                resultReceiver_ = CreateSuccessResult(cleanResult.dump());
             } else {
-                resultJson["status"] = false;
-                resultJson["error_code"] = IStatusReceiver::ERR_INSTALL_PARSE_FAILED;
-                cleanResult["data"] = STRING_CLEAN_DATA_BUNDLE_NG;
+                resultReceiver_ = CreateErrorResult(
+                    ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_DATA_BUNDLE_NG);
             }
         }
-        resultJson["data"] = cleanResult.dump();
-        resultReceiver_ = resultJson.dump();
     }
     APP_LOGI("end");
     return result;
@@ -1064,7 +1059,7 @@ int32_t BundleManagerShellCommand::UninstallOperation(
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
         APP_LOGE("statusReceiver is null");
-        return IStatusReceiver::ERR_UNKNOWN;
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
@@ -1072,7 +1067,7 @@ int32_t BundleManagerShellCommand::UninstallOperation(
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
         APP_LOGE("recipient is null");
-        return IStatusReceiver::ERR_UNKNOWN;
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
     bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
     bundleInstallerProxy_->Uninstall(bundleName, installParam, statusReceiver);
@@ -1085,13 +1080,13 @@ int32_t BundleManagerShellCommand::UninstallSharedOperation(const UninstallParam
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
         APP_LOGE("statusReceiver is null");
-        return IStatusReceiver::ERR_UNKNOWN;
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
         APP_LOGE("recipient is null");
-        return IStatusReceiver::ERR_UNKNOWN;
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
     bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
 
@@ -1103,7 +1098,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
 {
     APP_LOGI("begin to RunAsSetDisposedRuleCommand");
     if (argc_ <= 2) {
-        resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -1161,7 +1156,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
         if (option == '?') {
             std::string unknownOption = "";
             std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-            resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", unknownOptionMsg);
+            resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR, unknownOptionMsg);
             result = OHOS::ERR_INVALID_VALUE;
             break;
         }
@@ -1180,7 +1175,8 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
             case OPTION_APP_INDEX: {
                 if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
                     APP_LOGE("ohos-bm set-disposed-rule with error appIndex %{private}s", optarg);
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 break;
@@ -1188,7 +1184,8 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
             case OPTION_PRIORITY: {
                 if (!OHOS::StrToInt(optarg, disposedRule.priority)) {
                     APP_LOGE("ohos-bm set-disposed-rule with error priority %{private}s", optarg);
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 hasPriority = true;
@@ -1200,7 +1197,8 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
                     typeValue < static_cast<int32_t>(ComponentType::UI_ABILITY) ||
                     typeValue > static_cast<int32_t>(ComponentType::UI_EXTENSION)) {
                     APP_LOGE("ohos-bm set-disposed-rule with error componentType %{private}s", optarg);
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 disposedRule.componentType = static_cast<ComponentType>(typeValue);
@@ -1213,7 +1211,8 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
                     typeValue < static_cast<int32_t>(DisposedType::BLOCK_APPLICATION) ||
                     typeValue > static_cast<int32_t>(DisposedType::NON_BLOCK)) {
                     APP_LOGE("ohos-bm set-disposed-rule with error disposedType %{private}s", optarg);
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 disposedRule.disposedType = static_cast<DisposedType>(typeValue);
@@ -1226,7 +1225,8 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
                     typeValue < static_cast<int32_t>(ControlType::ALLOWED_LIST) ||
                     typeValue > static_cast<int32_t>(ControlType::DISALLOWED_LIST)) {
                     APP_LOGE("ohos-bm set-disposed-rule with error controlType %{private}s", optarg);
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 disposedRule.controlType = static_cast<ControlType>(typeValue);
@@ -1242,7 +1242,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
                 ElementName elementName;
                 if (!elementName.ParseURI(elementUri)) {
                     APP_LOGE("parse elementName failed: %{public}s", elementUri.c_str());
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                    resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                         "error: --elements format should be /bundleName/moduleName/abilityName.");
                     return OHOS::ERR_INVALID_VALUE;
                 }
@@ -1266,7 +1266,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
             case OPTION_WANT_PS: {
                 if (optind >= argc_ || argv_[optind] == nullptr ||
                     std::string(argv_[optind]).substr(0, 1) == "-") {
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                    resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                         "error: --wantParamsStrings requires key and value.");
                     return OHOS::ERR_INVALID_VALUE;
                 }
@@ -1278,14 +1278,15 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
             case OPTION_WANT_PI: {
                 if (optind >= argc_ || argv_[optind] == nullptr ||
                     std::string(argv_[optind]).substr(0, 1) == "-") {
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                    resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                         "error: --wantParamsInts requires key and value.");
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 int32_t intValue = 0;
                 if (!OHOS::StrToInt(argv_[optind], intValue)) {
                     APP_LOGE("ohos-bm set-disposed-rule --wantParamsInts with error value");
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 wantParamsInt.emplace_back(std::make_pair(std::string(optarg), intValue));
@@ -1295,7 +1296,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
             case OPTION_WANT_PB: {
                 if (optind >= argc_ || argv_[optind] == nullptr ||
                     std::string(argv_[optind]).substr(0, 1) == "-") {
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE",
+                    resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                         "error: --wantParamsBools requires key and value.");
                     return OHOS::ERR_INVALID_VALUE;
                 }
@@ -1318,7 +1319,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
             !hasDisposedType || !hasControlType ||
             !hasWantBundleName || !hasWantAbilityName) {
             APP_LOGD("'ohos-bm set-disposed-rule' missing required options.");
-            resultReceiver_ = CreateErrorResult("ERR_MISSING_PARAM",
+            resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                 "error: --appId, --priority, --componentType, "
                 "--disposedType, --controlType, --wantBundleName, "
                 "--wantAbilityName are required.");
@@ -1327,7 +1328,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_SET_DISPOSED_RULE);
+        resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR, HELP_MSG_SET_DISPOSED_RULE);
         return result;
     }
 
@@ -1335,7 +1336,8 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     if (userId == Constants::DEFAULT_USERID) {
         APP_LOGE("userId is 0, forbidden to call set-disposed-rule");
-        resultReceiver_ = CreateErrorResult("ERR_INVALID_USERID", STRING_USER_ID_INVALID);
+        resultReceiver_ = CreateErrorResult(
+            ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_USER_ID_INVALID);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -1357,13 +1359,14 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     // Call IPC interface
     if (InitAppControlProxy() != OHOS::ERR_OK && appControlProxy_ == nullptr) {
         APP_LOGE("appControlProxy_ is null");
-        resultReceiver_ = CreateErrorResult("ERR_SERVICE_UNAVAILABLE", "error: failed to get app control proxy.");
+        resultReceiver_ = CreateErrorResult(
+            ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, "error: failed to get app control proxy.");
         return OHOS::ERR_INVALID_VALUE;
     }
 
     ErrCode res = appControlProxy_->SetDisposedRuleForCloneApp(appId, disposedRule, appIndex, userId);
     if (res == OHOS::ERR_OK) {
-        resultReceiver_ = CreateSuccessResult(STRING_SET_DISPOSED_RULE_OK);
+        resultReceiver_ = CreateSuccessResult();
     } else {
         resultReceiver_ = CreateErrorResult(static_cast<int32_t>(res), STRING_SET_DISPOSED_RULE_NG);
     }
@@ -1376,7 +1379,7 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
 {
     APP_LOGI("begin to RunAsDeleteDisposedRuleCommand");
     if (argc_ <= 2) {
-        resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_NO_OPTION);
+        resultReceiver_ = CreateErrorResult(ERR_SET_DELETE_RULE_PARAM_ERROR, HELP_MSG_NO_OPTION);
         return OHOS::ERR_INVALID_VALUE;
     }
 
@@ -1410,7 +1413,7 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
         if (option == '?') {
             std::string unknownOption = "";
             std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-            resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", unknownOptionMsg);
+            resultReceiver_ = CreateErrorResult(ERR_SET_DELETE_RULE_PARAM_ERROR, unknownOptionMsg);
             result = OHOS::ERR_INVALID_VALUE;
             break;
         }
@@ -1429,7 +1432,7 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
             case OPTION_APP_INDEX: {
                 if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
                     APP_LOGE("ohos-bm delete-disposed-rule with error appIndex %{private}s", optarg);
-                    resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", STRING_REQUIRE_CORRECT_VALUE);
+                    resultReceiver_ = CreateErrorResult(ERR_SET_DELETE_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
                 break;
@@ -1445,14 +1448,14 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
     if (result == OHOS::ERR_OK && resultReceiver_ == "") {
         if (!hasAppId) {
             APP_LOGD("'ohos-bm delete-disposed-rule' missing required options.");
-            resultReceiver_ = CreateErrorResult("ERR_MISSING_PARAM",
+            resultReceiver_ = CreateErrorResult(ERR_SET_DELETE_RULE_PARAM_ERROR,
                 "error: --appId is required.");
             result = OHOS::ERR_INVALID_VALUE;
         }
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_ = CreateErrorResult("ERR_INVALID_VALUE", HELP_MSG_DELETE_DISPOSED_RULE);
+        resultReceiver_ = CreateErrorResult(ERR_SET_DELETE_RULE_PARAM_ERROR, HELP_MSG_DELETE_DISPOSED_RULE);
         return result;
     }
 
@@ -1460,20 +1463,22 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
     int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     if (userId == Constants::DEFAULT_USERID) {
         APP_LOGE("userId is 0, forbidden to call delete-disposed-rule");
-        resultReceiver_ = CreateErrorResult("ERR_INVALID_USERID", STRING_USER_ID_INVALID);
+        resultReceiver_ = CreateErrorResult(
+            ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_USER_ID_INVALID);
         return OHOS::ERR_INVALID_VALUE;
     }
 
     // Call IPC interface
     if (InitAppControlProxy() != OHOS::ERR_OK && appControlProxy_ == nullptr) {
         APP_LOGE("appControlProxy_ is null");
-        resultReceiver_ = CreateErrorResult("ERR_SERVICE_UNAVAILABLE", "error: failed to get app control proxy.");
+        resultReceiver_ = CreateErrorResult(
+            ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, "error: failed to get app control proxy.");
         return OHOS::ERR_INVALID_VALUE;
     }
 
     ErrCode res = appControlProxy_->DeleteDisposedRuleForCloneApp(appId, appIndex, userId);
     if (res == OHOS::ERR_OK) {
-        resultReceiver_ = CreateSuccessResult(STRING_DELETE_DISPOSED_RULE_OK);
+        resultReceiver_ = CreateSuccessResult();
     } else {
         resultReceiver_ = CreateErrorResult(static_cast<int32_t>(res), STRING_DELETE_DISPOSED_RULE_NG);
     }
