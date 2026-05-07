@@ -20,7 +20,14 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-
+namespace {
+const std::string ERR_DUMP_PARAM_ERROR = "ERR_DUMP_PARAM_ERROR";
+const std::string ERR_DUMP_DEPENDENCIES_PARAM_ERROR = "ERR_DUMP_DEPENDENCIES_PARAM_ERROR";
+const std::string ERR_DUMP_SHARED_PARAM_ERROR = "ERR_DUMP_SHARED_PARAM_ERROR";
+const std::string ERR_CLEAN_PARAM_ERROR = "ERR_CLEAN_PARAM_ERROR";
+const std::string ERR_SET_DISPOSED_RULE_PARAM_ERROR = "ERR_SET_DISPOSED_RULE_PARAM_ERROR";
+const std::string ERR_SET_DELETE_RULE_PARAM_ERROR = "ERR_SET_DELETE_RULE_PARAM_ERROR";
+}
 class ErrorCodeUtils {
 public:
     /**
