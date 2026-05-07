@@ -31,7 +31,7 @@ const std::string TOOL_NAME = "ohos-bm";
 
 const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
                              "These are common ohos-bm commands list:\n"
-                             "  help              list available commands\n"
+                             "  --help            list available commands\n"
                              "  uninstall         uninstall a bundle with options\n"
                              "  dump              dump the bundle info\n"
                              "  dump-dependencies dump dependencies by given bundle name and module name\n"

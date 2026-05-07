@@ -7,7 +7,13 @@
     "hasSubCommand": true,
     "inputSchema": {
         "type": "object",
-        "properties": {}
+        "description": "View information about ohos-bm subcommands",
+        "properties": {
+            "help" : {
+                "type": "boolean",
+                "default": false
+            }
+        }
     },
     "outputSchema": {
         "type": "object",
@@ -35,39 +41,6 @@
         }
     },
     "subcommands": {
-        "help": {
-            "description": "View information about ohos-bm subcommands",
-            "requirePermissions": [],
-            "inputSchema": {
-                "type": "object",
-                "properties": {}
-            },
-            "outputSchema": {
-                "type": "object",
-                "description": "Execution result",
-                "properties": {
-                    "type": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    },
-                    "data": {
-                        "type": "object",
-                        "properties": {}
-                    },
-                    "errCode": {
-                        "type": "string"
-                    },
-                    "errMsg": {
-                        "type": "string"
-                    },
-                    "suggestion": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "uninstall": {
             "description": "Uninstall an application package",
             "requirePermissions": [

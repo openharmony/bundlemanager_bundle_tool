@@ -29,7 +29,7 @@ ShellCommand::ShellCommand(int argc, char *argv[], std::string name)
     name_ = name;
 
     if (argc < MIN_ARGUMENT_NUMBER) {
-        cmd_ = "help";
+        cmd_ = "--help";
         return;
     }
     cmd_ = argv[1];
@@ -48,11 +48,11 @@ ErrCode ShellCommand::OnCommand()
     auto respond = commandMap_[cmd_];
     if (respond == nullptr) {
         resultReceiver_.append(GetCommandErrorMsg());
-        respond = commandMap_["help"];
+        respond = commandMap_["--help"];
     }
 
-    // help no need Init()
-    if (cmd_ == "help" || Init() == OHOS::ERR_OK) {
+    // --help no need Init()
+    if (cmd_ == "--help" || Init() == OHOS::ERR_OK) {
         respond();
     } else {
         result = OHOS::ERR_INVALID_VALUE;

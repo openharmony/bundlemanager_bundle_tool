@@ -142,8 +142,6 @@ std::string BundleManagerShellCommand::CreateSuccessResult(const std::string &me
         result["data"] = nlohmann::json::object();
         result["data"]["content"] = data;
     }
-    result["errCode"] = "SUCCESS";
-    result["errMsg"] = message;
     return result.dump();
 }
 
@@ -153,7 +151,6 @@ std::string BundleManagerShellCommand::CreateErrorResult(int32_t code,
     nlohmann::json result;
     result["type"] = "result";
     result["status"] = "failed";
-    result["data"] = nlohmann::json::object();
     result["errCode"] = ErrorCodeUtils::GetErrorCodeString(code);
     std::string errMsg = message;
     std::string codeMessage = GetMessageFromCode(code);
@@ -161,9 +158,7 @@ std::string BundleManagerShellCommand::CreateErrorResult(int32_t code,
         errMsg += "\n" + codeMessage;
     }
     result["errMsg"] = errMsg;
-    if (!suggestion.empty()) {
-        result["suggestion"] = suggestion;
-    }
+    result["suggestion"] = suggestion;
     return result.dump();
 }
 
@@ -173,19 +168,16 @@ std::string BundleManagerShellCommand::CreateErrorResult(const std::string &errC
     nlohmann::json result;
     result["type"] = "result";
     result["status"] = "failed";
-    result["data"] = nlohmann::json::object();
     result["errCode"] = errCode;
     result["errMsg"] = message;
-    if (!suggestion.empty()) {
-        result["suggestion"] = suggestion;
-    }
+    result["suggestion"] = suggestion;
     return result.dump();
 }
 
 ErrCode BundleManagerShellCommand::CreateCommandMap()
 {
     commandMap_ = {
-        {"help", [this] { return this->RunAsHelpCommand(); } },
+        {"--help", [this] { return this->RunAsHelpCommand(); } },
         {"uninstall", [this] { return this->RunAsUninstallCommand(); } },
         {"dump", [this] { return this->RunAsDumpCommand(); } },
         {"dump-dependencies", [this] { return this->RunAsDumpSharedDependenciesCommand(); } },
@@ -247,7 +239,7 @@ ErrCode BundleManagerShellCommand::InitInstaller()
 
 ErrCode BundleManagerShellCommand::RunAsHelpCommand()
 {
-    resultReceiver_ = CreateSuccessResult(HELP_MSG);
+    resultReceiver_ = HELP_MSG;
     return OHOS::ERR_OK;
 }
 
@@ -327,7 +319,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
         switch (option) {
             case 'h': {
                 APP_LOGD("'ohos-bm uninstall %{public}s'", argv_[optind - 1]);
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_UNINSTALL);
+                resultReceiver_ = HELP_MSG_UNINSTALL;
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -469,7 +461,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
         switch (option) {
             case 'h': {
                 APP_LOGD("'ohos-bm dump %{public}s'", argv_[optind - 1]);
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_DUMP);
+                resultReceiver_ = HELP_MSG_DUMP;
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -634,7 +626,7 @@ ErrCode BundleManagerShellCommand::ParseSharedDependenciesCommand(int32_t option
     } else {
         switch (option) {
             case 'h': {
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_DUMP_SHARED_DEPENDENCIES);
+                resultReceiver_ = HELP_MSG_DUMP_SHARED_DEPENDENCIES;
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -727,7 +719,7 @@ ErrCode BundleManagerShellCommand::ParseSharedCommand(int32_t option, std::strin
     } else {
         switch (option) {
             case 'h': {
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_DUMP_SHARED);
+                resultReceiver_ = HELP_MSG_DUMP_SHARED;
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -805,7 +797,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
         switch (option) {
             case 'h': {
                 APP_LOGD("'ohos-bm clean %{public}s'", argv_[optind - 1]);
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_CLEAN);
+                resultReceiver_ = HELP_MSG_CLEAN;
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
@@ -1177,7 +1169,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
         switch (option) {
             case 'h': {
                 APP_LOGD("'ohos-bm set-disposed-rule %{public}s'", argv_[optind - 1]);
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_SET_DISPOSED_RULE);
+                resultReceiver_ = HELP_MSG_SET_DISPOSED_RULE;
                 return OHOS::ERR_OK;
             }
             case OPTION_APP_ID: {
@@ -1426,7 +1418,7 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
         switch (option) {
             case 'h': {
                 APP_LOGD("'ohos-bm delete-disposed-rule %{public}s'", argv_[optind - 1]);
-                resultReceiver_ = CreateSuccessResult(HELP_MSG_DELETE_DISPOSED_RULE);
+                resultReceiver_ = HELP_MSG_DELETE_DISPOSED_RULE;
                 return OHOS::ERR_OK;
             }
             case OPTION_APP_ID: {
