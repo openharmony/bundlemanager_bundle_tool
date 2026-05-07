@@ -30,5 +30,8 @@ group("moduletest") {
 group("unittest") {
   testonly = true
 
-  deps = [ "unittest/bm:unittest" ]
+  deps = [
+    "unittest/bm:unittest",
+    "../ohos_bm/test:unittest"
+  ]
 }
