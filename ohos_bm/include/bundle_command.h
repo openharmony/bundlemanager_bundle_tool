@@ -200,6 +200,10 @@ private:
     std::string DumpSharedAll() const;
     std::string DumpAllLabel(int32_t userId) const;
     std::string DumpBundleLabel(const std::string &bundleName, int32_t userId) const;
+    
+    ErrCode ParseParamInteger(std::map<std::string, int>& pi);
+    ErrCode ParseParamBool(std::map<std::string, bool>& pb);
+    ErrCode ParseParamString(std::map<std::string, std::string>& ps);
 
     bool CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
     bool CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;

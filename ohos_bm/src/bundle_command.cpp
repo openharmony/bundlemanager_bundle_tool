@@ -1093,6 +1093,69 @@ int32_t BundleManagerShellCommand::UninstallSharedOperation(const UninstallParam
     bundleInstallerProxy_->Uninstall(uninstallParam, statusReceiver);
     return statusReceiver->GetResultCode();
 }
+// parse integer parameters
+ErrCode BundleManagerShellCommand::ParseParamInteger(std::map<std::string, int>& pi)
+{
+    std::string sarg(optarg);
+    if (!sarg.empty() && sarg.front() == '\'') {
+        sarg.erase(0, 1);
+    }
+    if (!sarg.empty() && sarg.back() == '\'') {
+        sarg.pop_back();
+    }
+    try {
+        auto paramObj = nlohmann::json::parse(sarg.c_str());
+        for (auto& [key, value] : paramObj.items()) {
+            pi[key] = value.get<int>();
+        }
+    } catch(const std::exception& e) {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    return OHOS::ERR_OK;
+}
+
+// parse bool parameters
+ErrCode BundleManagerShellCommand::ParseParamBool(std::map<std::string, bool>& pb)
+{
+    std::string sarg(optarg);
+    if (!sarg.empty() && sarg.front() == '\'') {
+        sarg.erase(0, 1);
+    }
+    if (!sarg.empty() && sarg.back() == '\'') {
+        sarg.pop_back();
+    }
+    try {
+        auto paramObj = nlohmann::json::parse(sarg.c_str());
+        for (auto& [key, value] : paramObj.items()) {
+            pb[key] = value.get<bool>();
+        }
+    } catch(const std::exception& e) {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    return OHOS::ERR_OK;
+}
+
+// parse string parameters
+ErrCode BundleManagerShellCommand::ParseParamString(std::map<std::string, std::string>& ps)
+{
+    std::string sarg(optarg);
+    if (!sarg.empty() && sarg.front() == '\'') {
+        sarg.erase(0, 1);
+    }
+    if (!sarg.empty() && sarg.back() == '\'') {
+        sarg.pop_back();
+    }
+    try {
+        auto paramObj = nlohmann::json::parse(sarg.c_str());
+        for (auto& [key, value] : paramObj.items()) {
+            ps[key] = value.get<std::string>();
+        }
+    } catch(const std::exception& e) {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    return OHOS::ERR_OK;
+}
+
 
 ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
 {
@@ -1117,6 +1180,9 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     std::string wantBundleName;
     std::string wantModuleName;
     std::string wantAbilityName;
+    std::map<std::string, int> parametersInteger;
+    std::map<std::string, std::string> parametersString;
+    std::map<std::string, bool> parametersBool;
     std::vector<std::pair<std::string, std::string>> wantParamsString;
     std::vector<std::pair<std::string, int32_t>> wantParamsInt;
     std::vector<std::pair<std::string, bool>> wantParamsBool;
@@ -1140,7 +1206,6 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
         {nullptr, 0, nullptr, 0},
     };
 
-    optind = INDEX_OFFSET;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, setDisposedRuleOptions.c_str(),
@@ -1264,46 +1329,32 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
                 break;
             }
             case OPTION_WANT_PS: {
-                if (optind >= argc_ || argv_[optind] == nullptr ||
-                    std::string(argv_[optind]).substr(0, 1) == "-") {
+                ErrCode res = ParseParamString(parametersString);
+                if (res != OHOS::ERR_OK) {
                     resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                         "error: --wantParamsStrings requires key and value.");
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                wantParamsString.emplace_back(std::make_pair(std::string(optarg),
-                    std::string(argv_[optind])));
-                optind++;
                 break;
             }
             case OPTION_WANT_PI: {
-                if (optind >= argc_ || argv_[optind] == nullptr ||
-                    std::string(argv_[optind]).substr(0, 1) == "-") {
-                    resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
-                        "error: --wantParamsInts requires key and value.");
-                    return OHOS::ERR_INVALID_VALUE;
-                }
-                int32_t intValue = 0;
-                if (!OHOS::StrToInt(argv_[optind], intValue)) {
+                ErrCode res = ParseParamInteger(parametersInteger);
+                if (res != OHOS::ERR_OK) {
                     APP_LOGE("ohos-bm set-disposed-rule --wantParamsInts with error value");
                     resultReceiver_ = CreateErrorResult(
                         ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                wantParamsInt.emplace_back(std::make_pair(std::string(optarg), intValue));
-                optind++;
                 break;
             }
             case OPTION_WANT_PB: {
-                if (optind >= argc_ || argv_[optind] == nullptr ||
-                    std::string(argv_[optind]).substr(0, 1) == "-") {
+                ErrCode res = ParseParamBool(parametersBool);
+                if (res != OHOS::ERR_OK) {
+                    APP_LOGE("ohos-bm set-disposed-rule --wantParamsInts with error value");
                     resultReceiver_ = CreateErrorResult(ERR_SET_DISPOSED_RULE_PARAM_ERROR,
                         "error: --wantParamsBools requires key and value.");
                     return OHOS::ERR_INVALID_VALUE;
                 }
-                std::string boolStr = argv_[optind];
-                bool boolValue = (boolStr == "true" || boolStr == "1");
-                wantParamsBool.emplace_back(std::make_pair(std::string(optarg), boolValue));
-                optind++;
                 break;
             }
             default: {
@@ -1345,14 +1396,14 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     auto want = std::make_shared<AAFwk::Want>();
     ElementName elementName("", wantBundleName, wantAbilityName, wantModuleName);
     want->SetElement(elementName);
-    for (const auto &param : wantParamsString) {
-        want->SetParam(param.first, param.second);
+    for (auto& [key, value] : parametersString) {
+        want->SetParam(key, value);
     }
-    for (const auto &param : wantParamsInt) {
-        want->SetParam(param.first, param.second);
+    for (auto& [key, value] : parametersInteger) {
+        want->SetParam(key, value);
     }
-    for (const auto &param : wantParamsBool) {
-        want->SetParam(param.first, param.second);
+    for (auto& [key, value] : parametersBool) {
+        want->SetParam(key, value);
     }
     disposedRule.want = want;
 
@@ -1397,7 +1448,6 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
         {nullptr, 0, nullptr, 0},
     };
 
-    optind = INDEX_OFFSET;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, deleteDisposedRuleOptions.c_str(),
