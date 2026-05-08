@@ -388,25 +388,16 @@
                         "description": "Want redirection target abilityName"
                     },
                     "wantParamsStrings": {
-                        "type": "array",
-                        "description": "Want string type additional parameters, format: key value, multiple groups allowed",
-                        "items": {
-                            "type": "string"
-                        }
+                        "type": "string",
+                        "description": "Want string type additional parameters, format: Example: '{\"key1\":\"value1\",\"key2\":\"value2\"}'"
                     },
                     "wantParamsInts": {
-                        "type": "array",
-                        "description": "Want int type additional parameters, format: key value, multiple groups allowed",
-                        "items": {
-                            "type": "string"
-                        }
+                        "type": "string",
+                        "description": "Want int type additional parameters, format: Example: '{\"key1\":100,\"key2\":101}'"
                     },
                     "wantParamsBools": {
-                        "type": "array",
-                        "description": "Want bool type additional parameters, format: key true/false, multiple groups allowed",
-                        "items": {
-                            "type": "string"
-                        }
+                        "type": "string",
+                        "description": "Want bool type additional parameters, format: Example: '{\"key1\":true,\"key2\":false}'"
                     }
                 }
             },

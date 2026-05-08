@@ -24,6 +24,8 @@ config("tools_ohos_bm_config") {
     "APP_LOG_TAG = \"OHOS_BMSTool\"",
     "LOG_DOMAIN = 0xD001123",
   ]
+
+  cflags_cc = [ "-fexceptions" ]
 }
 
 ohos_source_set("tools_ohos_bm_source_set") {
