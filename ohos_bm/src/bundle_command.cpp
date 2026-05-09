@@ -842,7 +842,7 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             result = OHOS::ERR_INVALID_VALUE;
         }
         if (!cleanCache && !cleanData) {
-            APP_LOGD("'ohos-bm clean' with no '-c' or '-d' option.");
+            APP_LOGD("'ohos-bm clean' with no --cache or --data option.");
             resultReceiver_ = CreateErrorResult(
                 ERR_CLEAN_PARAM_ERROR, HELP_MSG_NO_DATA_OR_CACHE_OPTION);
             result = OHOS::ERR_INVALID_VALUE;

@@ -43,59 +43,59 @@ const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
 const std::string HELP_MSG_UNINSTALL =
     "usage: ohos-bm uninstall <options>\n"
     "options list:\n"
-    "  -h, --help                           list available commands\n"
-    "  -n, --bundleName <bundle-name>      uninstall a bundle by bundle name\n"
-    "  -k, --keepData                      keep the user data after uninstall\n"
-    "  -s, --shared                         uninstall inter-application shared library\n"
-    "  -v, --version                        uninstall a inter-application shared library by versionCode\n";
+    "  --help                           list available commands\n"
+    "  --bundleName <bundle-name>      uninstall a bundle by bundle name\n"
+    "  --keepData                      keep the user data after uninstall\n"
+    "  --shared                         uninstall inter-application shared library\n"
+    "  --version                        uninstall a inter-application shared library by versionCode\n";
 
 const std::string HELP_MSG_DUMP =
     "usage: ohos-bm dump <options>\n"
     "options list:\n"
-    "  -h, --help                           list available commands\n"
-    "  -a, --all                            list all bundles in system\n"
-    "  -g, --debugBundle                   list debug bundles in system\n"
-    "  -n, --bundleName <bundle-name>      list the bundle info by a bundle name\n"
-    "  -s, --shortcutInfo                  list the shortcut info\n"
-    "  -d, --deviceId <device-id>          specify a device id\n"
-    "  -l, --label                          list the label info\n";
+    "  --help                           list available commands\n"
+    "  --all                            list all bundles in system\n"
+    "  --debugBundle                   list debug bundles in system\n"
+    "  --bundleName <bundle-name>      list the bundle info by a bundle name\n"
+    "  --shortcutInfo                  list the shortcut info\n"
+    "  --deviceId <device-id>          specify a device id\n"
+    "  --label                          list the label info\n";
 
 const std::string HELP_MSG_CLEAN =
     "usage: ohos-bm clean <options>\n"
     "options list:\n"
-    "  -h, --help                                      list available commands\n"
-    "  -n, --bundleName  <bundle-name>                bundle name\n"
-    "  -c, --cache                                     clean bundle cache files by bundle name\n"
-    "  -d, --data                                      clean bundle data files by bundle name\n"
-    "  -i, --appIndex <app-index>                     specify a app index\n";
+    "  --help                                      list available commands\n"
+    "  --bundleName  <bundle-name>                bundle name\n"
+    "  --cache                                     clean bundle cache files by bundle name\n"
+    "  --data                                      clean bundle data files by bundle name\n"
+    "  --appIndex <app-index>                     specify a app index\n";
 
 const std::string HELP_MSG_DUMP_SHARED =
     "usage: ohos-bm dump-shared <options>\n"
-    "eg:ohos-bm dump-shared -n <bundle-name> \n"
+    "eg:ohos-bm dump-shared --bundleName <bundle-name> \n"
     "options list:\n"
-    "  -h, --help                             list available commands\n"
-    "  -a, --all                              list all inter-application shared library name in system\n"
-    "  -n, --bundleName  <bundle-name>       dump inter-application shared library information by bundleName\n";
+    "  --help                             list available commands\n"
+    "  --all                              list all inter-application shared library name in system\n"
+    "  --bundleName  <bundle-name>       dump inter-application shared library information by bundleName\n";
 
 const std::string HELP_MSG_DUMP_SHARED_DEPENDENCIES =
     "usage: ohos-bm dump-dependencies <options>\n"
-    "eg:ohos-bm dump-dependencies -n <bundle-name> -m <module-name> \n"
+    "eg:ohos-bm dump-dependencies --bundleName <bundle-name> --moduleName <module-name> \n"
     "options list:\n"
-    "  -h, --help                             list available commands\n"
-    "  -n, --bundleName  <bundle-name>       dump dependencies by bundleName and moduleName\n"
-    "  -m, --moduleName  <module-name>       dump dependencies by bundleName and moduleName\n";
+    "  --help                             list available commands\n"
+    "  --bundleName  <bundle-name>       dump dependencies by bundleName and moduleName\n"
+    "  --moduleName  <module-name>       dump dependencies by bundleName and moduleName\n";
 
 const std::string HELP_MSG_NO_OPTION =
-    "error: no option specified. Use -h for help.";
+    "error: no option specified. Use --help for help.";
 
 const std::string HELP_MSG_NO_BUNDLE_NAME_OPTION =
-    "error: you must specify a bundle name with '-n' or '--bundleName'.";
+    "error: you must specify a bundle name with --bundleName.";
 
 const std::string STRING_UNINSTALL_BUNDLE_OK = "uninstall bundle successfully.";
 const std::string STRING_UNINSTALL_BUNDLE_NG = "error: failed to uninstall bundle.";
 
 const std::string HELP_MSG_NO_DATA_OR_CACHE_OPTION =
-    "error: you must specify '-c' or '-d' for 'ohos-bm clean' option.";
+    "error: you must specify --cache or --data for 'ohos-bm clean' option.";
 const std::string STRING_CLEAN_CACHE_BUNDLE_OK = "clean bundle cache files successfully.";
 const std::string STRING_CLEAN_CACHE_BUNDLE_NG = "error: failed to clean bundle cache files.";
 
@@ -107,8 +107,8 @@ const std::string STRING_REQUIRE_CORRECT_VALUE = "error: option requires a corre
 const std::string HELP_MSG_DUMP_FAILED = "error: failed to get information and the parameters may be wrong.";
 
 const std::string HELP_MSG_NO_REMOVABLE_OPTION =
-    "error: you must specify a bundle name with '-n' or '--bundleName' \n"
-    "and a module name with '-m' or '--moduleName' \n";
+    "error: you must specify a bundle name with --bundleName \n"
+    "and a module name with --moduleName \n";
 
 const std::string BUNDLE_NAME_EMPTY = "";
 const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
@@ -120,7 +120,7 @@ const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
 const std::string HELP_MSG_SET_DISPOSED_RULE =
     "usage: ohos-bm set-disposed-rule <options> "
     "options list: "
-    "-h, --help: list available commands. "
+    "--help: list available commands. "
     "--appId <app-id>: application appId or appIdentifier (required). "
     "--appIndex <app-index>: clone app index, a positive integer. "
     "--priority <priority>: priority of the disposed rule, a non-negative integer (required). "
@@ -139,7 +139,7 @@ const std::string HELP_MSG_SET_DISPOSED_RULE =
 const std::string HELP_MSG_DELETE_DISPOSED_RULE =
     "usage: ohos-bm delete-disposed-rule <options> "
     "options list: "
-    "-h, --help: list available commands. "
+    "--help: list available commands. "
     "--appId <app-id>: application appId or appIdentifier (required). "
     "--appIndex <app-index>: clone app index, a positive integer.";
 
