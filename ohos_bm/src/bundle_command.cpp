@@ -586,12 +586,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
                 ERR_DUMP_DEPENDENCIES_PARAM_ERROR, HELP_MSG_DUMP_SHARED_DEPENDENCIES);
         }
     } else {
-        std::string dumpResults = DumpSharedDependencies(bundleName, moduleName);
-        if (dumpResults.empty()) {
-            resultReceiver_ = CreateErrorResult(
-                ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
+        std::vector<Dependency> dependencies;
+        ErrCode ret = bundleMgrProxy_->GetSharedDependencies(bundleName, moduleName, dependencies);
+        if (ret != ERR_OK) {
+            APP_LOGE("dump shared dependencies failed due to errcode %{public}d", ret);
+            resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), HELP_MSG_DUMP_FAILED);
+            result = ret;
         } else {
-            resultReceiver_ = CreateSuccessResult(dumpResults);
+            nlohmann::json jsonResult = nlohmann::json {{DEPENDENCIES, dependencies}};
+            resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
         }
     }
     APP_LOGI("end");
@@ -679,20 +682,31 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             resultReceiver_ = CreateErrorResult(ERR_DUMP_SHARED_PARAM_ERROR, HELP_MSG_DUMP_SHARED);
         }
     } else if (dumpSharedAll) {
-        std::string dumpResults = DumpSharedAll();
-        resultReceiver_ = CreateSuccessResult(dumpResults);
+        std::vector<SharedBundleInfo> sharedBundleInfos;
+        ErrCode ret = bundleMgrProxy_->GetAllSharedBundleInfo(sharedBundleInfos);
+        if (ret != ERR_OK) {
+            APP_LOGE("dump-shared all failed due to errcode %{public}d", ret);
+            resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), HELP_MSG_DUMP_FAILED);
+            result = ret;
+        } else {
+            nlohmann::json jsonResult = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleInfos}};
+            resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
+        }
     } else {
         if ((resultReceiver_ == "") && (bundleName.size() == 0)) {
             resultReceiver_ = CreateErrorResult(ERR_DUMP_SHARED_PARAM_ERROR, HELP_MSG_NO_REMOVABLE_OPTION);
             result = OHOS::ERR_INVALID_VALUE;
             return result;
         }
-        std::string dumpResults = DumpShared(bundleName);
-        if (dumpResults.empty()) {
-            resultReceiver_ = CreateErrorResult(
-                ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
+        SharedBundleInfo sharedBundleInfo;
+        ErrCode ret = bundleMgrProxy_->GetSharedBundleInfoBySelf(bundleName, sharedBundleInfo);
+        if (ret != ERR_OK) {
+            APP_LOGE("dump-shared failed due to errcode %{public}d", ret);
+            resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), HELP_MSG_DUMP_FAILED);
+            result = ret;
         } else {
-            resultReceiver_ = CreateSuccessResult(dumpResults);
+            nlohmann::json jsonResult = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleInfo}};
+            resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
         }
     }
     APP_LOGI("end");
@@ -963,56 +977,6 @@ std::string BundleManagerShellCommand::DumpDistributedBundleInfo(
     return dumpResults;
 }
 
-std::string BundleManagerShellCommand::DumpSharedDependencies(const std::string &bundleName,
-    const std::string &moduleName) const
-{
-    APP_LOGD("DumpSharedDependencies bundleName: %{public}s, moduleName: %{public}s",
-        bundleName.c_str(), moduleName.c_str());
-    std::vector<Dependency> dependencies;
-    ErrCode ret = bundleMgrProxy_->GetSharedDependencies(bundleName, moduleName, dependencies);
-    nlohmann::json dependenciesJson;
-    if (ret != ERR_OK) {
-        APP_LOGE("dump shared dependencies failed due to errcode %{public}d", ret);
-        return std::string();
-    } else {
-        dependenciesJson = nlohmann::json {{DEPENDENCIES, dependencies}};
-    }
-    return dependenciesJson.dump(Constants::DUMP_INDENT) + "\n";
-}
-
-std::string BundleManagerShellCommand::DumpShared(const std::string &bundleName) const
-{
-    APP_LOGD("DumpShared bundleName: %{public}s", bundleName.c_str());
-    SharedBundleInfo sharedBundleInfo;
-    ErrCode ret = bundleMgrProxy_->GetSharedBundleInfoBySelf(bundleName, sharedBundleInfo);
-    nlohmann::json sharedBundleInfoJson;
-    if (ret != ERR_OK) {
-        APP_LOGE("dump-shared failed due to errcode %{public}d", ret);
-        return std::string();
-    } else {
-        sharedBundleInfoJson = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleInfo}};
-    }
-    return sharedBundleInfoJson.dump(Constants::DUMP_INDENT);
-}
-
-std::string BundleManagerShellCommand::DumpSharedAll() const
-{
-    APP_LOGD("DumpSharedAll");
-    std::string dumpResults = "";
-    std::vector<SharedBundleInfo> sharedBundleInfos;
-    ErrCode ret = bundleMgrProxy_->GetAllSharedBundleInfo(sharedBundleInfos);
-    if (ret != ERR_OK) {
-        APP_LOGE("dump-shared all failed due to errcode %{public}d", ret);
-        return dumpResults;
-    }
-    for (const auto& item : sharedBundleInfos) {
-        dumpResults.append("\t");
-        dumpResults.append(item.name);
-        dumpResults.append("\n");
-    }
-    return dumpResults;
-}
-
 // Clean helper methods
 
 bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId,
@@ -1238,7 +1202,7 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
                 break;
             }
             case OPTION_APP_INDEX: {
-                if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
+                if (!OHOS::StrToInt(optarg, appIndex)) {
                     APP_LOGE("ohos-bm set-disposed-rule with error appIndex %{private}s", optarg);
                     resultReceiver_ = CreateErrorResult(
                         ERR_SET_DISPOSED_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);

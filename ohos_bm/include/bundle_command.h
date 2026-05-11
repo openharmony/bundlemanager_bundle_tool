@@ -195,9 +195,6 @@ private:
     std::string DumpBundleInfo(const std::string &bundleName, int32_t userId) const;
     std::string DumpShortcutInfos(const std::string &bundleName, int32_t userId) const;
     std::string DumpDistributedBundleInfo(const std::string &deviceId, const std::string &bundleName);
-    std::string DumpSharedDependencies(const std::string &bundleName, const std::string &moduleName) const;
-    std::string DumpShared(const std::string &bundleName) const;
-    std::string DumpSharedAll() const;
     std::string DumpAllLabel(int32_t userId) const;
     std::string DumpBundleLabel(const std::string &bundleName, int32_t userId) const;
     
