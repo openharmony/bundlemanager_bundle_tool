@@ -267,8 +267,7 @@
         "clean": {
             "description": "Clean application cache or data files",
             "requirePermissions": [
-                "ohos.permission.cli.REMOVE_CACHE_FILES",
-                "ohos.permission.CLEAN_APPLICATION_DATA"
+                "ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES"
             ],
             "inputSchema": {
                 "type": "object",
@@ -353,8 +352,8 @@
                         "description": "Clone app index, a positive integer"
                     },
                     "priority": {
-                        "type": "string",
-                        "description": "Disposed rule priority, non-negative integer, higher value means higher priority"
+                        "type": "integer",
+                        "description": "Disposed rule priority, non-negative integer, lower value means higher priority"
                     },
                     "componentType": {
                         "type": "string",
