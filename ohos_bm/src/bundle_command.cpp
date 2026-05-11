@@ -1070,6 +1070,9 @@ ErrCode BundleManagerShellCommand::ParseParamInteger(std::map<std::string, int>&
     try {
         auto paramObj = nlohmann::json::parse(sarg.c_str());
         for (auto& [key, value] : paramObj.items()) {
+            if (key.empty()) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
             pi[key] = value.get<int>();
         }
     } catch(const std::exception& e) {
@@ -1091,6 +1094,9 @@ ErrCode BundleManagerShellCommand::ParseParamBool(std::map<std::string, bool>& p
     try {
         auto paramObj = nlohmann::json::parse(sarg.c_str());
         for (auto& [key, value] : paramObj.items()) {
+            if (key.empty()) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
             pb[key] = value.get<bool>();
         }
     } catch(const std::exception& e) {
@@ -1112,6 +1118,9 @@ ErrCode BundleManagerShellCommand::ParseParamString(std::map<std::string, std::s
     try {
         auto paramObj = nlohmann::json::parse(sarg.c_str());
         for (auto& [key, value] : paramObj.items()) {
+            if (key.empty()) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
             ps[key] = value.get<std::string>();
         }
     } catch(const std::exception& e) {
