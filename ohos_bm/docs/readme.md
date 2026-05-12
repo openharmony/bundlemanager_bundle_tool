@@ -1,367 +1,245 @@
 # ohos-bm
 
-ohos-bm is a command-line tool for managing applications on OpenHarmony devices.
+## 1. 概述
 
-## Commands Overview
+`ohos-bm` 是 OpenHarmony 系统的包管理器命令行工具，用于管理应用程序包。它提供了应用包的卸载、信息查看、依赖关系查询、共享库管理、缓存/数据清理以及克隆应用处置规则管理等功能。
 
-| Command | Description |
-|---------|-------------|
-| `help` | View information about ohos-bm subcommands |
-| `install` | Install a hap, hsp or app package |
-| `uninstall` | Uninstall an application package |
-| `dump` | View application package information |
-| `dump-dependencies` | View dependency information of specified application and module |
-| `dump-shared` | View inter-application shared library information |
-| `clean` | Clean application cache or data files |
-| `set-disposed-rule` | Set disposed rule for clone app to control component behavior |
-| `delete-disposed-rule` | Delete disposed rule for clone app |
+### 文件结构
 
-## Usage
-
-### help
-
-View available commands.
-
-```bash
-ohos-bm help
+```
+ohos_bm/
+├── include/                      # 头文件目录
+│   ├── bundle_command.h          # 命令处理主类
+│   ├── bundle_command_common.h   # 公共工具类（代理获取、用户ID处理）
+│   ├── error_code_utils.h        # 错误码转换工具
+│   ├── shell_command.h           # CLI命令解析基类
+│   └── status_receiver_impl.h    # 异步状态接收器实现
+├── src/                          # 源文件目录
+│   ├── main.cpp                  # 主入口
+│   ├── bundle_command.cpp        # 命令处理实现
+│   ├── bundle_command_common.cpp # 公共工具实现
+│   ├── error_code_utils.cpp      # 错误码转换实现
+│   ├── shell_command.cpp         # 命令解析与分发实现
+│   └── status_receiver_impl.cpp  # 异步结果处理实现
+├── test/                         # 测试代码目录
+│   ├── unittest/                 # 单元测试
+│   │   └── ohos_bm_command_test.cpp
+│   └── BUILD.gn                  # 测试构建配置
+├── docs/                         # 文档目录
+│   └ readme.md                   # 参考文档
+├── config.json                   # CLI配置文件（Claw规范）
+└── BUILD.gn                      # 构建配置
 ```
 
-### install
+## 2. CLI子命令表
 
-Install a hap, hsp or app package.
+| 子命令 | 作用 | 可选参数 | 所需权限 |
+|-------|------|---------|---------|
+| `--help` | 查看ohos-bm帮助信息 | 无 | 无 |
+| `uninstall` | 卸载应用包 | `--bundleName <bundle-name>`：指定要卸载的包名<br>`--keepData`：卸载后保留用户数据<br>`--shared`：卸载应用间共享库<br>`--version <version-code>`：指定共享库版本号卸载 | `ohos.permission.cli.UNINSTALL_BUNDLE` |
+| `dump` | 查看应用包信息 | `--all`：列出系统中所有应用包<br>`--bundleName <bundle-name>`：查看指定包的信息<br>`--shortcutInfo`：查看快捷方式信息<br>`--deviceId <device-id>`：指定设备ID查看分布式应用信息<br>`--debugBundle`：列出调试应用包<br>`--label`：查看标签信息 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
+| `dump-dependencies` | 查看指定应用和模块的依赖关系 | `--bundleName <bundle-name>`：指定包名<br>`--moduleName <module-name>`：指定模块名 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
+| `dump-shared` | 查看应用间共享库信息 | `--all`：列出所有共享库名称<br>`--bundleName <bundle-name>`：查看指定共享库信息 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
+| `clean` | 清理应用缓存或数据文件 | `--bundleName <bundle-name>`：指定包名<br>`--cache`：清理缓存文件<br>`--data`：清理数据文件<br>`--appIndex <app-index>`：指定应用索引 | `ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES` |
+| `set-disposed-rule` | 为克隆应用设置处置规则 | `--appId <app-id>`：应用ID或标识符（必选）<br>`--appIndex <app-index>`：克隆应用索引<br>`--priority <priority>`：处置规则优先级（必选）<br>`--componentType <type>`：组件类型（必选）：1=UI_ABILITY, 2=UI_EXTENSION<br>`--disposedType <type>`：处置类型（必选）：1=BLOCK_APPLICATION, 2=BLOCK_ABILITY, 3=NON_BLOCK<br>`--controlType <type>`：控制类型（必选）：1=ALLOWED_LIST, 2=DISALLOWED_LIST<br>`--elements <element-uri>`：要控制的元素，格式：/bundleName/moduleName/abilityName，可多次使用<br>`--wantBundleName <name>`：重定向目标包名（必选）<br>`--wantModuleName <name>`：重定向目标模块名<br>`--wantAbilityName <name>`：重定向目标Ability名（必选）<br>`--wantParamsStrings <json>`：Want字符串参数<br>`--wantParamsInts <json>`：Want整数参数<br>`--wantParamsBools <json>`：Want布尔参数 | `ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS` |
+| `delete-disposed-rule` | 删除克隆应用的处置规则 | `--appId <app-id>`：应用ID或标识符（必选）<br>`--appIndex <app-index>`：克隆应用索引 | `ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS` |
 
-```bash
-ohos-bm install -p <file-path>
+## 3. Claw规范遵循情况
+
+### 命令命名规范
+
+- **主命令命名**：使用小写字母和连字符组合，格式为 `ohos-<module>`，例如 `ohos-bm`（bm代表bundle manager）
+- **子命令命名**：使用小写字母，多个单词时使用连字符连接，例如 `dump-dependencies`、`set-disposed-rule`
+- **参数命名**：使用小驼峰命名法（camelCase）或连字符命名法，例如 `--bundleName` 或 `--bundle-name`
+- **遵循度**：✅ 完全遵循
+
+### 输入格式规范
+
+通过 `config.json` 文件定义输入参数的 JSON Schema：
+
+```json
+{
+  "inputSchema": {
+    "type": "object",
+    "required": ["参数列表"],
+    "properties": {
+      "参数名": {
+        "type": "数据类型",
+        "description": "参数描述",
+        "default": "默认值"
+      }
+    }
+  }
+}
 ```
 
-#### Install options
+- **参数类型定义**：明确指定每个参数的数据类型（string、integer、boolean、array等）
+- **必选参数标记**：通过 `required` 字段明确标识必选参数
+- **参数描述**：每个参数都有详细的 `description` 字段说明用途
+- **默认值设置**：可选参数通过 `default` 字段设置默认值
+- **遵循度**：✅ 完全遵循，所有子命令的输入参数都在 `config.json` 中有完整的 JSON Schema 定义
 
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `-p, --bundlePath <file-path>` | Install a hap/hsp/app by specified path. Multiple paths can be specified. |
-| `-r, --replace` | Replace an existing bundle (default behavior) |
-| `-s, --sharedBundleDirPath <dir-path>` | Install inter-application hsp files |
-| `-u, --userId <user-id>` | Specify a user id (only supports current user or userId is 0) |
-| `-w, --waittingTime <seconds>` | Set waiting time for installation (180s ~ 600s) |
-| `-d, --downgrade` | Allow downgrade installation |
-| `-g, --grantPermission` | Grant permissions during installation |
+### 输出格式规范
 
-#### Install examples
+所有命令的输出均采用 JSON 格式，包含以下统一字段：
 
-```bash
-# Install a single hap
-ohos-bm install -p /data/local/tmp/test.hap
-
-# Install multiple haps of one bundle
-ohos-bm install -p /data/local/tmp/entry.hap /data/local/tmp/feature.hap
-
-# Install with replace
-ohos-bm install -r -p /data/local/tmp/test.hap
-
-# Install with shared hsp
-ohos-bm install -p /data/local/tmp/test.hap -s /data/local/tmp/shared.hsp
-
-# Install with downgrade allowed
-ohos-bm install -p /data/local/tmp/test.hap -d
-
-# Install with permissions granted
-ohos-bm install -p /data/local/tmp/test.hap -g
+```json
+{
+  "type": "result",
+  "status": "success | failed",
+  "data": {
+    // 返回的具体数据
+  },
+  "errCode": "错误码字符串",
+  "errMsg": "错误消息",
+  "suggestion": "错误解决建议"
+}
 ```
 
-### uninstall
+- **type字段**：固定为 `"result"`，标识这是执行结果
+- **status字段**：取值为 `"success"` 或 `"failed"`，表示执行状态
+- **data字段**：成功时包含返回的数据对象，失败时为空对象或包含错误详情
+- **errCode字段**：失败时返回具体的错误码字符串（如 `ERR_DUMP_PARAM_ERROR`）
+- **errMsg字段**：失败时返回详细的错误消息说明
+- **suggestion字段**：失败时提供解决问题的建议或帮助信息
+- **遵循度**：✅ 完全遵循，所有命令的输出都在 `config.json` 中有完整的 JSON Schema 定义
 
-Uninstall an application package.
+## 4. 使用示例
+
+### 4.1 查看帮助信息
 
 ```bash
-ohos-bm uninstall -n <bundle-name>
+ohos-bm --help
 ```
 
-#### Uninstall options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `-n, --bundleName <bundle-name>` | Specify the bundle name to uninstall |
-| `-m, --moduleName <module-name>` | Uninstall a specific module by module name |
-| `-u, --userId <user-id>` | Specify a user id (only supports current user or userId is 0) |
-| `-k, --keepData` | Keep user data after uninstall |
-| `-s, --shared` | Uninstall inter-application shared library |
-| `-v, --version <versionCode>` | Specify version code for shared library uninstall |
-
-#### Uninstall examples
+### 4.2 卸载应用包
 
 ```bash
-# Uninstall by bundle name
-ohos-bm uninstall -n com.example.test
+# 卸载指定包名的应用
+ohos-bm uninstall --bundleName com.example.test
 
-# Uninstall a specific module
-ohos-bm uninstall -n com.example.test -m entry
+# 卸载应用但保留用户数据
+ohos-bm uninstall --bundleName com.example.test --keepData
 
-# Uninstall keeping user data
-ohos-bm uninstall -n com.example.test -k
+# 卸载应用间共享库
+ohos-bm uninstall --bundleName com.example.sharedlib --shared
 
-# Uninstall shared library
-ohos-bm uninstall -n com.example.sharedlib -s
-
-# Uninstall shared library by version
-ohos-bm uninstall -n com.example.sharedlib -s -v 1000000
+# 卸载指定版本的共享库
+ohos-bm uninstall --bundleName com.example.sharedlib --shared --version 1000000
 ```
 
-### dump
-
-View application package information.
+### 4.3 查看应用包信息
 
 ```bash
-ohos-bm dump -n <bundle-name>
+# 列出系统中所有应用包
+ohos-bm dump --all
+
+# 查看指定应用包的详细信息
+ohos-bm dump --bundleName com.example.test
+
+# 查看应用的快捷方式信息
+ohos-bm dump --bundleName com.example.test --shortcutInfo
+
+# 查看指定设备的分布式应用信息
+ohos-bm dump --bundleName com.example.test --deviceId device123
+
+# 列出调试应用包
+ohos-bm dump --debugBundle
+
+# 查看所有应用的标签信息
+ohos-bm dump --all --label
+
+# 查看指定应用的标签信息
+ohos-bm dump --bundleName com.example.test --label
 ```
 
-#### Dump options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `-a, --all` | List all bundles in system |
-| `-g, --debugBundle` | List debug bundles in system |
-| `-n, --bundleName <bundle-name>` | List the bundle info by a bundle name |
-| `-s, --shortcutInfo` | List the shortcut info |
-| `-d, --deviceId <device-id>` | Specify a device id |
-| `-u, --userId <user-id>` | Specify a user id (only supports current user or userId is 0) |
-| `-l, --label` | List the label info |
-
-#### Dump examples
+### 4.4 查看依赖关系
 
 ```bash
-# List all bundles
-ohos-bm dump -a
-
-# Dump specific bundle info
-ohos-bm dump -n com.example.test
-
-# Dump shortcut info
-ohos-bm dump -n com.example.test -s
-
-# Dump debug bundles
-ohos-bm dump -g
-
-# Dump label info
-ohos-bm dump -n com.example.test -l
+# 查看指定应用和模块的依赖关系
+ohos-bm dump-dependencies --bundleName com.example.test --moduleName entry
 ```
 
-### dump-dependencies
-
-View dependency information of specified application and module.
+### 4.5 查看共享库信息
 
 ```bash
-ohos-bm dump-dependencies -n <bundle-name> -m <module-name>
+# 列出所有应用间共享库
+ohos-bm dump-shared --all
+
+# 查看指定共享库的详细信息
+ohos-bm dump-shared --bundleName com.example.sharedlib
 ```
 
-#### Dump-dependencies options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `-n, --bundleName <bundle-name>` | Specify bundle name |
-| `-m, --moduleName <module-name>` | Specify module name |
-
-#### Dump-dependencies examples
+### 4.6 清理应用缓存或数据
 
 ```bash
-# Dump dependencies for specific module
-ohos-bm dump-dependencies -n com.example.test -m entry
+# 清理应用缓存文件
+ohos-bm clean --bundleName com.example.test --cache
+
+# 清理应用数据文件
+ohos-bm clean --bundleName com.example.test --data
+
+# 清理指定应用索引的缓存
+ohos-bm clean --bundleName com.example.test --cache --appIndex 1001
 ```
 
-### dump-shared
-
-View inter-application shared library information.
+### 4.7 设置处置规则
 
 ```bash
-ohos-bm dump-shared -n <bundle-name>
-```
-
-#### Dump-shared options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `-a, --all` | List all inter-application shared library names in system |
-| `-n, --bundleName <bundle-name>` | Dump inter-application shared library information by bundle name |
-
-#### Dump-shared examples
-
-```bash
-# List all shared libraries
-ohos-bm dump-shared -a
-
-# Dump specific shared library info
-ohos-bm dump-shared -n com.example.sharedlib
-```
-
-### clean
-
-Clean application cache or data files.
-
-```bash
-ohos-bm clean -n <bundle-name> -c
-```
-
-#### Clean options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `-n, --bundleName <bundle-name>` | Specify bundle name |
-| `-c, --cache` | Clean bundle cache files by bundle name |
-| `-d, --data` | Clean bundle data files by bundle name |
-| `-u, --userId <user-id>` | Specify a user id (only supports current user or userId is 0) |
-| `-i, --appIndex <app-index>` | Specify a app index |
-
-#### Clean examples
-
-```bash
-# Clean cache files
-ohos-bm clean -n com.example.test -c
-
-# Clean data files
-ohos-bm clean -n com.example.test -d
-
-# Clean cache for specific user
-ohos-bm clean -n com.example.test -c -u 100
-```
-
-### set-disposed-rule
-
-Set disposed rule for clone app to control component behavior.
-
-```bash
-ohos-bm set-disposed-rule --appId <app-id> --priority <priority> ...
-```
-
-#### Set-disposed-rule options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `--appId <app-id>` | Application appId or appIdentifier (required) |
-| `--appIndex <app-index>` | Clone app index, a positive integer |
-| `--priority <priority>` | Disposed rule priority, non-negative integer, higher value means higher priority (required) |
-| `--componentType <type>` | Component type to control (required): 1=UI_ABILITY, 2=UI_EXTENSION |
-| `--disposedType <type>` | Disposed type (required): 1=BLOCK_APPLICATION, 2=BLOCK_ABILITY, 3=NON_BLOCK |
-| `--controlType <type>` | Control type (required): 1=ALLOWED_LIST, 2=DISALLOWED_LIST |
-| `--elements <element-uri>` | Element to control, format: /bundleName/moduleName/abilityName. Can be repeated for multiple elements. |
-| `--wantBundleName <name>` | Want redirection target bundleName (required) |
-| `--wantModuleName <name>` | Want redirection target moduleName |
-| `--wantAbilityName <name>` | Want redirection target abilityName (required) |
-| `--wantParamsStrings <key> <value>` | Want string type additional parameters. Can be repeated. |
-| `--wantParamsInts <key> <value>` | Want int type additional parameters. Can be repeated. |
-| `--wantParamsBools <key> <true/false>` | Want bool type additional parameters. Can be repeated. |
-
-#### Set-disposed-rule examples
-
-```bash
-# Block an application
-ohos-bm set-disposed-rule --appId com.example.test \
-    --priority 100 --componentType 1 --disposedType 1 \
-    --controlType 1 --wantBundleName com.example.redirect \
+# 阻止整个应用并重定向
+ohos-bm set-disposed-rule \
+    --appId com.example.test \
+    --priority 100 \
+    --componentType 1 \
+    --disposedType 1 \
+    --controlType 1 \
+    --wantBundleName com.example.redirect \
     --wantAbilityName MainAbility
 
-# Block specific abilities with allowed list
-ohos-bm set-disposed-rule --appId com.example.test \
-    --priority 100 --componentType 2 --disposedType 2 \
+# 阻止特定Ability并重定向（使用允许列表）
+ohos-bm set-disposed-rule \
+    --appId com.example.test \
+    --priority 100 \
+    --componentType 2 \
+    --disposedType 2 \
     --controlType 1 \
     --elements /com.example.test/entry/MainAbility \
     --elements /com.example.test/feature/SubAbility \
     --wantBundleName com.example.redirect \
     --wantModuleName entry \
     --wantAbilityName MainAbility
+
+# 设置带参数的处置规则
+ohos-bm set-disposed-rule \
+    --appId com.example.test \
+    --priority 50 \
+    --componentType 1 \
+    --disposedType 3 \
+    --controlType 2 \
+    --wantBundleName com.example.target \
+    --wantAbilityName MainAbility \
+    --wantParamsStrings '{"key1":"value1","key2":"value2"}' \
+    --wantParamsInts '{"count":10,"index":5}' \
+    --wantParamsBools '{"enabled":true}'
+
+# 为克隆应用设置处置规则
+ohos-bm set-disposed-rule \
+    --appId com.example.test \
+    --appIndex 1001 \
+    --priority 100 \
+    --componentType 1 \
+    --disposedType 1 \
+    --controlType 1 \
+    --wantBundleName com.example.redirect \
+    --wantAbilityName MainAbility
 ```
 
-### delete-disposed-rule
-
-Delete disposed rule for clone app.
+### 4.8 删除处置规则
 
 ```bash
-ohos-bm delete-disposed-rule --appId <app-id>
-```
-
-#### Delete-disposed-rule options
-
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help information |
-| `--appId <app-id>` | Application appId or appIdentifier (required) |
-| `--appIndex <app-index>` | Clone app index, a positive integer |
-
-#### Delete-disposed-rule examples
-
-```bash
-# Delete disposed rule by appId
+# 根据appId删除处置规则
 ohos-bm delete-disposed-rule --appId com.example.test
 
-# Delete disposed rule for specific clone app
+# 删除克隆应用的处置规则
 ohos-bm delete-disposed-rule --appId com.example.test --appIndex 1001
 ```
-
-## Architecture
-
-```
-ohos_bm/
-  include/             # Header files
-    bundle_command.h          # Command handler (install/uninstall)
-    bundle_command_common.h   # Common utilities (proxy, error messages)
-    error_code_utils.h        # Error code to string mapping utility
-    shell_command.h           # Base class for CLI command parsing
-    status_receiver_impl.h    # Async status receiver
-  src/                 # Source files
-    main.cpp                  # Entry point
-    bundle_command.cpp        # Install/uninstall implementation
-    bundle_command_common.cpp # Proxy & error message map
-    error_code_utils.cpp      # Error code mapping implementation
-    shell_command.cpp         # Command parsing & dispatch
-    status_receiver_impl.cpp  # Async result handling
-  test/                # Test code
-  docs/                # Documentation
-    readme.md
-  config.json          # CLI configuration file
-  BUILD.gn             # Build configuration
-```
-
-## Dependencies
-
-- `bundle_framework:appexecfwk_base` - Base bundle framework types
-- `bundle_framework:appexecfwk_core` - Core bundle framework interfaces
-- `bundle_framework:bundle_tool_libs` - Bundle tool libraries
-- `ipc:ipc_core` - IPC/Binder core
-- `samgr:samgr_proxy` - System ability manager proxy
-- `c_utils:utils` - C++ utility library
-- `hilog:libhilog` - Logging
-- `init:libbegetutil` - System parameter utilities
-- `json:nlohmann_json_static` - JSON library
-
-## Output Format
-
-All commands return JSON output with the following structure:
-
-```json
-{
-    "type": "result",
-    "status": "success|failed",
-    "data": {},
-    "errCode": "SUCCESS|ERR_XXX",
-    "errMsg": "Error message",
-    "suggestion": "Suggestion for resolving the error"
-}
-```
-
-## Permissions
-
-| Command | Required Permission |
-|---------|---------------------|
-| `install` | `ohos.permission.cli.INSTALL_BUNDLE` |
-| `uninstall` | `ohos.permission.cli.UNINSTALL_BUNDLE` |
-| `dump` | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
-| `dump-dependencies` | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
-| `dump-shared` | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
-| `clean` | `ohos.permission.cli.REMOVE_CACHE_FILES` |
-| `set-disposed-rule` | `ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS` |
-| `delete-disposed-rule` | `ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS` |
