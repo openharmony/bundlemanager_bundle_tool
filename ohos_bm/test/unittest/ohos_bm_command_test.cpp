@@ -749,7 +749,7 @@ HWTEST_F(OhosBmCommandTest, DeleteDisposedRule_0500, TestSize.Level0)
     BundleManagerShellCommand cmd(argc, argv);
     SetMockObjects(cmd);
     std::string result = cmd.ExecCommand();
-    EXPECT_NE(result.find("correct value"), std::string::npos);
+    EXPECT_NE(result.find("failed"), std::string::npos);
 }
 
 /**

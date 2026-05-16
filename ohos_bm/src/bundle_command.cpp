@@ -1453,7 +1453,7 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
                 break;
             }
             case OPTION_APP_INDEX: {
-                if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
+                if (!OHOS::StrToInt(optarg, appIndex)) {
                     APP_LOGE("ohos-bm delete-disposed-rule with error appIndex %{private}s", optarg);
                     resultReceiver_ = CreateErrorResult(ERR_SET_DELETE_RULE_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
