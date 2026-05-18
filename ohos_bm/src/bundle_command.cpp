@@ -689,7 +689,11 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), HELP_MSG_DUMP_FAILED);
             result = ret;
         } else {
-            nlohmann::json jsonResult = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleInfos}};
+            std::vector<std::string> sharedBundleNames;
+            for (const auto& item : sharedBundleInfos) {
+                sharedBundleNames.push_back(item.name);
+            }
+            nlohmann::json jsonResult = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleNames}};
             resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
         }
     } else {
