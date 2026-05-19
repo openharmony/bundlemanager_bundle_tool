@@ -35,7 +35,7 @@ public:
     bool DumpInfos(
         const DumpFlag flag, const std::string &bundleName, int32_t userId, std::string &result) override;
     ErrCode SetApplicationEnabled(const std::string &bundleName, bool isEnable,
-        int32_t userId = Constants::UNSPECIFIED_USERID) override;
+        int32_t userId = Constants::UNSPECIFIED_USERID, bool killProcess = false) override;
     ErrCode SetAbilityEnabled(const AbilityInfo &abilityInfo, bool isEnable,
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
     bool GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag, BundleInfo &bundleInfo) override;

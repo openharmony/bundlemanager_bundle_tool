@@ -71,7 +71,8 @@ bool MockBundleMgrHost::CleanBundleDataFiles(const std::string &bundleName, cons
     return true;
 }
 
-ErrCode MockBundleMgrHost::SetApplicationEnabled(const std::string &bundleName, bool isEnable, int32_t userId)
+ErrCode MockBundleMgrHost::SetApplicationEnabled(const std::string &bundleName, bool isEnable, int32_t userId,
+    bool killProcess)
 {
     APP_LOGD("enter");
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
