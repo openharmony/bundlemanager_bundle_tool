@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
 #include <future>
 #include <getopt.h>
 #include <iostream>
@@ -51,6 +52,7 @@
 #include "process_cache_callback_host.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "spm_module_parser.h"
 #include "system_ability_definition.h"
 #ifdef BUNDLE_FRAMEWORK_QUICK_FIX
 #include "quick_fix_status_callback_host_impl.h"
@@ -236,7 +238,8 @@ static const std::string HELP_MSG =
     "  uninstallEnterpriseReSignatureCert    uninstall enterprise re sign cert\n"
     "  getEnterpriseReSignatureCert          get enterprise re sign cert\n"
     "  getApiTargetVersionByUid          get api target version by uid\n"
-    "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n";
+    "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n"
+    "  parseSpmModule                   parse spm module\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -498,6 +501,13 @@ const std::string HELP_MSG_BATCH_GET_BUNDLE_INFO =
     "  -n, --bundle-name <bundle-name>        specify bundle names separated by commas\n"
     "  -f, --flags <flags>                    specify bundle info flags (default: 1)\n"
     "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_PARSE_SPM_MODULE =
+    "usage: bundle_test_tool parseSpmModule <options>\n"
+    "eg:bundle_test_tool parseSpmModule -p <module-json-path>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -p, --module-json-path <path>          specify module.json file path\n";
 
 const std::string HELP_MSG_GET_BUNDLE_STATS =
     "usage: bundle_test_tool getBundleStats <options>\n"
@@ -960,6 +970,9 @@ const std::string STRING_BATCH_GET_COMPATIBLE_DEVICE_TYPE_NG = "batchGetCompatib
 
 const std::string STRING_BATCH_GET_BUNDLE_INFO_OK = "batchGetBundleInfo successfully\n";
 const std::string STRING_BATCH_GET_BUNDLE_INFO_NG = "batchGetBundleInfo failed\n";
+
+const std::string STRING_PARSE_SPM_MODULE_OK = "parseSpmModule successfully\n";
+const std::string STRING_PARSE_SPM_MODULE_NG = "parseSpmModule failed\n";
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
@@ -1424,6 +1437,13 @@ const struct option LONG_OPTIONS_BATCH_GET_BUNDLE_INFO[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_PARSE_SPM_MODULE = "hp:";
+const struct option LONG_OPTIONS_PARSE_SPM_MODULE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"module-json-path", required_argument, nullptr, 'p'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1727,7 +1747,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getOdidResetCount", std::bind(&BundleTestTool::RunAsGetOdidResetCount, this)},
         {"setBundleFirstLaunch", std::bind(&BundleTestTool::RunAsSetBundleFirstLaunch, this)},
         {"getTopNLargestItemsInAppDataDir", std::bind(&BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir, this)},
-        {"batchGetBundleInfo", std::bind(&BundleTestTool::RunAsBatchGetBundleInfo, this)}
+        {"batchGetBundleInfo", std::bind(&BundleTestTool::RunAsBatchGetBundleInfo, this)},
+        {"parseSpmModule", std::bind(&BundleTestTool::RunAsParseSpmModule, this)}
     };
 
     return OHOS::ERR_OK;
@@ -7906,6 +7927,129 @@ ErrCode BundleTestTool::RunAsBatchGetBundleInfo()
         result = ret;
     }
     APP_LOGI("RunAsBatchGetBundleInfo end");
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsParseSpmModule()
+{
+    APP_LOGI("RunAsParseSpmModule start");
+    std::string moduleJsonPath;
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_PARSE_SPM_MODULE.c_str(),
+            LONG_OPTIONS_PARSE_SPM_MODULE, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                result = OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'p': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'p': {
+                moduleJsonPath = optarg;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (moduleJsonPath.empty()) {
+            resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_PARSE_SPM_MODULE);
+    } else {
+        std::ifstream ifs(moduleJsonPath);
+        if (!ifs.is_open()) {
+            resultReceiver_.append(STRING_PARSE_SPM_MODULE_NG +
+                "failed to open file: " + moduleJsonPath + "\n");
+            APP_LOGI("RunAsParseSpmModule end");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        std::string moduleJson((std::istreambuf_iterator<char>(ifs)),
+            std::istreambuf_iterator<char>());
+        ifs.close();
+
+        Spm::InnerModuleInfoForSpm moduleInfo;
+        bool ret = Spm::ParseSpmModule(moduleJson, moduleInfo);
+        if (ret) {
+            nlohmann::json jsonResult;
+            jsonResult["bundleName"] = moduleInfo.bundleName;
+            jsonResult["moduleName"] = moduleInfo.moduleName;
+            jsonResult["bundleType"] = static_cast<int32_t>(moduleInfo.bundleType);
+            jsonResult["apiTargetVersion"] = moduleInfo.apiTargetVersion;
+            jsonResult["skillName"] = moduleInfo.skillName;
+
+            nlohmann::json definePerms = nlohmann::json::array();
+            for (const auto &perm : moduleInfo.definePermission) {
+                nlohmann::json p;
+                p["name"] = perm.name;
+                p["grantMode"] = perm.grantMode;
+                p["availableLevel"] = perm.availableLevel;
+                p["availableType"] = perm.availableType;
+                p["provisionEnable"] = perm.provisionEnable;
+                p["distributedSceneEnable"] = perm.distributedSceneEnable;
+                definePerms.push_back(p);
+            }
+            jsonResult["definePermission"] = definePerms;
+
+            nlohmann::json requestPerms = nlohmann::json::array();
+            for (const auto &perm : moduleInfo.requestPermission) {
+                nlohmann::json p;
+                p["name"] = perm.name;
+                p["moduleName"] = perm.moduleName;
+                p["reason"] = perm.reason;
+                requestPerms.push_back(p);
+            }
+            jsonResult["requestPermission"] = requestPerms;
+
+            resultReceiver_.append(STRING_PARSE_SPM_MODULE_OK);
+            resultReceiver_.append(jsonResult.dump(Constants::DUMP_INDENT));
+            resultReceiver_.append("\n");
+        } else {
+            resultReceiver_.append(STRING_PARSE_SPM_MODULE_NG);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    APP_LOGI("RunAsParseSpmModule end");
     return result;
 }
 

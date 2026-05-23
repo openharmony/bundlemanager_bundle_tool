@@ -151,6 +151,7 @@ private:
     ErrCode RunAsGetTopNLargestItemsInAppDataDir();
     // eg: bundle_test_tool batchGetBundleInfo -n <bundle-name>,<bundle-name> -f <flags> -u <user-id>
     ErrCode RunAsBatchGetBundleInfo();
+    ErrCode RunAsParseSpmModule();
 
     std::condition_variable cv_;
     std::mutex mutex_;

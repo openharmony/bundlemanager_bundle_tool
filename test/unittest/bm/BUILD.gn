@@ -446,6 +446,7 @@ ohos_unittest("bundle_test_tool_cache_stat_test") {
     "bundle_framework:bundle_napi_common",
     "bundle_framework:bundle_tool_libs",
     "bundle_framework:libappexecfwk_common",
+    "bundle_framework:spm_module_parser",
     "c_utils:utils",
     "cJSON:cjson_static",
     "common_event_service:cesfwk_innerkits",
