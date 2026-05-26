@@ -50,8 +50,13 @@ ohos_source_set("tools_bm_source_set") {
 
   public_configs = [ ":tools_bm_config" ]
 
-  cflags = [ "-fstack-protector-strong" ]
-  cflags_cc = cflags
+  cflags = [
+    "-fstack-protector-strong",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-flto",
+  ]
+  cflags_cc = cflags + [ "-Os" ]
 
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -95,6 +100,11 @@ ohos_source_set("tools_bm_source_set") {
 
 ohos_executable("bm") {
   deps = [ ":tools_bm_source_set" ]
+
+  ldflags = [
+    "-Wl,--gc-sections",
+    "-flto",
+  ]
 
   external_deps = [ "hilog:libhilog" ]
 

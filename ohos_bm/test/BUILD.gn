@@ -54,7 +54,7 @@ ohos_unittest("ohos_bm_unittest") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
+    "cJSON:cjson",
     "samgr:samgr_proxy",
   ]
 

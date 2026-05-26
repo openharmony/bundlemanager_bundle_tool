@@ -22,7 +22,6 @@
 #include "app_control_interface.h"
 #include "disposed_rule.h"
 #include "status_receiver_interface.h"
-#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace AppExecFwk {

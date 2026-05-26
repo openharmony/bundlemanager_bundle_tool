@@ -51,7 +51,13 @@ ohos_source_set("tools_ohos_bm_source_set") {
 
   public_configs = [ ":tools_ohos_bm_config" ]
 
-  cflags = [ "-fstack-protector-strong" ]
+  cflags = [
+    "-fstack-protector-strong",
+    "-Oz",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-fvisibility=hidden",
+  ]
   cflags_cc = cflags
 
   if (target_cpu == "arm") {
@@ -70,7 +76,7 @@ ohos_source_set("tools_ohos_bm_source_set") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
+    "cJSON:cjson",
     "samgr:samgr_proxy",
   ]
 
@@ -87,6 +93,11 @@ ohos_source_set("tools_ohos_bm_source_set") {
 ohos_cli_executable("ohos-bm") {
   deps = [ ":tools_ohos_bm_source_set" ]
   cli_config_file = "config.json"
+  ldflags = [
+    "-Wl,--gc-sections",
+    "-Wl,--as-needed",
+    "-s",
+  ]
   external_deps = [ "hilog:libhilog" ]
   install_enable = true
   install_images = [ "system" ]
