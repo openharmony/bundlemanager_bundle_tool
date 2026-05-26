@@ -31,7 +31,7 @@
 #include "error_code_utils.h"
 #include "ipc_skeleton.h"
 #include "json_serializer.h"
-#include "nlohmann/json.hpp"
+#include "cJSON.h"
 #include "status_receiver_impl.h"
 #include "string_ex.h"
 
@@ -123,54 +123,115 @@ bool CleanCacheCallbackImpl::GetResultCode()
 }
 }  // namespace
 
+namespace {
+cJSON* SharedBundleInfoToJson(const SharedBundleInfo &info)
+{
+    cJSON *obj = cJSON_CreateObject();
+    cJSON_AddStringToObject(obj, "name", info.name.c_str());
+    cJSON_AddNumberToObject(obj, "compatiblePolicy", static_cast<int>(info.compatiblePolicy));
+    cJSON *moduleArray = cJSON_CreateArray();
+    for (const auto &module : info.sharedModuleInfos) {
+        cJSON *mod = cJSON_CreateObject();
+        cJSON_AddStringToObject(mod, "name", module.name.c_str());
+        cJSON_AddNumberToObject(mod, "versionCode", module.versionCode);
+        cJSON_AddStringToObject(mod, "versionName", module.versionName.c_str());
+        cJSON_AddStringToObject(mod, "description", module.description.c_str());
+        cJSON_AddNumberToObject(mod, "descriptionId", module.descriptionId);
+        cJSON_AddNumberToObject(mod, "aotCompileStatus", static_cast<int>(module.aotCompileStatus));
+        cJSON_AddBoolToObject(mod, "compressNativeLibs", module.compressNativeLibs);
+        cJSON_AddStringToObject(mod, "hapPath", module.hapPath.c_str());
+        cJSON_AddStringToObject(mod, "cpuAbi", module.cpuAbi.c_str());
+        cJSON_AddStringToObject(mod, "nativeLibraryPath", module.nativeLibraryPath.c_str());
+        cJSON_AddStringToObject(mod, "moduleArkTSMode", module.moduleArkTSMode.c_str());
+        cJSON *fileNames = cJSON_CreateArray();
+        for (const auto &fn : module.nativeLibraryFileNames) {
+            cJSON_AddItemToArray(fileNames, cJSON_CreateString(fn.c_str()));
+        }
+        cJSON_AddItemToObject(mod, "nativeLibraryFileNames", fileNames);
+        cJSON *libDirs = cJSON_CreateArray();
+        for (const auto &dir : module.librarySupportDirectory) {
+            cJSON_AddItemToArray(libDirs, cJSON_CreateString(dir.c_str()));
+        }
+        cJSON_AddItemToObject(mod, "librarySupportDirectory", libDirs);
+        cJSON_AddItemToArray(moduleArray, mod);
+    }
+    cJSON_AddItemToObject(obj, "sharedModuleInfos", moduleArray);
+    return obj;
+}
+}  // namespace
+
 BundleManagerShellCommand::BundleManagerShellCommand(int argc, char *argv[])
     : ShellCommand(argc, argv, TOOL_NAME)
 {}
 
 std::string BundleManagerShellCommand::CreateSuccessResult(const std::string &data) const
 {
-    nlohmann::json result;
-    result["type"] = "result";
-    result["status"] = "success";
-    if (data.empty()) {
-        result["data"] = nlohmann::json::object();
-    } else if (nlohmann::json::accept(data)) {
-        result["data"] = nlohmann::json::parse(data);
-    } else {
-        // If data is not valid JSON, wrap it as a string in an object
-        result["data"] = nlohmann::json::object();
-        result["data"]["content"] = data;
+    cJSON *result = cJSON_CreateObject();
+    if (result == nullptr) {
+        return "";
     }
-    return result.dump();
+    cJSON_AddStringToObject(result, "type", "result");
+    cJSON_AddStringToObject(result, "status", "success");
+    if (data.empty()) {
+        cJSON_AddItemToObject(result, "data", cJSON_CreateObject());
+    } else {
+        cJSON *parsed = cJSON_Parse(data.c_str());
+        if (parsed != nullptr) {
+            cJSON_AddItemToObject(result, "data", parsed);
+        } else {
+            cJSON *wrapper = cJSON_CreateObject();
+            cJSON_AddStringToObject(wrapper, "content", data.c_str());
+            cJSON_AddItemToObject(result, "data", wrapper);
+        }
+    }
+    char *output = cJSON_PrintUnformatted(result);
+    std::string ret(output);
+    cJSON_Delete(result);
+    cJSON_free(output);
+    return ret;
 }
 
 std::string BundleManagerShellCommand::CreateErrorResult(int32_t code,
     const std::string &message, const std::string &suggestion) const
 {
-    nlohmann::json result;
-    result["type"] = "result";
-    result["status"] = "failed";
-    result["errCode"] = ErrorCodeUtils::GetErrorCodeString(code);
+    cJSON *result = cJSON_CreateObject();
+    if (result == nullptr) {
+        return "";
+    }
+    cJSON_AddStringToObject(result, "type", "result");
+    cJSON_AddStringToObject(result, "status", "failed");
+    cJSON_AddStringToObject(result, "errCode", ErrorCodeUtils::GetErrorCodeString(code).c_str());
     std::string errMsg = message;
     std::string codeMessage = GetMessageFromCode(code);
     if (!codeMessage.empty()) {
         errMsg += "\n" + codeMessage;
     }
-    result["errMsg"] = errMsg;
-    result["suggestion"] = suggestion;
-    return result.dump();
+    cJSON_AddStringToObject(result, "errMsg", errMsg.c_str());
+    cJSON_AddStringToObject(result, "suggestion", suggestion.c_str());
+    char *output = cJSON_PrintUnformatted(result);
+    std::string ret(output);
+    cJSON_Delete(result);
+    cJSON_free(output);
+    return ret;
 }
 
 std::string BundleManagerShellCommand::CreateErrorResult(const std::string &errCode,
     const std::string &message, const std::string &suggestion) const
 {
-    nlohmann::json result;
-    result["type"] = "result";
-    result["status"] = "failed";
-    result["errCode"] = errCode;
-    result["errMsg"] = message;
-    result["suggestion"] = suggestion;
-    return result.dump();
+    cJSON *result = cJSON_CreateObject();
+    if (result == nullptr) {
+        return "";
+    }
+    cJSON_AddStringToObject(result, "type", "result");
+    cJSON_AddStringToObject(result, "status", "failed");
+    cJSON_AddStringToObject(result, "errCode", errCode.c_str());
+    cJSON_AddStringToObject(result, "errMsg", message.c_str());
+    cJSON_AddStringToObject(result, "suggestion", suggestion.c_str());
+    char *output = cJSON_PrintUnformatted(result);
+    std::string ret(output);
+    cJSON_Delete(result);
+    cJSON_free(output);
+    return ret;
 }
 
 ErrCode BundleManagerShellCommand::CreateCommandMap()
@@ -593,8 +654,20 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
             resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), HELP_MSG_DUMP_FAILED);
             result = ret;
         } else {
-            nlohmann::json jsonResult = nlohmann::json {{DEPENDENCIES, dependencies}};
-            resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
+            cJSON *jsonResult = cJSON_CreateObject();
+            cJSON *depArray = cJSON_CreateArray();
+            for (const auto &dep : dependencies) {
+                cJSON *item = cJSON_CreateObject();
+                cJSON_AddStringToObject(item, Constants::BUNDLE_NAME, dep.bundleName.c_str());
+                cJSON_AddStringToObject(item, Constants::MODULE_NAME, dep.moduleName.c_str());
+                cJSON_AddNumberToObject(item, "versionCode", dep.versionCode);
+                cJSON_AddItemToArray(depArray, item);
+            }
+            cJSON_AddItemToObject(jsonResult, DEPENDENCIES.c_str(), depArray);
+            char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
+            resultReceiver_ = CreateSuccessResult(std::string(output));
+            cJSON_Delete(jsonResult);
+            cJSON_free(output);
         }
     }
     APP_LOGI("end");
@@ -693,8 +766,16 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             for (const auto& item : sharedBundleInfos) {
                 sharedBundleNames.push_back(item.name);
             }
-            nlohmann::json jsonResult = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleNames}};
-            resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
+            cJSON *jsonResult = cJSON_CreateObject();
+            cJSON *nameArray = cJSON_CreateArray();
+            for (const auto &name : sharedBundleNames) {
+                cJSON_AddItemToArray(nameArray, cJSON_CreateString(name.c_str()));
+            }
+            cJSON_AddItemToObject(jsonResult, SHARED_BUNDLE_INFO.c_str(), nameArray);
+            char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
+            resultReceiver_ = CreateSuccessResult(std::string(output));
+            cJSON_Delete(jsonResult);
+            cJSON_free(output);
         }
     } else {
         if ((resultReceiver_ == "") && (bundleName.size() == 0)) {
@@ -709,8 +790,12 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), HELP_MSG_DUMP_FAILED);
             result = ret;
         } else {
-            nlohmann::json jsonResult = nlohmann::json {{SHARED_BUNDLE_INFO, sharedBundleInfo}};
-            resultReceiver_ = CreateSuccessResult(jsonResult.dump(Constants::DUMP_INDENT));
+            cJSON *jsonResult = cJSON_CreateObject();
+            cJSON_AddItemToObject(jsonResult, SHARED_BUNDLE_INFO.c_str(), SharedBundleInfoToJson(sharedBundleInfo));
+            char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
+            resultReceiver_ = CreateSuccessResult(std::string(output));
+            cJSON_Delete(jsonResult);
+            cJSON_free(output);
         }
     }
     APP_LOGI("end");
@@ -872,11 +957,13 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             resultReceiver_ = CreateErrorResult(ERR_CLEAN_PARAM_ERROR, HELP_MSG_CLEAN);
         }
     } else {
-        nlohmann::json cleanResult;
+        cJSON *cleanResult = cJSON_CreateObject();
         if (cleanCache) {
             if (CleanBundleCacheFilesOperation(bundleName, userId, appIndex)) {
-                cleanResult["cache"] = STRING_CLEAN_CACHE_BUNDLE_OK;
-                resultReceiver_ = CreateSuccessResult(cleanResult.dump());
+                cJSON_AddStringToObject(cleanResult, "cache", STRING_CLEAN_CACHE_BUNDLE_OK.c_str());
+                char *output = cJSON_PrintUnformatted(cleanResult);
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_CACHE_BUNDLE_NG);
@@ -884,13 +971,16 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
         }
         if (cleanData) {
             if (CleanBundleDataFilesOperation(bundleName, userId, appIndex)) {
-                cleanResult["data"] = STRING_CLEAN_DATA_BUNDLE_OK;
-                resultReceiver_ = CreateSuccessResult(cleanResult.dump());
+                cJSON_AddStringToObject(cleanResult, "data", STRING_CLEAN_DATA_BUNDLE_OK.c_str());
+                char *output = cJSON_PrintUnformatted(cleanResult);
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_DATA_BUNDLE_NG);
             }
         }
+        cJSON_Delete(cleanResult);
     }
     APP_LOGI("end");
     return result;
@@ -1063,17 +1153,24 @@ ErrCode BundleManagerShellCommand::ParseParamInteger(std::map<std::string, int>&
     if (!sarg.empty() && sarg.back() == '\'') {
         sarg.pop_back();
     }
-    try {
-        auto paramObj = nlohmann::json::parse(sarg.c_str());
-        for (auto& [key, value] : paramObj.items()) {
-            if (key.empty()) {
-                return OHOS::ERR_INVALID_VALUE;
-            }
-            pi[key] = value.get<int>();
-        }
-    } catch(const std::exception& e) {
+    cJSON *paramObj = cJSON_Parse(sarg.c_str());
+    if (paramObj == nullptr || !cJSON_IsObject(paramObj)) {
+        cJSON_Delete(paramObj);
         return OHOS::ERR_INVALID_VALUE;
     }
+    cJSON *item = nullptr;
+    cJSON_ArrayForEach(item, paramObj) {
+        if (item->string == nullptr || strlen(item->string) == 0) {
+            cJSON_Delete(paramObj);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (!cJSON_IsNumber(item)) {
+            cJSON_Delete(paramObj);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        pi[item->string] = static_cast<int>(item->valuedouble);
+    }
+    cJSON_Delete(paramObj);
     return OHOS::ERR_OK;
 }
 
@@ -1087,17 +1184,24 @@ ErrCode BundleManagerShellCommand::ParseParamBool(std::map<std::string, bool>& p
     if (!sarg.empty() && sarg.back() == '\'') {
         sarg.pop_back();
     }
-    try {
-        auto paramObj = nlohmann::json::parse(sarg.c_str());
-        for (auto& [key, value] : paramObj.items()) {
-            if (key.empty()) {
-                return OHOS::ERR_INVALID_VALUE;
-            }
-            pb[key] = value.get<bool>();
-        }
-    } catch(const std::exception& e) {
+    cJSON *paramObj = cJSON_Parse(sarg.c_str());
+    if (paramObj == nullptr || !cJSON_IsObject(paramObj)) {
+        cJSON_Delete(paramObj);
         return OHOS::ERR_INVALID_VALUE;
     }
+    cJSON *item = nullptr;
+    cJSON_ArrayForEach(item, paramObj) {
+        if (item->string == nullptr || strlen(item->string) == 0) {
+            cJSON_Delete(paramObj);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (!cJSON_IsBool(item)) {
+            cJSON_Delete(paramObj);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        pb[item->string] = cJSON_IsTrue(item);
+    }
+    cJSON_Delete(paramObj);
     return OHOS::ERR_OK;
 }
 
@@ -1111,17 +1215,24 @@ ErrCode BundleManagerShellCommand::ParseParamString(std::map<std::string, std::s
     if (!sarg.empty() && sarg.back() == '\'') {
         sarg.pop_back();
     }
-    try {
-        auto paramObj = nlohmann::json::parse(sarg.c_str());
-        for (auto& [key, value] : paramObj.items()) {
-            if (key.empty()) {
-                return OHOS::ERR_INVALID_VALUE;
-            }
-            ps[key] = value.get<std::string>();
-        }
-    } catch(const std::exception& e) {
+    cJSON *paramObj = cJSON_Parse(sarg.c_str());
+    if (paramObj == nullptr || !cJSON_IsObject(paramObj)) {
+        cJSON_Delete(paramObj);
         return OHOS::ERR_INVALID_VALUE;
     }
+    cJSON *item = nullptr;
+    cJSON_ArrayForEach(item, paramObj) {
+        if (item->string == nullptr || strlen(item->string) == 0) {
+            cJSON_Delete(paramObj);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (!cJSON_IsString(item)) {
+            cJSON_Delete(paramObj);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        ps[item->string] = item->valuestring;
+    }
+    cJSON_Delete(paramObj);
     return OHOS::ERR_OK;
 }
 
