@@ -6885,6 +6885,10 @@ ErrCode BundleTestTool::RunAsGetAllBundleCacheStat()
     std::string name = "";
     std::string msg;
     int uid = 0;
+    if (argc_ < 0 || argv_ == nullptr) {
+        APP_LOGE("invalid argc or argv");
+        return OHOS::ERR_INVALID_VALUE;
+    }
     while (counter <= 1) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_ALL_BUNDLE_CACHE_STAT.c_str(),
@@ -6895,11 +6899,16 @@ ErrCode BundleTestTool::RunAsGetAllBundleCacheStat()
         }
         if (option == -1) {
             // When scanning the first argument
-            if ((counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0)) {
-                msg = "with no option, set uid: 0";
-                resultReceiver_.append(msg + "\n");
-                setuid(uid);
-                break;
+            if (counter == 1) {
+                if (optind >= argc_ || argv_[optind] == nullptr) {
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    msg = "with no option, set uid: 0";
+                    resultReceiver_.append(msg + "\n");
+                    setuid(uid);
+                    break;
+                }
             }
             if (counter > 1) {
                 msg = "get uid: " + std::to_string(uid);
@@ -7390,7 +7399,7 @@ ErrCode BundleTestTool::RunAsGetAppIdentifierAndAppIndex()
     int result = OHOS::ERR_OK;
     int counter = 0;
     std::string commandName = "getAppIdentifierAndAppIndex";
-    uint32_t accessTokenId;
+    uint32_t accessTokenId = 0;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX.c_str(),
