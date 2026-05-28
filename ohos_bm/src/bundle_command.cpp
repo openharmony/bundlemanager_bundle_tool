@@ -40,6 +40,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int32_t INDEX_OFFSET = 2;
+const int32_t INVALID_ARGS_NUMBER = 2;
 
 const std::string UNINSTALL_OPTIONS = "hn:kv:s";
 const struct option UNINSTALL_LONG_OPTIONS[] = {
@@ -94,6 +95,14 @@ const std::string RECOVER_OPTIONS = "hn:";
 const struct option RECOVER_LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundleName", required_argument, nullptr, 'n'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string CREATE_CLI_SANDBOX_APP_OPTIONS = "hn:c:";
+const struct option CREATE_CLI_SANDBOX_APP_LONG_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundleName", required_argument, nullptr, 'n'},
+    {"callerBundleName", required_argument, nullptr, 'c'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -263,6 +272,7 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"delete-disposed-rule", [this] { return this->RunAsDeleteDisposedRuleCommand(); } },
         {"get-recoverable-apps", [this] { return this->RunAsGetRecoverableAppsCommand(); } },
         {"recover", [this] { return this->RunAsRecoverCommand(); } },
+        {"create-cli-sandbox-app", [this] { return this->RunAsCreateCliSandboxAppCommand(); } },
     };
     return OHOS::ERR_OK;
 }
@@ -1822,6 +1832,134 @@ int32_t BundleManagerShellCommand::RecoverOperation(const std::string &bundleNam
     bundleInstallerProxy_->Recover(bundleName, installParam, statusReceiver);
 
     return statusReceiver->GetResultCode();
+}
+
+ErrCode BundleManagerShellCommand::CreateCliSandboxAppOperation(const std::string &callerBundleName,
+    const std::string &bundleName, int32_t userId, int32_t &appIndex) const
+{
+    APP_LOGD("CreateCliSandboxAppOperation bundleName %{public}s", bundleName.c_str());
+    return bundleInstallerProxy_->CreateCliSandboxApp(callerBundleName, bundleName, userId, appIndex);
+}
+
+ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
+{
+    APP_LOGI("begin to RunAsCreateCliSandboxAppCommand");
+    int32_t result = OHOS::ERR_OK;
+
+    if (argc_ <= INVALID_ARGS_NUMBER) {
+        APP_LOGD("'ohos-bm create-cli-sandbox-app' with no option.");
+        resultReceiver_ = CreateErrorResult(ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    if (InitInstaller() != OHOS::ERR_OK) {
+        resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+            "error: failed to connect to bundle installer service.");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    std::string bundleName;
+    std::string callerBundleName;
+
+    while (true) {
+        int32_t option = getopt_long(argc_, argv_, CREATE_CLI_SANDBOX_APP_OPTIONS.c_str(),
+            CREATE_CLI_SANDBOX_APP_LONG_OPTIONS, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (option == -1) {
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'n':
+                case 'c': {
+                    APP_LOGD("'ohos-bm create-cli-sandbox-app -%{public}c' with no argument.", optopt);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    APP_LOGD("'ohos-bm create-cli-sandbox-app' with an unknown option.");
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR, unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'ohos-bm create-cli-sandbox-app %{public}s'", argv_[optind - INDEX_OFFSET]);
+                resultReceiver_ = HELP_MSG_CREATE_CLI_SANDBOX_APP;
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                APP_LOGD("'ohos-bm create-cli-sandbox-app %{public}s %{public}s'",
+                    argv_[optind - INDEX_OFFSET], optarg);
+                bundleName = optarg;
+                break;
+            }
+            case 'c': {
+                callerBundleName = optarg;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && bundleName.size() == 0) {
+            APP_LOGD("'ohos-bm create-cli-sandbox-app' with no bundle name option.");
+            resultReceiver_ = CreateErrorResult(ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR, HELP_MSG_NO_BUNDLE_NAME_OPTION);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && callerBundleName.size() == 0) {
+            APP_LOGD("'ohos-bm create-cli-sandbox-app' with no caller bundle name option.");
+            resultReceiver_ = CreateErrorResult(ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR,
+                HELP_MSG_NO_CALLER_BUNDLE_NAME_OPTION);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        if (resultReceiver_ == "") {
+            resultReceiver_ = CreateErrorResult(ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR,
+                HELP_MSG_CREATE_CLI_SANDBOX_APP);
+        }
+        return result;
+    }
+
+    int32_t appIndex = 0;
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
+    ErrCode ret = CreateCliSandboxAppOperation(callerBundleName, bundleName, userId, appIndex);
+    if (ret == OHOS::ERR_OK) {
+        cJSON *data = cJSON_CreateObject();
+        cJSON_AddNumberToObject(data, "appIndex", appIndex);
+        char *dataStr = cJSON_PrintUnformatted(data);
+        std::string dataContent = (dataStr != nullptr) ? std::string(dataStr) : "";
+        if (dataStr != nullptr) {
+            cJSON_free(dataStr);
+        }
+        cJSON_Delete(data);
+        resultReceiver_ = CreateSuccessResult(dataContent);
+    } else {
+        resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), STRING_CREATE_CLI_SANDBOX_APP_NG);
+    }
+
+    APP_LOGI("end");
+    return result;
 }
 
 }  // namespace AppExecFwk

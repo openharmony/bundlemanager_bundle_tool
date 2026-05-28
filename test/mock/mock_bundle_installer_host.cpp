@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,12 @@ ErrCode MockBundleInstallerHost::InstallSandboxApp(const std::string &bundleName
 }
 
 ErrCode MockBundleInstallerHost::UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId)
+{
+    return OHOS::ERR_OK;
+}
+
+ErrCode MockBundleInstallerHost::CreateCliSandboxApp(const std::string &callerPackageName,
+    const std::string &bundleName, int32_t userId, int32_t &appIndex)
 {
     return OHOS::ERR_OK;
 }
