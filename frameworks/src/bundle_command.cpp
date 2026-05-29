@@ -38,6 +38,7 @@
 #include "string_ex.h"
 #include "app_mgr_client.h"
 #include "directory_ex.h"
+#include "iremote_object.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -62,6 +63,31 @@ const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
 const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
+
+class DeathRecipientGuard {
+public:
+    DeathRecipientGuard(const sptr<IRemoteObject> &object, const sptr<IRemoteObject::DeathRecipient> &recipient)
+        : object_(object), recipient_(recipient)
+    {
+        if (object_ != nullptr && recipient_ != nullptr) {
+            object_->AddDeathRecipient(recipient_);
+        }
+    }
+
+    ~DeathRecipientGuard()
+    {
+        if (object_ != nullptr && recipient_ != nullptr) {
+            object_->RemoveDeathRecipient(recipient_);
+        }
+    }
+
+    DeathRecipientGuard(const DeathRecipientGuard &) = delete;
+    DeathRecipientGuard &operator=(const DeathRecipientGuard &) = delete;
+
+private:
+    sptr<IRemoteObject> object_;
+    sptr<IRemoteObject::DeathRecipient> recipient_;
+};
 
 const std::string SHORT_OPTIONS_COMPILE = "hm:r:";
 const struct option LONG_OPTIONS_COMPILE[] = {
@@ -2381,7 +2407,12 @@ int32_t BundleManagerShellCommand::InstallOperation(const std::vector<std::strin
         APP_LOGE("recipient is null");
         return IStatusReceiver::ERR_UNKNOWN;
     }
-    bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto bundleInstallerObject = bundleInstallerProxy_->AsObject();
+    if (bundleInstallerObject == nullptr) {
+        APP_LOGE("bundleInstallerObject is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    DeathRecipientGuard deathRecipientGuard(bundleInstallerObject, recipient);
     ErrCode res = bundleInstallerProxy_->StreamInstall(pathVec, installParam, statusReceiver);
     APP_LOGD("StreamInstall result is %{public}d", res);
     if (res == ERR_OK) {
@@ -2425,7 +2456,12 @@ int32_t BundleManagerShellCommand::UninstallOperation(
         APP_LOGE("recipient is null");
         return IStatusReceiver::ERR_UNKNOWN;
     }
-    bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto bundleInstallerObject = bundleInstallerProxy_->AsObject();
+    if (bundleInstallerObject == nullptr) {
+        APP_LOGE("bundleInstallerObject is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    DeathRecipientGuard deathRecipientGuard(bundleInstallerObject, recipient);
     if (moduleName.size() != 0) {
         bundleInstallerProxy_->Uninstall(bundleName, moduleName, installParam, statusReceiver);
     } else {
@@ -2448,7 +2484,12 @@ int32_t BundleManagerShellCommand::UninstallSharedOperation(const UninstallParam
         APP_LOGE("recipient is null");
         return IStatusReceiver::ERR_UNKNOWN;
     }
-    bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto bundleInstallerObject = bundleInstallerProxy_->AsObject();
+    if (bundleInstallerObject == nullptr) {
+        APP_LOGE("bundleInstallerObject is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    DeathRecipientGuard deathRecipientGuard(bundleInstallerObject, recipient);
 
     bundleInstallerProxy_->Uninstall(uninstallParam, statusReceiver);
     return statusReceiver->GetResultCode();
@@ -2884,7 +2925,12 @@ ErrCode BundleManagerShellCommand::DeployQuickFixDisable(const std::vector<std::
         APP_LOGE("recipient is null");
         return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
     }
-    bundleMgrProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto bundleMgrObject = bundleMgrProxy_->AsObject();
+    if (bundleMgrObject == nullptr) {
+        APP_LOGE("bundleMgrObject is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    DeathRecipientGuard deathRecipientGuard(bundleMgrObject, recipient);
     auto quickFixProxy = bundleMgrProxy_->GetQuickFixManagerProxy();
     if (quickFixProxy == nullptr) {
         APP_LOGE("quickFixProxy is null");
@@ -2918,7 +2964,12 @@ ErrCode BundleManagerShellCommand::DeleteQuickFix(const std::string &bundleName,
         APP_LOGE("recipient is null");
         return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
     }
-    bundleMgrProxy_->AsObject()->AddDeathRecipient(recipient);
+    auto bundleMgrObject = bundleMgrProxy_->AsObject();
+    if (bundleMgrObject == nullptr) {
+        APP_LOGE("bundleMgrObject is null");
+        return ERR_BUNDLEMANAGER_QUICK_FIX_INTERNAL_ERROR;
+    }
+    DeathRecipientGuard deathRecipientGuard(bundleMgrObject, recipient);
     auto quickFixProxy = bundleMgrProxy_->GetQuickFixManagerProxy();
     if (quickFixProxy == nullptr) {
         APP_LOGE("quickFixProxy is null");
