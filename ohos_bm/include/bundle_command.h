@@ -37,7 +37,9 @@ const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
                              "  dump-shared       dump inter-application shared library information by bundle name\n"
                              "  clean             clean the bundle data\n"
                              "  set-disposed-rule set disposed rule for clone app\n"
-                             "  delete-disposed-rule delete disposed rule for clone app\n";
+                             "  delete-disposed-rule delete disposed rule for clone app\n"
+                             "  get-recoverable-apps get list of recoverable applications info\n"
+                             "  recover           recover an uninstalled pre-installed application\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: ohos-bm uninstall <options>\n"
@@ -148,6 +150,24 @@ const std::string STRING_DELETE_DISPOSED_RULE_OK = "delete disposed rule success
 const std::string STRING_DELETE_DISPOSED_RULE_NG = "error: failed to delete disposed rule.";
 const std::string STRING_USER_ID_INVALID = "error: userId is invalid, cannot call this command.";
 
+const std::string HELP_MSG_GET_RECOVERABLE_APPS =
+    "usage: ohos-bm get-recoverable-apps\n"
+    "This command queries recoverable (uninstalled pre-installed) applications.\n"
+    "No parameters required.\n"
+    "Output: a list of bundle names that can be recovered.\n";
+
+const std::string STRING_GET_RECOVERABLE_APPS_OK = "get recoverable apps successfully.";
+const std::string STRING_GET_RECOVERABLE_APPS_NG = "error: failed to get recoverable apps.";
+
+const std::string HELP_MSG_RECOVER =
+    "usage: ohos-bm recover <options>\n"
+    "options list:\n"
+    "  --help                           list available commands\n"
+    "  --bundleName <bundle-name>      recover a bundle by bundle name\n";
+
+const std::string STRING_RECOVER_OK = "recover bundle successfully.";
+const std::string STRING_RECOVER_NG = "error: failed to recover bundle.";
+
 constexpr int32_t OPTION_APP_ID = 1000;
 constexpr int32_t OPTION_APP_INDEX = 1001;
 constexpr int32_t OPTION_PRIORITY = 1002;
@@ -184,10 +204,13 @@ private:
     ErrCode RunAsCleanCommand();
     ErrCode RunAsSetDisposedRuleCommand();
     ErrCode RunAsDeleteDisposedRuleCommand();
+    ErrCode RunAsGetRecoverableAppsCommand();
+    ErrCode RunAsRecoverCommand();
 
     int32_t UninstallOperation(const std::string &bundleName,
                                InstallParam &installParam) const;
     int32_t UninstallSharedOperation(const UninstallParam &uninstallParam) const;
+    int32_t RecoverOperation(const std::string &bundleName, InstallParam &installParam) const;
 
     std::string DumpBundleList(int32_t userId) const;
     std::string DumpDebugBundleList(int32_t userId) const;

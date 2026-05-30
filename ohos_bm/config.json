@@ -476,6 +476,102 @@
                     }
                 }
             }
+        },
+        "get-recoverable-apps": {
+            "description": "Get recoverable (uninstalled pre-installed) applications info",
+            "requirePermissions": [
+                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+            ],
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
+            "outputSchema": {
+                "type": "object",
+                "description": "Execution result",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "recoverableApps": {
+                                "type": "array",
+                                "description": "List of recoverable application bundle names",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "recover": {
+            "description": "Recover an uninstalled pre-installed application",
+            "requirePermissions": [
+                "ohos.permission.cli.INSTALL_BUNDLE",
+                "ohos.permission.cli.RECOVER_BUNDLE"
+            ],
+            "inputSchema": {
+                "type": "object",
+                "required": [
+                    "bundleName"
+                ],
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "Bundle name to recover"
+                    }
+                }
+            },
+            "outputSchema": {
+                "type": "object",
+                "description": "Execution result",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     }
 }
