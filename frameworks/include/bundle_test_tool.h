@@ -152,6 +152,37 @@ private:
     // eg: bundle_test_tool batchGetBundleInfo -n <bundle-name>,<bundle-name> -f <flags> -u <user-id>
     ErrCode RunAsBatchGetBundleInfo();
     ErrCode RunAsParseSpmModule();
+    ErrCode RunAsQueryAbilityInfo();
+    ErrCode ParseQueryAbilityInfoOptions(std::string &bundleName, std::string &moduleName,
+        std::string &abilityName, int32_t &flags, int32_t &userId);
+    ErrCode ExecuteQueryAbilityInfo(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, int32_t flags, int32_t userId);
+    ErrCode RunAsBatchQueryAbilityInfos();
+    ErrCode ParseBatchQueryAbilityInfosOptions(std::vector<AAFwk::Want> &wants, int32_t &flags, int32_t &userId);
+    ErrCode ExecuteBatchQueryAbilityInfos(const std::vector<AAFwk::Want> &wants, int32_t flags, int32_t userId);
+    ErrCode RunAsImplicitQueryInfos();
+    ErrCode ParseImplicitQueryInfosOptions(std::string &bundleName, std::string &action,
+        std::string &entity, std::string &uri, std::string &type, int32_t &flags,
+        int32_t &userId, bool &withDefault);
+    ErrCode ExecuteImplicitQueryInfos(const std::string &bundleName, const std::string &action,
+        const std::string &entity, const std::string &uri, const std::string &type,
+        int32_t flags, int32_t userId, bool withDefault);
+    ErrCode RunAsGetCloneBundleInfoExt();
+    ErrCode ParseGetCloneBundleInfoExtOptions(std::string &bundleName, uint32_t &flags,
+        int32_t &appIndex, int32_t &userId);
+    ErrCode ExecuteGetCloneBundleInfoExt(const std::string &bundleName, uint32_t flags,
+        int32_t appIndex, int32_t userId);
+    ErrCode RunAsAddResourceInfoByBundleName();
+    ErrCode ParseAddResourceInfoByBundleNameOptions(std::string &bundleName, int32_t &userId);
+    ErrCode ExecuteAddResourceInfoByBundleName(const std::string &bundleName, int32_t userId);
+    ErrCode RunAsAddResourceInfoByAbility();
+    ErrCode ParseAddResourceInfoByAbilityOptions(std::string &bundleName, std::string &moduleName,
+        std::string &abilityName, int32_t &userId);
+    ErrCode ExecuteAddResourceInfoByAbility(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, int32_t userId);
+    ErrCode RunAsDeleteResourceInfo();
+    ErrCode ParseDeleteResourceInfoOptions(std::string &key);
+    ErrCode ExecuteDeleteResourceInfo(const std::string &key);
 
     std::condition_variable cv_;
     std::mutex mutex_;
@@ -159,6 +190,7 @@ private:
 
     sptr<IBundleMgr> bundleMgrProxy_;
     sptr<IBundleInstaller> bundleInstallerProxy_;
+    sptr<IBundleResource> bundleResourceProxy_;
 
     bool CheckRemovableErrorOption(int option, int counter, const std::string &commandName);
     bool CheckRemovableCorrectOption(int option, const std::string &commandName, int &isRemovable, std::string &name);
