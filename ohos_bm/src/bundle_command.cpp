@@ -193,9 +193,12 @@ std::string BundleManagerShellCommand::CreateSuccessResult(const std::string &da
         }
     }
     char *output = cJSON_PrintUnformatted(result);
-    std::string ret(output);
+    std::string ret;
+    if (output != nullptr) {
+        ret = std::string(output);
+        cJSON_free(output);
+    }
     cJSON_Delete(result);
-    cJSON_free(output);
     return ret;
 }
 
@@ -217,9 +220,12 @@ std::string BundleManagerShellCommand::CreateErrorResult(int32_t code,
     cJSON_AddStringToObject(result, "errMsg", errMsg.c_str());
     cJSON_AddStringToObject(result, "suggestion", suggestion.c_str());
     char *output = cJSON_PrintUnformatted(result);
-    std::string ret(output);
+    std::string ret;
+    if (output != nullptr) {
+        ret = std::string(output);
+        cJSON_free(output);
+    }
     cJSON_Delete(result);
-    cJSON_free(output);
     return ret;
 }
 
@@ -236,9 +242,12 @@ std::string BundleManagerShellCommand::CreateErrorResult(const std::string &errC
     cJSON_AddStringToObject(result, "errMsg", message.c_str());
     cJSON_AddStringToObject(result, "suggestion", suggestion.c_str());
     char *output = cJSON_PrintUnformatted(result);
-    std::string ret(output);
+    std::string ret;
+    if (output != nullptr) {
+        ret = std::string(output);
+        cJSON_free(output);
+    }
     cJSON_Delete(result);
-    cJSON_free(output);
     return ret;
 }
 
@@ -675,9 +684,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
             }
             cJSON_AddItemToObject(jsonResult, DEPENDENCIES.c_str(), depArray);
             char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-            resultReceiver_ = CreateSuccessResult(std::string(output));
+            if (output != nullptr) {
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
+            } else {
+                APP_LOGE("cJSON_PrintBuffered failed");
+                resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                    "error: failed to format JSON result.");
+            }
             cJSON_Delete(jsonResult);
-            cJSON_free(output);
         }
     }
     APP_LOGI("end");
@@ -783,9 +798,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             }
             cJSON_AddItemToObject(jsonResult, SHARED_BUNDLE_INFO.c_str(), nameArray);
             char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-            resultReceiver_ = CreateSuccessResult(std::string(output));
+            if (output != nullptr) {
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
+            } else {
+                APP_LOGE("cJSON_PrintBuffered failed");
+                resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                    "error: failed to format JSON result.");
+            }
             cJSON_Delete(jsonResult);
-            cJSON_free(output);
         }
     } else {
         if ((resultReceiver_ == "") && (bundleName.size() == 0)) {
@@ -803,9 +824,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             cJSON *jsonResult = cJSON_CreateObject();
             cJSON_AddItemToObject(jsonResult, SHARED_BUNDLE_INFO.c_str(), SharedBundleInfoToJson(sharedBundleInfo));
             char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-            resultReceiver_ = CreateSuccessResult(std::string(output));
+            if (output != nullptr) {
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
+            } else {
+                APP_LOGE("cJSON_PrintBuffered failed");
+                resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                    "error: failed to format JSON result.");
+            }
             cJSON_Delete(jsonResult);
-            cJSON_free(output);
         }
     }
     APP_LOGI("end");
@@ -972,8 +999,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             if (CleanBundleCacheFilesOperation(bundleName, userId, appIndex)) {
                 cJSON_AddStringToObject(cleanResult, "cache", STRING_CLEAN_CACHE_BUNDLE_OK.c_str());
                 char *output = cJSON_PrintUnformatted(cleanResult);
-                resultReceiver_ = CreateSuccessResult(std::string(output));
-                cJSON_free(output);
+                if (output != nullptr) {
+                    resultReceiver_ = CreateSuccessResult(std::string(output));
+                    cJSON_free(output);
+                } else {
+                    APP_LOGE("cJSON_PrintUnformatted failed");
+                    resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                        "error: failed to format JSON result.");
+                }
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_CACHE_BUNDLE_NG);
@@ -983,8 +1016,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             if (CleanBundleDataFilesOperation(bundleName, userId, appIndex)) {
                 cJSON_AddStringToObject(cleanResult, "data", STRING_CLEAN_DATA_BUNDLE_OK.c_str());
                 char *output = cJSON_PrintUnformatted(cleanResult);
-                resultReceiver_ = CreateSuccessResult(std::string(output));
-                cJSON_free(output);
+                if (output != nullptr) {
+                    resultReceiver_ = CreateSuccessResult(std::string(output));
+                    cJSON_free(output);
+                } else {
+                    APP_LOGE("cJSON_PrintUnformatted failed");
+                    resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                        "error: failed to format JSON result.");
+                }
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_DATA_BUNDLE_NG);
@@ -1655,11 +1694,17 @@ ErrCode BundleManagerShellCommand::RunAsGetRecoverableAppsCommand()
     }
     cJSON_AddItemToObject(jsonResult, "recoverableApps", bundleNameArray);
     char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-    resultReceiver_ = CreateSuccessResult(std::string(output));
+    if (output != nullptr) {
+        resultReceiver_ = CreateSuccessResult(std::string(output));
+        cJSON_free(output);
+    } else {
+        APP_LOGE("cJSON_PrintBuffered failed");
+        resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+            STRING_GET_RECOVERABLE_APPS_NG);
+        cJSON_Delete(jsonResult);
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     cJSON_Delete(jsonResult);
-    cJSON_free(output);
-
-    APP_LOGI("end");
     return OHOS::ERR_OK;
 }
 
