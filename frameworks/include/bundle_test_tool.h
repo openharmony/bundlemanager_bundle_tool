@@ -183,6 +183,7 @@ private:
     ErrCode RunAsDeleteResourceInfo();
     ErrCode ParseDeleteResourceInfoOptions(std::string &key);
     ErrCode ExecuteDeleteResourceInfo(const std::string &key);
+    ErrCode RunAsGetMainAndCloneBundleInfo();
 
     std::condition_variable cv_;
     std::mutex mutex_;
