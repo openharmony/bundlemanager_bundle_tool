@@ -137,7 +137,6 @@ cJSON* SharedBundleInfoToJson(const SharedBundleInfo &info)
         cJSON_AddStringToObject(mod, "versionName", module.versionName.c_str());
         cJSON_AddStringToObject(mod, "description", module.description.c_str());
         cJSON_AddNumberToObject(mod, "descriptionId", module.descriptionId);
-        cJSON_AddNumberToObject(mod, "aotCompileStatus", static_cast<int>(module.aotCompileStatus));
         cJSON_AddBoolToObject(mod, "compressNativeLibs", module.compressNativeLibs);
         cJSON_AddStringToObject(mod, "hapPath", module.hapPath.c_str());
         cJSON_AddStringToObject(mod, "cpuAbi", module.cpuAbi.c_str());
