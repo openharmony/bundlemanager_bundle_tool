@@ -34,6 +34,7 @@
 #include "cJSON.h"
 #include "status_receiver_impl.h"
 #include "string_ex.h"
+#include "recoverable_application_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -86,6 +87,13 @@ const struct option CLEAN_LONG_OPTIONS[] = {
     {"cache", no_argument, nullptr, 'c'},
     {"data", no_argument, nullptr, 'd'},
     {"appIndex", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string RECOVER_OPTIONS = "hn:";
+const struct option RECOVER_LONG_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundleName", required_argument, nullptr, 'n'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -184,9 +192,12 @@ std::string BundleManagerShellCommand::CreateSuccessResult(const std::string &da
         }
     }
     char *output = cJSON_PrintUnformatted(result);
-    std::string ret(output);
+    std::string ret;
+    if (output != nullptr) {
+        ret = std::string(output);
+        cJSON_free(output);
+    }
     cJSON_Delete(result);
-    cJSON_free(output);
     return ret;
 }
 
@@ -208,9 +219,12 @@ std::string BundleManagerShellCommand::CreateErrorResult(int32_t code,
     cJSON_AddStringToObject(result, "errMsg", errMsg.c_str());
     cJSON_AddStringToObject(result, "suggestion", suggestion.c_str());
     char *output = cJSON_PrintUnformatted(result);
-    std::string ret(output);
+    std::string ret;
+    if (output != nullptr) {
+        ret = std::string(output);
+        cJSON_free(output);
+    }
     cJSON_Delete(result);
-    cJSON_free(output);
     return ret;
 }
 
@@ -227,9 +241,12 @@ std::string BundleManagerShellCommand::CreateErrorResult(const std::string &errC
     cJSON_AddStringToObject(result, "errMsg", message.c_str());
     cJSON_AddStringToObject(result, "suggestion", suggestion.c_str());
     char *output = cJSON_PrintUnformatted(result);
-    std::string ret(output);
+    std::string ret;
+    if (output != nullptr) {
+        ret = std::string(output);
+        cJSON_free(output);
+    }
     cJSON_Delete(result);
-    cJSON_free(output);
     return ret;
 }
 
@@ -244,6 +261,8 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"clean", [this] { return this->RunAsCleanCommand(); } },
         {"set-disposed-rule", [this] { return this->RunAsSetDisposedRuleCommand(); } },
         {"delete-disposed-rule", [this] { return this->RunAsDeleteDisposedRuleCommand(); } },
+        {"get-recoverable-apps", [this] { return this->RunAsGetRecoverableAppsCommand(); } },
+        {"recover", [this] { return this->RunAsRecoverCommand(); } },
     };
     return OHOS::ERR_OK;
 }
@@ -664,9 +683,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
             }
             cJSON_AddItemToObject(jsonResult, DEPENDENCIES.c_str(), depArray);
             char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-            resultReceiver_ = CreateSuccessResult(std::string(output));
+            if (output != nullptr) {
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
+            } else {
+                APP_LOGE("cJSON_PrintBuffered failed");
+                resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                    "error: failed to format JSON result.");
+            }
             cJSON_Delete(jsonResult);
-            cJSON_free(output);
         }
     }
     APP_LOGI("end");
@@ -772,9 +797,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             }
             cJSON_AddItemToObject(jsonResult, SHARED_BUNDLE_INFO.c_str(), nameArray);
             char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-            resultReceiver_ = CreateSuccessResult(std::string(output));
+            if (output != nullptr) {
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
+            } else {
+                APP_LOGE("cJSON_PrintBuffered failed");
+                resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                    "error: failed to format JSON result.");
+            }
             cJSON_Delete(jsonResult);
-            cJSON_free(output);
         }
     } else {
         if ((resultReceiver_ == "") && (bundleName.size() == 0)) {
@@ -792,9 +823,15 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
             cJSON *jsonResult = cJSON_CreateObject();
             cJSON_AddItemToObject(jsonResult, SHARED_BUNDLE_INFO.c_str(), SharedBundleInfoToJson(sharedBundleInfo));
             char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
-            resultReceiver_ = CreateSuccessResult(std::string(output));
+            if (output != nullptr) {
+                resultReceiver_ = CreateSuccessResult(std::string(output));
+                cJSON_free(output);
+            } else {
+                APP_LOGE("cJSON_PrintBuffered failed");
+                resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                    "error: failed to format JSON result.");
+            }
             cJSON_Delete(jsonResult);
-            cJSON_free(output);
         }
     }
     APP_LOGI("end");
@@ -961,8 +998,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             if (CleanBundleCacheFilesOperation(bundleName, userId, appIndex)) {
                 cJSON_AddStringToObject(cleanResult, "cache", STRING_CLEAN_CACHE_BUNDLE_OK.c_str());
                 char *output = cJSON_PrintUnformatted(cleanResult);
-                resultReceiver_ = CreateSuccessResult(std::string(output));
-                cJSON_free(output);
+                if (output != nullptr) {
+                    resultReceiver_ = CreateSuccessResult(std::string(output));
+                    cJSON_free(output);
+                } else {
+                    APP_LOGE("cJSON_PrintUnformatted failed");
+                    resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                        "error: failed to format JSON result.");
+                }
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_CACHE_BUNDLE_NG);
@@ -972,8 +1015,14 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
             if (CleanBundleDataFilesOperation(bundleName, userId, appIndex)) {
                 cJSON_AddStringToObject(cleanResult, "data", STRING_CLEAN_DATA_BUNDLE_OK.c_str());
                 char *output = cJSON_PrintUnformatted(cleanResult);
-                resultReceiver_ = CreateSuccessResult(std::string(output));
-                cJSON_free(output);
+                if (output != nullptr) {
+                    resultReceiver_ = CreateSuccessResult(std::string(output));
+                    cJSON_free(output);
+                } else {
+                    APP_LOGE("cJSON_PrintUnformatted failed");
+                    resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+                        "error: failed to format JSON result.");
+                }
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_DATA_BUNDLE_NG);
@@ -1614,6 +1663,165 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
 
     APP_LOGI("end");
     return res;
+}
+
+ErrCode BundleManagerShellCommand::RunAsGetRecoverableAppsCommand()
+{
+    APP_LOGI("begin to RunAsGetRecoverableAppsCommand");
+    
+    if (argc_ > 2) {
+        std::string option = argv_[2];
+        if (option == "--help" || option == "-h") {
+            resultReceiver_ = HELP_MSG_GET_RECOVERABLE_APPS;
+            return OHOS::ERR_OK;
+        }
+        resultReceiver_ = CreateErrorResult(ERR_GET_RECOVERABLE_APPS_PARAM_ERROR, HELP_MSG_GET_RECOVERABLE_APPS);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    std::vector<RecoverableApplicationInfo> recoverableApplications;
+    ErrCode ret = bundleMgrProxy_->GetRecoverableApplicationInfo(recoverableApplications);
+    if (ret != ERR_OK) {
+        APP_LOGE("GetRecoverableApplicationInfo failed due to errcode %{public}d", ret);
+        resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), STRING_GET_RECOVERABLE_APPS_NG);
+        return ret;
+    }
+
+    cJSON *jsonResult = cJSON_CreateObject();
+    cJSON *bundleNameArray = cJSON_CreateArray();
+    for (const auto &appInfo : recoverableApplications) {
+        cJSON_AddItemToArray(bundleNameArray, cJSON_CreateString(appInfo.bundleName.c_str()));
+    }
+    cJSON_AddItemToObject(jsonResult, "recoverableApps", bundleNameArray);
+    char *output = cJSON_PrintBuffered(jsonResult, Constants::DUMP_INDENT, 1);
+    if (output != nullptr) {
+        resultReceiver_ = CreateSuccessResult(std::string(output));
+        cJSON_free(output);
+    } else {
+        APP_LOGE("cJSON_PrintBuffered failed");
+        resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+            STRING_GET_RECOVERABLE_APPS_NG);
+        cJSON_Delete(jsonResult);
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    cJSON_Delete(jsonResult);
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleManagerShellCommand::RunAsRecoverCommand()
+{
+    APP_LOGI("begin to RunAsRecoverCommand");
+
+    if (argc_ <= 2) {
+        APP_LOGD("'ohos-bm recover' with no option.");
+        resultReceiver_ = CreateErrorResult(ERR_RECOVER_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    if (InitInstaller() != OHOS::ERR_OK) {
+        resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+            "error: failed to connect to bundle installer service.");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    int result = OHOS::ERR_OK;
+    std::string bundleName = "";
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
+
+    while (true) {
+        int32_t option = getopt_long(argc_, argv_, RECOVER_OPTIONS.c_str(), RECOVER_LONG_OPTIONS, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (option == -1) {
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'n': {
+                    APP_LOGD("'ohos-bm recover -n' with no argument.");
+                    resultReceiver_ = CreateErrorResult(ERR_RECOVER_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    APP_LOGD("'ohos-bm recover' with an unknown option.");
+                    resultReceiver_ = CreateErrorResult(ERR_RECOVER_PARAM_ERROR, unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'ohos-bm recover %{public}s'", argv_[optind - 1]);
+                resultReceiver_ = HELP_MSG_RECOVER;
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                APP_LOGD("'ohos-bm recover %{public}s %{public}s'",
+                    argv_[optind - INDEX_OFFSET], optarg);
+                bundleName = optarg;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && bundleName.size() == 0) {
+            APP_LOGD("'ohos-bm recover' with bundle name option.");
+            resultReceiver_ = CreateErrorResult(ERR_RECOVER_PARAM_ERROR, HELP_MSG_NO_BUNDLE_NAME_OPTION);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        if (resultReceiver_ == "") {
+            resultReceiver_ = CreateErrorResult(ERR_RECOVER_PARAM_ERROR, HELP_MSG_RECOVER);
+        }
+        return result;
+    }
+
+    InstallParam installParam;
+    installParam.userId = userId;
+
+    int32_t recoverResult = RecoverOperation(bundleName, installParam);
+    if (recoverResult == OHOS::ERR_OK) {
+        resultReceiver_ = CreateSuccessResult();
+    } else {
+        resultReceiver_ = CreateErrorResult(recoverResult, STRING_RECOVER_NG);
+    }
+
+    APP_LOGI("end");
+    return result;
+}
+
+int32_t BundleManagerShellCommand::RecoverOperation(const std::string &bundleName, InstallParam &installParam) const
+{
+    sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
+    if (statusReceiver == nullptr) {
+        APP_LOGE("statusReceiver is null");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+
+    APP_LOGD("bundleName: %{public}s", bundleName.c_str());
+
+    sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
+    if (recipient == nullptr) {
+        APP_LOGE("Recover recipient is null");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
+    bundleInstallerProxy_->Recover(bundleName, installParam, statusReceiver);
+
+    return statusReceiver->GetResultCode();
 }
 
 }  // namespace AppExecFwk

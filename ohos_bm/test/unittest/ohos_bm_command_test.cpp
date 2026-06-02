@@ -2678,3 +2678,220 @@ HWTEST_F(OhosBmCommandTest, IsUserForeground_0100, TestSize.Level0)
     bool result = BundleCommandCommon::IsUserForeground(100);
     EXPECT_TRUE(result);
 }
+
+// ========== GetRecoverableApps Command Tests ==========
+
+/**
+ * @tc.name: GetRecoverableApps_0100
+ * @tc.desc: Test "ohos-bm get-recoverable-apps" with no options (normal case).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, GetRecoverableApps_0100, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("get-recoverable-apps"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("failed"), std::string::npos);
+}
+
+/**
+ * @tc.name: GetRecoverableApps_0200
+ * @tc.desc: Test "ohos-bm get-recoverable-apps --help" shows help.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, GetRecoverableApps_0200, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("get-recoverable-apps"),
+        const_cast<char *>("--help"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("get-recoverable-apps"), std::string::npos);
+}
+
+/**
+ * @tc.name: GetRecoverableApps_0300
+ * @tc.desc: Test "ohos-bm get-recoverable-apps -h" shows help.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, GetRecoverableApps_0300, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("get-recoverable-apps"),
+        const_cast<char *>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("get-recoverable-apps"), std::string::npos);
+}
+
+/**
+ * @tc.name: GetRecoverableApps_0400
+ * @tc.desc: Test "ohos-bm get-recoverable-apps" with unknown option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, GetRecoverableApps_0400, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("get-recoverable-apps"),
+        const_cast<char *>("--unknown"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+// ========== Recover Command Tests ==========
+
+/**
+ * @tc.name: RecoverCommand_0100
+ * @tc.desc: Test "ohos-bm recover" with no options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0100, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(result.find("no option"), std::string::npos);
+}
+
+/**
+ * @tc.name: RecoverCommand_0200
+ * @tc.desc: Test "ohos-bm recover -h" shows help.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0200, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+        const_cast<char *>("-h"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("recover"), std::string::npos);
+}
+
+/**
+ * @tc.name: RecoverCommand_0300
+ * @tc.desc: Test "ohos-bm recover -n" with no argument.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0300, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+        const_cast<char *>("-n"),
+        nullptr,
+    };
+    int argc = 3;
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("correct value"), std::string::npos);
+}
+
+/**
+ * @tc.name: RecoverCommand_0400
+ * @tc.desc: Test "ohos-bm recover" with unknown option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0400, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+        const_cast<char *>("-z"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: RecoverCommand_0500
+ * @tc.desc: Test "ohos-bm recover -n bundleName" normal case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0500, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"success\""), std::string::npos);
+}
+
+/**
+ * @tc.name: RecoverCommand_0600
+ * @tc.desc: Test "ohos-bm recover --bundleName bundleName" with long option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0600, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+        const_cast<char *>("--bundleName"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"success\""), std::string::npos);
+}
+
+/**
+ * @tc.name: RecoverCommand_0700
+ * @tc.desc: Test "ohos-bm recover" with installer proxy null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, RecoverCommand_0700, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("recover"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    cmd.bundleMgrProxy_ = nullptr;
+    cmd.bundleInstallerProxy_ = nullptr;
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
