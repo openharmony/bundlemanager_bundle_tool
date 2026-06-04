@@ -43,6 +43,8 @@ ohos_unittest("ohos_bm_unittest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:app_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libprivacy_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bundle_napi_common",
@@ -53,7 +55,7 @@ ohos_unittest("ohos_bm_unittest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "cJSON:cjson",
     "samgr:samgr_proxy",
   ]

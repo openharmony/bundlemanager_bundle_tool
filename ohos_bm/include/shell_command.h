@@ -41,6 +41,8 @@ public:
     std::string GetUnknownOptionMsg(std::string &unknownOption) const;
     std::string GetMessageFromCode(const int32_t code) const;
 
+    void ReportPermissionUsedRecord(bool success);
+
     virtual ErrCode CreateCommandMap() = 0;
     virtual ErrCode CreateMessageMap() = 0;
     virtual ErrCode Init() = 0;
