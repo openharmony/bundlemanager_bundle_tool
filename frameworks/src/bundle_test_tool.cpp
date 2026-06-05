@@ -218,6 +218,7 @@ static const std::string HELP_MSG =
     "  batchQueryAbilityInfos           batch get ability infos by repeated want specs\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
+    "  cleanBundlePartialCacheAutomatic clear partial or all cache data of a specified bundle\n"
     "  getContinueBundleName            get continue bundle name list\n"
     "  updateAppEncryptedStatus         update app encrypted status\n"
     "  getDirByBundleNameAndAppIndex    obtain the dir by bundleName and appIndex\n"
@@ -417,6 +418,17 @@ const std::string HELP_MSG_AUTO_CLEAN_CACHE_RULE =
     "  -s, --cache-size <cache-size>          specify the cache size that needs to be cleaned\n"
     "  -t, --clean-type <clean-type>          specify the cleanup type (0=cache-space, 1=inode-count)\n";
 
+const std::string HELP_MSG_AUTO_CLEAN_PARTIAL_CACHE_RULE =
+    "usage: bundle_test_tool <options>\n"
+    "eg:bundle_test_tool cleanBundlePartialCacheAutomatic"
+    " -n <bundle-name> -u <user-id> -a <app-index> -s <cache-size> \n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify the bundle name for which to clean cache\n"
+    "  -u, --user-id <user-id>                specify the user id for which to clean cache\n"
+    "  -a, --app-index <app-index>            specify the app index for which to clean cache\n"
+    "  -s, --cache-size <cache-size>          specify the cache size that needs to be reserved\n";
+
 const std::string HELP_MSG_NO_ADD_INSTALL_RULE_OPTION =
     "error: you must specify a app id with '-a' or '--app-id' \n"
     "and a control type with '-t' or '--control-rule-type' \n"
@@ -457,6 +469,12 @@ const std::string HELP_MSG_NO_GET_APP_RUNNING_RULE_OPTION =
 
 const std::string HELP_MSG_NO_AUTO_CLEAN_CACHE_OPTION =
     "error: you must specify a cache size with '-s' or '--cache-size' \n";
+
+const std::string HELP_MSG_NO_AUTO_CLEAN_PARTIAL_CACHE_OPTION =
+    "error: you must specify a bundleName with '-n' or '--bundle-name' \n"
+    "and a user id with '-u' or '--user-id' \n"
+    "and a app index with '-a' or '--app-index' \n"
+    "and a cache size with '-s' or '--cache-size' \n";
 
 const std::string HELP_MSG_DEPLOY_QUICK_FIX =
     "usage: bundle_test_tool deploy quick fix <options>\n"
@@ -1293,6 +1311,16 @@ const struct option LONG_OPTIONS_AUTO_CLEAN_CACHE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE = "hn:u:a:s:";
+const struct option LONG_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
+    {"cache-size", required_argument, nullptr, 's'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_UPDATE_APP_EXCRYPTED_STATUS = "hn:e:a:";
 const struct option LONG_OPTIONS_UPDATE_APP_EXCRYPTED_STATUS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1893,6 +1921,8 @@ ErrCode BundleTestTool::CreateCommandMap()
             std::bind(&BundleTestTool::RunAsQueryAbilityInfoByContinueType, this)},
         {"cleanBundleCacheFilesAutomatic",
             std::bind(&BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand, this)},
+        {"cleanBundlePartialCacheAutomatic",
+            std::bind(&BundleTestTool::RunAsCleanBundlePartialCacheAutomaticCommand, this)},
         {"getContinueBundleName",
             std::bind(&BundleTestTool::RunAsGetContinueBundleName, this)},
         {"updateAppEncryptedStatus",
@@ -2772,6 +2802,23 @@ ErrCode BundleTestTool::StringToUnsignedLongLong(
         result = false;
     }
     return OHOS::ERR_OK;
+}
+
+bool BundleTestTool::StringToUnsignedLongLong(
+    std::string optarg, const std::string &commandName, uint64_t &temp)
+{
+    try {
+        APP_LOGI("StringToUnsignedLongLong start, optarg : %{public}s", optarg.c_str());
+        if ((optarg == "") || (!isdigit(optarg[0]))) {
+            resultReceiver_.append("error: parameter error, cache size must be greater than or equal to 0\n");
+            return false;
+        }
+        temp = std::stoull(optarg);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
+    return true;
 }
 
 bool BundleTestTool::StrToUint32(const std::string &str, uint32_t &value)
@@ -4279,6 +4326,98 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
         return res;
     }
     return res;
+}
+
+ErrCode BundleTestTool::CheckCleanBundlePartialCacheAutomaticOption(
+    int32_t option, const std::string &commandName, CleanCacheInfo &cleanCacheInfo)
+{
+    switch (option) {
+        case 'h': {
+            APP_LOGI("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        case 'n': {
+            cleanCacheInfo.bundleName = optarg;
+            break;
+        }
+        case 'u': {
+            if (!OHOS::StrToInt(optarg, cleanCacheInfo.userId) || cleanCacheInfo.userId < 0) {
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        case 'a': {
+            if (!OHOS::StrToInt(optarg, cleanCacheInfo.appIndex) ||
+                (cleanCacheInfo.appIndex < 0 || cleanCacheInfo.appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        case 's': {
+            if (!StringToUnsignedLongLong(optarg, commandName, cleanCacheInfo.cacheThreshold)) {
+                resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGE("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsCleanBundlePartialCacheAutomaticCommand()
+{
+    ErrCode result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "cleanBundlePartialCacheAutomatic";
+    CleanCacheInfo cleanCacheInfo;
+    APP_LOGI("RunAsCleanBundlePartialCacheAutomaticCommand is start");
+
+    while (true) {
+        counter++;
+        int option = getopt_long(argc_, argv_, SHORT_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE.c_str(),
+            LONG_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE, nullptr);
+        APP_LOGI("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                APP_LOGE("bundle_test_tool getRule with no option.");
+                resultReceiver_.append(HELP_MSG_NO_AUTO_CLEAN_PARTIAL_CACHE_OPTION);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = CheckCleanBundlePartialCacheAutomaticOption(option, commandName, cleanCacheInfo);
+        if (result != OHOS::ERR_OK) {
+            resultReceiver_.append(HELP_MSG_AUTO_CLEAN_PARTIAL_CACHE_RULE);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    uint64_t beforeCleanedSize = 0;
+    uint64_t afterCleanedSize = 0;
+    result = bundleMgrProxy_->CleanBundlePartialCacheAutomatic(cleanCacheInfo, beforeCleanedSize, afterCleanedSize);
+    if (result == ERR_OK) {
+        std::string resultMsg = "clean partial cache successfully\n";
+        resultMsg += "Requested cache size: " + std::to_string(cleanCacheInfo.cacheThreshold) + "bytes\n";
+        resultMsg += "Before cleaned size: " + std::to_string(beforeCleanedSize) + "bytes\n";
+        resultMsg += "After cleaned size: " + std::to_string(afterCleanedSize) + "bytes\n";
+        resultReceiver_.append(resultMsg);
+    } else {
+        resultReceiver_.append("clean partial cache failed, errCode is " + std::to_string(result) + "\n");
+        APP_LOGE("CleanBundlePartialCacheAutomatic failed, result: %{public}d", result);
+    }
+    return result;
 }
 
 ErrCode BundleTestTool::RunAsGetContinueBundleName()

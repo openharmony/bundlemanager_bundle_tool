@@ -107,6 +107,7 @@ private:
     ErrCode RunAsImplicitQuerySkillUriInfo();
     ErrCode RunAsQueryAbilityInfoByContinueType();
     ErrCode RunAsCleanBundleCacheFilesAutomaticCommand();
+    ErrCode RunAsCleanBundlePartialCacheAutomaticCommand();
     ErrCode RunAsUpdateAppEncryptedStatus();
     ErrCode RunAsGetDirByBundleNameAndAppIndex();
     ErrCode RunAsGetAllBundleDirs();
@@ -228,6 +229,7 @@ private:
     ErrCode StringToInt(std::string option, const std::string &commandName, int &temp, bool &result);
     ErrCode StringToUnsignedLongLong(std::string optarg, const std::string &commandName,
         uint64_t &temp, bool &result);
+    bool StringToUnsignedLongLong(std::string optarg, const std::string &commandName, uint64_t &temp);
     bool StrToUint32(const std::string &str, uint32_t &value);
     ErrCode DeployQuickFix(const std::vector<std::string> &quickFixPaths,
         std::shared_ptr<QuickFixResult> &quickFixRes, bool isDebug);
@@ -265,6 +267,8 @@ private:
     ErrCode CheckGetBundleNameOption(int32_t option, std::string &bundleName);
     ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
         uint64_t &cacheSize, int32_t &cleanType);
+    ErrCode CheckCleanBundlePartialCacheAutomaticOption(
+        int32_t option, const std::string &commandName, CleanCacheInfo &cleanCacheInfo);
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
     bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
         std::string &bundleName);
