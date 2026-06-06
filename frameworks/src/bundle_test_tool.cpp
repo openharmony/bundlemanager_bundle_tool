@@ -246,7 +246,8 @@ static const std::string HELP_MSG =
     "  getEnterpriseReSignatureCert          get enterprise re sign cert\n"
     "  getApiTargetVersionByUid          get api target version by uid\n"
     "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n"
-    "  parseSpmModule                   parse spm module\n";
+    "  parseSpmModule                   parse spm module\n"
+    "  getMainAndCloneBundleInfo        get main and clone bundle info\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -589,6 +590,15 @@ const std::string HELP_MSG_DELETE_RESOURCE_INFO =
     "options list:\n"
     "  -h, --help                             list available commands\n"
     "  -k, --key <key>                        specify resource key\n";
+
+const std::string HELP_MSG_GET_MAIN_AND_CLONE_BUNDLE_INFO =
+    "usage: bundle_test_tool getMainAndCloneBundleInfo <options>\n"
+    "eg:bundle_test_tool getMainAndCloneBundleInfo -n <bundle-name> -f <flags> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name of the application\n"
+    "  -f, --flags <flags>                    specify bundle info flags (default: 1)\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
 
 const std::string HELP_MSG_GET_BUNDLE_STATS =
     "usage: bundle_test_tool getBundleStats <options>\n"
@@ -1081,6 +1091,9 @@ const std::string STRING_BATCH_GET_BUNDLE_INFO_NG = "batchGetBundleInfo failed\n
 
 const std::string STRING_PARSE_SPM_MODULE_OK = "parseSpmModule successfully\n";
 const std::string STRING_PARSE_SPM_MODULE_NG = "parseSpmModule failed\n";
+
+const std::string STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_OK = "getMainAndCloneBundleInfo successfully\n";
+const std::string STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_NG = "getMainAndCloneBundleInfo failed\n";
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
@@ -1639,6 +1652,15 @@ const struct option LONG_OPTIONS_PARSE_SPM_MODULE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_GET_MAIN_AND_CLONE_BUNDLE_INFO = "hn:f:u:";
+const struct option LONG_OPTIONS_GET_MAIN_AND_CLONE_BUNDLE_INFO[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"flags", required_argument, nullptr, 'f'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -1950,7 +1972,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getCloneBundleInfoExt", std::bind(&BundleTestTool::RunAsGetCloneBundleInfoExt, this)},
         {"addResourceInfoByBundleName", std::bind(&BundleTestTool::RunAsAddResourceInfoByBundleName, this)},
         {"addResourceInfoByAbility", std::bind(&BundleTestTool::RunAsAddResourceInfoByAbility, this)},
-        {"deleteResourceInfo", std::bind(&BundleTestTool::RunAsDeleteResourceInfo, this)}
+        {"deleteResourceInfo", std::bind(&BundleTestTool::RunAsDeleteResourceInfo, this)},
+        {"getMainAndCloneBundleInfo", std::bind(&BundleTestTool::RunAsGetMainAndCloneBundleInfo, this)}
     };
 
     return OHOS::ERR_OK;
@@ -9098,6 +9121,134 @@ ErrCode BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir()
                                    std::to_string(ret) + "\n");
         }
     }
+    return result;
+}
+
+ErrCode BundleTestTool::RunAsGetMainAndCloneBundleInfo()
+{
+    APP_LOGI("RunAsGetMainAndCloneBundleInfo start");
+    std::string bundleName;
+    int32_t flags = static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    ErrCode result = OHOS::ERR_OK;
+    int32_t counter = 0;
+
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_MAIN_AND_CLONE_BUNDLE_INFO.c_str(),
+            LONG_OPTIONS_GET_MAIN_AND_CLONE_BUNDLE_INFO, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'n': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'f': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'u': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                bundleName = optarg;
+                APP_LOGD("bundleName: %{public}s", bundleName.c_str());
+                break;
+            }
+            case 'f': {
+                if (!OHOS::StrToInt(optarg, flags) || flags < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                APP_LOGD("flags: %{public}d", flags);
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                APP_LOGD("userId: %{public}d", userId);
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (bundleName.empty()) {
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_MAIN_AND_CLONE_BUNDLE_INFO);
+    } else {
+        if (bundleMgrProxy_ == nullptr) {
+            APP_LOGE("bundleMgrProxy_ is nullptr");
+            resultReceiver_.append(STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_NG + "bundleMgrProxy is null\n");
+            APP_LOGI("RunAsGetMainAndCloneBundleInfo end");
+            return ERR_APPEXECFWK_SERVICE_NOT_READY;
+        }
+        std::vector<BundleInfo> bundleInfos;
+        userId = BundleCommandCommon::GetCurrentUserId(userId);
+        ErrCode ret = bundleMgrProxy_->GetMainAndCloneBundleInfo(bundleName, flags, userId, bundleInfos);
+        if (ret == ERR_OK) {
+            nlohmann::json jsonResult = nlohmann::json::array();
+            for (const auto &bundleInfo : bundleInfos) {
+                nlohmann::json jsonObject = bundleInfo;
+                jsonObject["applicationInfo"] = bundleInfo.applicationInfo;
+                jsonResult.push_back(jsonObject);
+            }
+            std::string msg = jsonResult.dump(Constants::DUMP_INDENT);
+            resultReceiver_.append(STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_OK);
+            resultReceiver_.append(msg);
+            resultReceiver_.append("\n");
+        } else {
+            resultReceiver_.append(STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_NG +
+                                   "errCode is " + std::to_string(ret) + "\n");
+        }
+        result = ret;
+    }
+    APP_LOGI("RunAsGetMainAndCloneBundleInfo end");
     return result;
 }
 } // AppExecFwk
