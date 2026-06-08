@@ -572,6 +572,58 @@
                     }
                 }
             }
+        },
+        "create-cli-sandbox-app": {
+            "description": "Create an cli sandbox app",
+            "requirePermissions": [
+                "ohos.permission.cli.INSTALL_BUNDLE"
+            ],
+            "inputSchema": {
+                "type": "object",
+                "required": [
+                    "bundleName",
+                    "callerBundleName"
+                ],
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "Bundle name need to create sandbox app"
+                    },
+                    "callerBundleName": {
+                        "type": "string",
+                        "description": "Bundle name to create sandbox app"
+                    }
+                }
+            },
+            "outputSchema": {
+                "type": "object",
+                "description": "Execution result",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     }
 }

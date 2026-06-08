@@ -39,7 +39,8 @@ const std::string HELP_MSG = "usage: ohos-bm <command> <options>\n"
                              "  set-disposed-rule set disposed rule for clone app\n"
                              "  delete-disposed-rule delete disposed rule for clone app\n"
                              "  get-recoverable-apps get list of recoverable applications info\n"
-                             "  recover           recover an uninstalled pre-installed application\n";
+                             "  recover           recover an uninstalled pre-installed application\n"
+                             "  createCliSandboxApp create cli sandbox app\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: ohos-bm uninstall <options>\n"
@@ -168,6 +169,20 @@ const std::string HELP_MSG_RECOVER =
 const std::string STRING_RECOVER_OK = "recover bundle successfully.";
 const std::string STRING_RECOVER_NG = "error: failed to recover bundle.";
 
+const std::string HELP_MSG_CREATE_CLI_SANDBOX_APP =
+    "usage: ohos-bm createCliSandboxApp <options>\n"
+    "options list:\n"
+    "  --help                                  list available commands\n"
+    "  --bundleName <bundle-name>              specify bundle name (required)\n"
+    "  --callerBundleName <caller-bundle-name> specify caller bundle name (required)\n";
+
+const std::string STRING_CREATE_CLI_SANDBOX_APP_OK = "create cli sandbox app successfully.";
+const std::string STRING_CREATE_CLI_SANDBOX_APP_NG = "error: failed to create cli sandbox app.";
+const std::string HELP_MSG_NO_CALLER_BUNDLE_NAME_OPTION =
+    "error: you must specify a caller bundle name with --callerBundleName.";
+
+const std::string ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR = "ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR";
+
 constexpr int32_t OPTION_APP_ID = 1000;
 constexpr int32_t OPTION_APP_INDEX = 1001;
 constexpr int32_t OPTION_PRIORITY = 1002;
@@ -206,11 +221,14 @@ private:
     ErrCode RunAsDeleteDisposedRuleCommand();
     ErrCode RunAsGetRecoverableAppsCommand();
     ErrCode RunAsRecoverCommand();
+    ErrCode RunAsCreateCliSandboxAppCommand();
 
     int32_t UninstallOperation(const std::string &bundleName,
                                InstallParam &installParam) const;
     int32_t UninstallSharedOperation(const UninstallParam &uninstallParam) const;
     int32_t RecoverOperation(const std::string &bundleName, InstallParam &installParam) const;
+    ErrCode CreateCliSandboxAppOperation(const std::string &callerBundleName,
+        const std::string &bundleName, int32_t userId, int32_t &appIndex) const;
 
     std::string DumpBundleList(int32_t userId) const;
     std::string DumpDebugBundleList(int32_t userId) const;
