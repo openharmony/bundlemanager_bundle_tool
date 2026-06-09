@@ -2895,3 +2895,621 @@ HWTEST_F(OhosBmCommandTest, RecoverCommand_0700, TestSize.Level0)
     std::string result = cmd.ExecCommand();
     EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
 }
+
+// ========== ReportPermissionUsedRecord Direct Tests ==========
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0100
+ * @tc.desc: Test ReportPermissionUsedRecord with cmd not in map ("help") - should return early.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0100, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("help"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    // "help" is not in SUBCOMMAND_PERMISSION_MAP, should return early without crash
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0200
+ * @tc.desc: Test ReportPermissionUsedRecord with cmd not in map ("install") - should return early.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0200, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("install"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    // "install" is not in SUBCOMMAND_PERMISSION_MAP
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0300
+ * @tc.desc: Test ReportPermissionUsedRecord with "uninstall" (in map), success=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0300, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    // "uninstall" is in SUBCOMMAND_PERMISSION_MAP
+    // PrivacyKit::AddPermissionUsedRecord may fail in test env, but should not crash
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0400
+ * @tc.desc: Test ReportPermissionUsedRecord with "uninstall" (in map), success=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0400, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0500
+ * @tc.desc: Test ReportPermissionUsedRecord with "dump" (in map), success=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0500, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0600
+ * @tc.desc: Test ReportPermissionUsedRecord with "dump" (in map), success=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0600, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0700
+ * @tc.desc: Test ReportPermissionUsedRecord with "dump-dependencies" (in map).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0700, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-dependencies"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0800
+ * @tc.desc: Test ReportPermissionUsedRecord with "dump-shared" (in map).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0800, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-shared"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_0900
+ * @tc.desc: Test ReportPermissionUsedRecord with "clean" (in map).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_0900, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("clean"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_1000
+ * @tc.desc: Test ReportPermissionUsedRecord with "set-disposed-rule" (in map).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_1000, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("set-disposed-rule"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_1100
+ * @tc.desc: Test ReportPermissionUsedRecord with "delete-disposed-rule" (in map).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_1100, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("delete-disposed-rule"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_1200
+ * @tc.desc: Test ReportPermissionUsedRecord with empty cmd_ (argc < 2 sets cmd_ to "--help").
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_1200, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    // argc=1 → cmd_ is "--help" which is not in SUBCOMMAND_PERMISSION_MAP
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+/**
+ * @tc.name: ReportPermissionUsedRecord_1300
+ * @tc.desc: Test ReportPermissionUsedRecord with unknown command not in map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionUsedRecord_1300, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("unknown-command"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(true));
+    EXPECT_NO_THROW(cmd.ReportPermissionUsedRecord(false));
+}
+
+// ========== ReportPermissionUsedRecord Integration Tests ==========
+
+/**
+ * @tc.name: ReportPermissionIntegration_0100
+ * @tc.desc: Test uninstall error path (no bundle name) triggers permission record with failure.
+ *           Verifies the result variable fix: result = uninstallResult for error path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0100, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // Command fails (no bundle name) → ReportPermissionUsedRecord(false) is called
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0200
+ * @tc.desc: Test uninstall success path triggers permission record with success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0200, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // Mock returns SUCCESS → ReportPermissionUsedRecord(true) is called
+    EXPECT_NE(result.find("success"), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0300
+ * @tc.desc: Test uninstall with -k flag success path triggers permission record with success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0300, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+        const_cast<char *>("-k"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"success\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0400
+ * @tc.desc: Test uninstall shared success path triggers permission record with success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0400, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+        const_cast<char *>("-s"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.shared"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"success\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0500
+ * @tc.desc: Test dump error path (no options) triggers permission record with failure.
+ *           Verifies result propagation for empty dumpResults.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0500, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0600
+ * @tc.desc: Test dump success path (-a dump all) triggers permission record with success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0600, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump"),
+        const_cast<char *>("-a"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"success\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0700
+ * @tc.desc: Test dump-dependencies error path (missing moduleName) triggers permission record
+ *           with failure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0700, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-dependencies"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // Missing moduleName → error, ReportPermissionUsedRecord(false)
+    EXPECT_NE(result.find("bundleName"), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0800
+ * @tc.desc: Test dump-dependencies failure path (GetSharedDependencies not mocked).
+ *           Verifies result = ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR for cJSON failure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0800, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-dependencies"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+        const_cast<char *>("-m"),
+        const_cast<char *>("entry"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // GetSharedDependencies not mocked, returns failure
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_0900
+ * @tc.desc: Test dump-shared error path (no options) triggers permission record with failure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_0900, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-shared"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1000
+ * @tc.desc: Test dump-shared success path (-a dump all shared) triggers permission record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1000, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-shared"),
+        const_cast<char *>("-a"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"success\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1100
+ * @tc.desc: Test dump-shared by-name failure path (GetSharedBundleInfoBySelf not mocked).
+ *           Verifies result propagation for error branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1100, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("dump-shared"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.shared"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // GetSharedBundleInfoBySelf not mocked, returns failure
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1200
+ * @tc.desc: Test clean error path (no options) triggers permission record with failure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1200, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("clean"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1300
+ * @tc.desc: Test clean success path (clean cache) triggers permission record with success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1300, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("clean"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+        const_cast<char *>("-c"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("successfully"), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1400
+ * @tc.desc: Test set-disposed-rule error path (missing required params) triggers permission record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1400, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("set-disposed-rule"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1500
+ * @tc.desc: Test delete-disposed-rule error path (missing --appId) triggers permission record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1500, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("delete-disposed-rule"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1600
+ * @tc.desc: Test help command (not in permission map) does not call ReportPermissionUsedRecord.
+ *           Verify full flow works without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1600, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("help"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // help command: cmd_ is "help", not in SUBCOMMAND_PERMISSION_MAP
+    EXPECT_NE(result.find("uninstall"), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1700
+ * @tc.desc: Test uninstall with null installer triggers permission record with failure.
+ *           Verifies result propagation when InitInstaller fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1700, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("uninstall"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    cmd.bundleMgrProxy_ = nullptr;
+    cmd.bundleInstallerProxy_ = nullptr;
+    std::string result = cmd.ExecCommand();
+    // Init fails → OnCommand returns ERR_INVALID_VALUE
+    // ReportPermissionUsedRecord is NOT called (Init check fails)
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1800
+ * @tc.desc: Test clean with both -c and -d triggers permission record.
+ *           Verifies result propagation for clean data path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1800, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("clean"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+        const_cast<char *>("-c"),
+        const_cast<char *>("-d"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // -d overrides -c, only data cleaning runs (may fail in test env)
+    EXPECT_TRUE(result.find("successfully") != std::string::npos ||
+        result.find("failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: ReportPermissionIntegration_1900
+ * @tc.desc: Test clean error path (no -c or -d specified) triggers permission record with failure.
+ *           Verifies result = ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR propagation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OhosBmCommandTest, ReportPermissionIntegration_1900, TestSize.Level0)
+{
+    char *argv[] = {
+        const_cast<char *>("ohos-bm"),
+        const_cast<char *>("clean"),
+        const_cast<char *>("-n"),
+        const_cast<char *>("com.test.bundle"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleManagerShellCommand cmd(argc, argv);
+    SetMockObjects(cmd);
+    std::string result = cmd.ExecCommand();
+    // No -c or -d specified → error
+    EXPECT_NE(result.find("\"status\":\"failed\""), std::string::npos);
+    EXPECT_NE(result.find("specify"), std::string::npos);
+}

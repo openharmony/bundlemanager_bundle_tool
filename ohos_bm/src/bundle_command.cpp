@@ -471,6 +471,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
         } else {
             resultReceiver_ = CreateErrorResult(uninstallResult,
                 STRING_UNINSTALL_BUNDLE_NG);
+            result = uninstallResult;
         }
     } else {
         InstallParam installParam;
@@ -484,6 +485,7 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
         } else {
             resultReceiver_ = CreateErrorResult(uninstallResult,
                 STRING_UNINSTALL_BUNDLE_NG);
+            result = uninstallResult;
         }
     }
     APP_LOGI("end");
@@ -629,6 +631,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
         if (dumpResults.empty()) {
             resultReceiver_ = CreateErrorResult(
                 ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
+            return OHOS::ERR_INVALID_VALUE;
         } else {
             resultReceiver_ = CreateSuccessResult(dumpResults);
         }
@@ -700,6 +703,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
                 APP_LOGE("cJSON_PrintBuffered failed");
                 resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                     "error: failed to format JSON result.");
+                return OHOS::ERR_INVALID_VALUE;
             }
             cJSON_Delete(jsonResult);
         }
@@ -814,6 +818,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
                 APP_LOGE("cJSON_PrintBuffered failed");
                 resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                     "error: failed to format JSON result.");
+                return OHOS::ERR_INVALID_VALUE;
             }
             cJSON_Delete(jsonResult);
         }
@@ -840,6 +845,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
                 APP_LOGE("cJSON_PrintBuffered failed");
                 resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                     "error: failed to format JSON result.");
+                return OHOS::ERR_INVALID_VALUE;
             }
             cJSON_Delete(jsonResult);
         }
@@ -1015,10 +1021,12 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                     APP_LOGE("cJSON_PrintUnformatted failed");
                     resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                         "error: failed to format JSON result.");
+                    return OHOS::ERR_INVALID_VALUE;
                 }
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_CACHE_BUNDLE_NG);
+                return OHOS::ERR_INVALID_VALUE;
             }
         }
         if (cleanData) {
@@ -1032,10 +1040,12 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                     APP_LOGE("cJSON_PrintUnformatted failed");
                     resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                         "error: failed to format JSON result.");
+                    return OHOS::ERR_INVALID_VALUE;
                 }
             } else {
                 resultReceiver_ = CreateErrorResult(
                     ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, STRING_CLEAN_DATA_BUNDLE_NG);
+                return OHOS::ERR_INVALID_VALUE;
             }
         }
         cJSON_Delete(cleanResult);
@@ -1167,7 +1177,7 @@ int32_t BundleManagerShellCommand::UninstallOperation(
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
         APP_LOGE("statusReceiver is null");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
 
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
@@ -1175,7 +1185,7 @@ int32_t BundleManagerShellCommand::UninstallOperation(
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
         APP_LOGE("recipient is null");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
     bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
     bundleInstallerProxy_->Uninstall(bundleName, installParam, statusReceiver);
@@ -1188,13 +1198,13 @@ int32_t BundleManagerShellCommand::UninstallSharedOperation(const UninstallParam
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
         APP_LOGE("statusReceiver is null");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
 
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
         APP_LOGE("recipient is null");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
     bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
 
@@ -1711,7 +1721,7 @@ ErrCode BundleManagerShellCommand::RunAsGetRecoverableAppsCommand()
         resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
             STRING_GET_RECOVERABLE_APPS_NG);
         cJSON_Delete(jsonResult);
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
     cJSON_Delete(jsonResult);
     return OHOS::ERR_OK;
@@ -1818,7 +1828,7 @@ int32_t BundleManagerShellCommand::RecoverOperation(const std::string &bundleNam
     sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
     if (statusReceiver == nullptr) {
         APP_LOGE("statusReceiver is null");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
 
     APP_LOGD("bundleName: %{public}s", bundleName.c_str());
@@ -1826,7 +1836,7 @@ int32_t BundleManagerShellCommand::RecoverOperation(const std::string &bundleNam
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
         APP_LOGE("Recover recipient is null");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+        return OHOS::ERR_INVALID_VALUE;
     }
     bundleInstallerProxy_->AsObject()->AddDeathRecipient(recipient);
     bundleInstallerProxy_->Recover(bundleName, installParam, statusReceiver);
