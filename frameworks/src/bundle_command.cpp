@@ -1740,6 +1740,17 @@ ErrCode BundleManagerShellCommand::RunAsDisableCommand()
     return result;
 }
 
+void BundleManagerShellCommand::GetUdidOperation()
+{
+    if (bundleMgrProxy_->VerifySystemApi()) {
+        resultReceiver_.append(STRING_GET_UDID_OK + "\n");
+        resultReceiver_.append(GetUdid() + "\n");
+    } else {
+        APP_LOGE("permission denied");
+        resultReceiver_.append(STRING_GET_UDID_NG + "\n");
+    }
+}
+
 ErrCode BundleManagerShellCommand::RunAsGetCommand()
 {
     APP_LOGI("begin to RunAsGetCommand");
@@ -1787,8 +1798,7 @@ ErrCode BundleManagerShellCommand::RunAsGetCommand()
         resultReceiver_.append(HELP_MSG_GET);
         return result;
     }
-    resultReceiver_.append(STRING_GET_UDID_OK + "\n");
-    resultReceiver_.append(GetUdid() + "\n");
+    GetUdidOperation();
     APP_LOGI("end");
     return result;
 }

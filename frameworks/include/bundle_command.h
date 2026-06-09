@@ -323,6 +323,7 @@ private:
 
     bool CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
     bool CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
+    void GetUdidOperation();
 
     bool SetApplicationEnabledOperation(const AbilityInfo &abilityInfo, bool isEnable, int32_t userId) const;
     std::string DumpOverlayInfo(const std::string &bundleName, const std::string &moduleName,
