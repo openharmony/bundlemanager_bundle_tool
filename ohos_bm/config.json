@@ -529,7 +529,7 @@
             "description": "Recover an uninstalled pre-installed application",
             "requirePermissions": [
                 "ohos.permission.cli.INSTALL_BUNDLE",
-                "ohos.permission.cli.RECOVER_BUNDLE"
+                "ohos.permission.RECOVER_BUNDLE"
             ],
             "inputSchema": {
                 "type": "object",
