@@ -624,6 +624,62 @@
                     }
                 }
             }
+        },
+        "destroy-cli-sandbox-app": {
+            "description": "Destroy an cli sandbox app",
+            "requirePermissions": [
+                "ohos.permission.MANAGE_SANDBOX_BUNDLE"
+            ],
+            "inputSchema": {
+                "type": "object",
+                "required": [
+                    "bundleName",
+                    "appIndex"
+                ],
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "Bundle name need to destroy sandbox app"
+                    },
+                    "creatorBundleName": {
+                        "type": "string",
+                        "description": "Creator bundle name to destroy sandbox app"
+                    },
+                    "appIndex": {
+                        "type": "integer",
+                        "description": "AppIndex of the sandbox app to destroy"
+                    }
+                }
+            },
+            "outputSchema": {
+                "type": "object",
+                "description": "Execution result",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     }
 }

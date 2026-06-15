@@ -106,6 +106,15 @@ const struct option CREATE_CLI_SANDBOX_APP_LONG_OPTIONS[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string DESTROY_CLI_SANDBOX_APP_OPTIONS = "hn:c:i:";
+const struct option DESTROY_CLI_SANDBOX_APP_LONG_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundleName", required_argument, nullptr, 'n'},
+    {"creatorBundleName", required_argument, nullptr, 'c'},
+    {"appIndex", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
 class CleanCacheCallbackImpl : public CleanCacheCallbackHost {
 public:
     CleanCacheCallbackImpl() : signal_(std::make_shared<std::promise<bool>>())
@@ -273,6 +282,7 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"get-recoverable-apps", [this] { return this->RunAsGetRecoverableAppsCommand(); } },
         {"recover", [this] { return this->RunAsRecoverCommand(); } },
         {"create-cli-sandbox-app", [this] { return this->RunAsCreateCliSandboxAppCommand(); } },
+        {"destroy-cli-sandbox-app", [this] { return this->RunAsDestroyCliSandboxAppCommand(); } },
     };
     return OHOS::ERR_OK;
 }
@@ -1956,6 +1966,144 @@ ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
         resultReceiver_ = CreateSuccessResult(dataContent);
     } else {
         resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), STRING_CREATE_CLI_SANDBOX_APP_NG);
+    }
+
+    APP_LOGI("end");
+    return result;
+}
+
+ErrCode BundleManagerShellCommand::DestroyCliSandboxAppOperation(const std::string &creatorBundleName,
+    const std::string &envCallerBundleName, const std::string &bundleName,
+    int32_t userId, int32_t appIndex) const
+{
+    APP_LOGD("DestroyCliSandboxAppOperation creatorBundleName %{public}s, envCallerBundleName %{public}s, "
+        "bundleName %{public}s, userId %{public}d, appIndex %{public}d",
+        creatorBundleName.c_str(), envCallerBundleName.c_str(), bundleName.c_str(), userId, appIndex);
+    return bundleInstallerProxy_->DestroyCliSandboxApp(creatorBundleName, envCallerBundleName,
+        bundleName, userId, appIndex);
+}
+
+ErrCode BundleManagerShellCommand::RunAsDestroyCliSandboxAppCommand()
+{
+    APP_LOGI("begin to RunAsDestroyCliSandboxAppCommand");
+    int32_t result = OHOS::ERR_OK;
+
+    if (argc_ <= INVALID_ARGS_NUMBER) {
+        APP_LOGD("'ohos-bm destroy-cli-sandbox-app' with no option.");
+        resultReceiver_ = CreateErrorResult(ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    if (InitInstaller() != OHOS::ERR_OK) {
+        resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
+            "error: failed to connect to bundle installer service.");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    std::string bundleName;
+    std::string creatorBundleName;
+    int32_t appIndex = 0;
+
+    while (true) {
+        int32_t option = getopt_long(argc_, argv_, DESTROY_CLI_SANDBOX_APP_OPTIONS.c_str(),
+            DESTROY_CLI_SANDBOX_APP_LONG_OPTIONS, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (option == -1) {
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'n':
+                case 'c':
+                case 'i': {
+                    APP_LOGD("'ohos-bm destroy-cli-sandbox-app -%{public}c' with no argument.", optopt);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    APP_LOGD("'ohos-bm destroy-cli-sandbox-app' with an unknown option.");
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR, unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'ohos-bm destroy-cli-sandbox-app %{public}s'", argv_[optind - INDEX_OFFSET]);
+                resultReceiver_ = HELP_MSG_DESTROY_CLI_SANDBOX_APP;
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                APP_LOGD("'ohos-bm destroy-cli-sandbox-app %{public}s %{public}s",
+                    argv_[optind - INDEX_OFFSET], optarg);
+                bundleName = optarg;
+                break;
+            }
+            case 'c': {
+                creatorBundleName = optarg;
+                break;
+            }
+            case 'i': {
+                if (!OHOS::StrToInt(optarg, appIndex)) {
+                    APP_LOGE("ohos-bm destroy-cli-sandbox-app with error appIndex %{private}s", optarg);
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && bundleName.size() == 0) {
+            APP_LOGD("'ohos-bm destroy-cli-sandbox-app' with no bundle name option.");
+            resultReceiver_ = CreateErrorResult(ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR,
+                HELP_MSG_NO_BUNDLE_NAME_OPTION);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && appIndex <= 0) {
+            APP_LOGD("'ohos-bm destroy-cli-sandbox-app' with no appIndex option.");
+            resultReceiver_ = CreateErrorResult(ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR,
+                HELP_MSG_NO_APP_INDEX_OPTION);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        if (resultReceiver_ == "") {
+            resultReceiver_ = CreateErrorResult(ERR_DESTROY_CLI_SANDBOX_APP_PARAM_ERROR,
+                HELP_MSG_DESTROY_CLI_SANDBOX_APP);
+        }
+        return result;
+    }
+
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
+    const char* envCallerBundle = std::getenv("ohos_cli_callerBundleName");
+    std::string envCallerBundleName =
+        (envCallerBundle != nullptr && strlen(envCallerBundle) > 0) ? std::string(envCallerBundle) : "";
+    ErrCode ret = DestroyCliSandboxAppOperation(creatorBundleName, envCallerBundleName, bundleName, userId, appIndex);
+    if (ret == OHOS::ERR_OK) {
+        resultReceiver_ = CreateSuccessResult();
+    } else {
+        resultReceiver_ = CreateErrorResult(static_cast<int32_t>(ret), STRING_DESTROY_CLI_SANDBOX_APP_NG);
     }
 
     APP_LOGI("end");

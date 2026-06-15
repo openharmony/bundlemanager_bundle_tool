@@ -117,6 +117,12 @@ ErrCode MockBundleInstallerHost::CreateCliSandboxApp(const std::string &callerPa
     return OHOS::ERR_OK;
 }
 
+ErrCode MockBundleInstallerHost::DestroyCliSandboxApp(const std::string &creatorBundleName,
+    const std::string &envCallerBundleName, const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    return OHOS::ERR_OK;
+}
+
 sptr<IBundleStreamInstaller> MockBundleInstallerHost::CreateStreamInstaller(const InstallParam &installParam,
     const sptr<IStatusReceiver> &statusReceiver, const std::vector<std::string> &originHapPaths)
 {
