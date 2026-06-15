@@ -248,7 +248,8 @@ static const std::string HELP_MSG =
     "  getApiTargetVersionByUid          get api target version by uid\n"
     "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n"
     "  parseSpmModule                   parse spm module\n"
-    "  getMainAndCloneBundleInfo        get main and clone bundle info\n";
+    "  getMainAndCloneBundleInfo        get main and clone bundle info\n"
+    "  querySandboxCloneAbilityInfo     query sandbox clone ability info\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -618,6 +619,20 @@ const std::string HELP_MSG_GET_MAIN_AND_CLONE_BUNDLE_INFO =
     "  -f, --flags <flags>                    specify bundle info flags (default: 1)\n"
     "  -u, --user-id <user-id>                specify a user id\n";
 
+const std::string HELP_MSG_QUERY_SANDBOX_CLONE_ABILITY_INFO =
+    "usage: bundle_test_tool querySandboxCloneAbilityInfo <options>\n"
+    "eg:bundle_test_tool querySandboxCloneAbilityInfo -c <creator-bundle-name> "
+    "-n <bundle-name> -m <module-name> -a <ability-name> -f <flags> -i <app-index> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -c, --creator-bundle-name <creator-bundle-name> specify creator bundle name\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name in the element\n"
+    "  -m, --module-name <module-name>        specify module name of the ability\n"
+    "  -a, --ability-name <ability-name>      specify ability name\n"
+    "  -f, --flags <flags>                    specify ability info flags (default: 0)\n"
+    "  -i, --app-index <app-index>            specify app index (default: 0)\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
 const std::string HELP_MSG_GET_BUNDLE_STATS =
     "usage: bundle_test_tool getBundleStats <options>\n"
     "eg:bundle_test_tool getBundleStats -n <bundle-name>\n"
@@ -905,6 +920,9 @@ const std::string HELP_MSG_NO_BATCH_QUERY_ABILITY_INFOS =
 const std::string HELP_MSG_NO_GET_CLONE_BUNDLE_INFO_EXT =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
 
+const std::string HELP_MSG_NO_QUERY_SANDBOX_CLONE_ABILITY_INFO =
+    "error: you must specify a creator bundle name with '-c' or '--creator-bundle-name' \n";
+
 const std::string HELP_MSG_NO_ADD_RESOURCE_INFO_BY_BUNDLE_NAME =
     "error: you must specify a bundle name with '-n' or '--bundle-name' \n";
 
@@ -1112,6 +1130,8 @@ const std::string STRING_PARSE_SPM_MODULE_NG = "parseSpmModule failed\n";
 
 const std::string STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_OK = "getMainAndCloneBundleInfo successfully\n";
 const std::string STRING_GET_MAIN_AND_CLONE_BUNDLE_INFO_NG = "getMainAndCloneBundleInfo failed\n";
+const std::string STRING_QUERY_SANDBOX_CLONE_ABILITY_INFO_OK = "querySandboxCloneAbilityInfo successfully\n";
+const std::string STRING_QUERY_SANDBOX_CLONE_ABILITY_INFO_NG = "querySandboxCloneAbilityInfo failed\n";
 
 const std::string STRING_GET_ODID_OK = "getOdid successfully\n";
 const std::string STRING_GET_ODID_NG = "getOdid failed\n";
@@ -1689,6 +1709,19 @@ const struct option LONG_OPTIONS_GET_MAIN_AND_CLONE_BUNDLE_INFO[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_QUERY_SANDBOX_CLONE_ABILITY_INFO = "hc:n:m:a:f:i:u:";
+const struct option LONG_OPTIONS_QUERY_SANDBOX_CLONE_ABILITY_INFO[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"creator-bundle-name", required_argument, nullptr, 'c'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"module-name", required_argument, nullptr, 'm'},
+    {"ability-name", required_argument, nullptr, 'a'},
+    {"flags", required_argument, nullptr, 'f'},
+    {"app-index", required_argument, nullptr, 'i'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_DIR = "hn:a:";
 const struct option LONG_OPTIONS_GET_DIR[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -2003,7 +2036,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"addResourceInfoByBundleName", std::bind(&BundleTestTool::RunAsAddResourceInfoByBundleName, this)},
         {"addResourceInfoByAbility", std::bind(&BundleTestTool::RunAsAddResourceInfoByAbility, this)},
         {"deleteResourceInfo", std::bind(&BundleTestTool::RunAsDeleteResourceInfo, this)},
-        {"getMainAndCloneBundleInfo", std::bind(&BundleTestTool::RunAsGetMainAndCloneBundleInfo, this)}
+        {"getMainAndCloneBundleInfo", std::bind(&BundleTestTool::RunAsGetMainAndCloneBundleInfo, this)},
+        {"querySandboxCloneAbilityInfo",
+            std::bind(&BundleTestTool::RunAsQuerySandboxCloneAbilityInfo, this)}
     };
 
     return OHOS::ERR_OK;
@@ -9389,6 +9424,142 @@ ErrCode BundleTestTool::RunAsGetMainAndCloneBundleInfo()
     }
     APP_LOGI("RunAsGetMainAndCloneBundleInfo end");
     return result;
+}
+
+ErrCode BundleTestTool::RunAsQuerySandboxCloneAbilityInfo()
+{
+    APP_LOGI("RunAsQuerySandboxCloneAbilityInfo start");
+    std::string creatorBundleName;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    int32_t flags = static_cast<int32_t>(GetAbilityInfoFlag::GET_ABILITY_INFO_DEFAULT);
+    int32_t appIndex = 0;
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    ErrCode result = ParseQuerySandboxCloneAbilityInfoOptions(creatorBundleName, bundleName, moduleName,
+        abilityName, flags, appIndex, userId);
+    APP_LOGI("creatorBundleName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, "
+        "abilityName: %{public}s, flags: %{public}d, appIndex: %{public}d, userId: %{public}d",
+        creatorBundleName.c_str(), bundleName.c_str(), moduleName.c_str(), abilityName.c_str(),
+        flags, appIndex, userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_QUERY_SANDBOX_CLONE_ABILITY_INFO);
+        return result;
+    }
+    return ExecuteQuerySandboxCloneAbilityInfo(creatorBundleName, bundleName, moduleName,
+        abilityName, flags, appIndex, userId);
+}
+
+ErrCode BundleTestTool::ParseQuerySandboxCloneAbilityInfoOptions(std::string &creatorBundleName,
+    std::string &bundleName, std::string &moduleName, std::string &abilityName,
+    int32_t &flags, int32_t &appIndex, int32_t &userId)
+{
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_,
+            SHORT_OPTIONS_QUERY_SANDBOX_CLONE_ABILITY_INFO.c_str(),
+            LONG_OPTIONS_QUERY_SANDBOX_CLONE_ABILITY_INFO, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        if (option == '?') {
+            resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'c': {
+                creatorBundleName = optarg;
+                break;
+            }
+            case 'n': {
+                bundleName = optarg;
+                break;
+            }
+            case 'm': {
+                moduleName = optarg;
+                break;
+            }
+            case 'a': {
+                abilityName = optarg;
+                break;
+            }
+            case 'f': {
+                if (!OHOS::StrToInt(optarg, flags) || flags < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'i': {
+                if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                std::string unknownOption;
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    if (result == OHOS::ERR_OK && creatorBundleName.empty()) {
+        resultReceiver_.append(HELP_MSG_NO_QUERY_SANDBOX_CLONE_ABILITY_INFO);
+        result = OHOS::ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::ExecuteQuerySandboxCloneAbilityInfo(const std::string &creatorBundleName,
+    const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,
+    int32_t flags, int32_t appIndex, int32_t userId)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        resultReceiver_.append(STRING_QUERY_SANDBOX_CLONE_ABILITY_INFO_NG);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    ElementName element("", bundleName, abilityName, moduleName);
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+
+    AbilityInfo abilityInfo;
+    ErrCode ret = bundleMgrProxy_->QuerySandboxCloneAbilityInfo(creatorBundleName, element,
+        flags, appIndex, abilityInfo, userId);
+    if (ret != ERR_OK) {
+        resultReceiver_.append(STRING_QUERY_SANDBOX_CLONE_ABILITY_INFO_NG);
+        resultReceiver_.append("errCode is " + std::to_string(ret) + "\n");
+        return ret;
+    }
+
+    nlohmann::json jsonObject = abilityInfo;
+    resultReceiver_.append(STRING_QUERY_SANDBOX_CLONE_ABILITY_INFO_OK);
+    resultReceiver_.append(jsonObject.dump(Constants::DUMP_INDENT));
+    resultReceiver_.append("\n");
+    return OHOS::ERR_OK;
 }
 } // AppExecFwk
 } // OHOS

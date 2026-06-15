@@ -576,13 +576,12 @@
         "create-cli-sandbox-app": {
             "description": "Create an cli sandbox app",
             "requirePermissions": [
-                "ohos.permission.cli.INSTALL_BUNDLE"
+                "ohos.permission.MANAGER_SANDBOX_BUNDLE"
             ],
             "inputSchema": {
                 "type": "object",
                 "required": [
-                    "bundleName",
-                    "callerBundleName"
+                    "bundleName"
                 ],
                 "properties": {
                     "help": {
@@ -593,7 +592,7 @@
                         "type": "string",
                         "description": "Bundle name need to create sandbox app"
                     },
-                    "callerBundleName": {
+                    "creatorBundleName": {
                         "type": "string",
                         "description": "Bundle name to create sandbox app"
                     }

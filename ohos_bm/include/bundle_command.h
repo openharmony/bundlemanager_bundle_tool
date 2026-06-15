@@ -175,12 +175,12 @@ const std::string HELP_MSG_CREATE_CLI_SANDBOX_APP =
     "options list:\n"
     "  --help                                  list available commands\n"
     "  --bundleName <bundle-name>              specify bundle name (required)\n"
-    "  --callerBundleName <caller-bundle-name> specify caller bundle name (required)\n";
+    "  --creatorBundleName <creator-bundle-name> specify creator bundle name (required)\n";
 
 const std::string STRING_CREATE_CLI_SANDBOX_APP_OK = "create cli sandbox app successfully.";
 const std::string STRING_CREATE_CLI_SANDBOX_APP_NG = "error: failed to create cli sandbox app.";
 const std::string HELP_MSG_NO_CALLER_BUNDLE_NAME_OPTION =
-    "error: you must specify a caller bundle name with --callerBundleName.";
+    "error: you must specify a creator bundle name with --creatorBundleName.";
 
 const std::string ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR = "ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR";
 
@@ -244,8 +244,9 @@ private:
                                InstallParam &installParam) const;
     int32_t UninstallSharedOperation(const UninstallParam &uninstallParam) const;
     int32_t RecoverOperation(const std::string &bundleName, InstallParam &installParam) const;
-    ErrCode CreateCliSandboxAppOperation(const std::string &callerBundleName,
-        const std::string &bundleName, int32_t userId, int32_t &appIndex) const;
+    ErrCode CreateCliSandboxAppOperation(const std::string &creatorBundleName,
+        const std::string &envCreatorBundleName, const std::string &bundleName, int32_t userId,
+        int32_t &appIndex) const;
     ErrCode DestroyCliSandboxAppOperation(const std::string &creatorBundleName,
         const std::string &envCallerBundleName, const std::string &bundleName,
         int32_t userId, int32_t appIndex) const;

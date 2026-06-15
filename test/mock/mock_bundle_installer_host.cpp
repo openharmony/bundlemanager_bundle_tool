@@ -111,7 +111,8 @@ ErrCode MockBundleInstallerHost::UninstallSandboxApp(const std::string &bundleNa
     return OHOS::ERR_OK;
 }
 
-ErrCode MockBundleInstallerHost::CreateCliSandboxApp(const std::string &callerPackageName,
+ErrCode MockBundleInstallerHost::CreateCliSandboxApp(const std::string &creatorBundleName,
+    const std::string &envCreatorBundleName,
     const std::string &bundleName, int32_t userId, int32_t &appIndex)
 {
     return OHOS::ERR_OK;
