@@ -76,6 +76,9 @@ public:
     ErrCode CreateCliSandboxApp(const std::string &callerPackageName, const std::string &bundleName,
         int32_t userId, int32_t &appIndex) override;
 
+    ErrCode DestroyCliSandboxApp(const std::string &creatorBundleName, const std::string &envCallerPackageName,
+        const std::string &bundleName, int32_t userId, int32_t appIndex) override;
+
     sptr<IBundleStreamInstaller> CreateStreamInstaller(const InstallParam &installParam,
         const sptr<IStatusReceiver> &statusReceiver, const std::vector<std::string> &originHapPaths) override;
 
