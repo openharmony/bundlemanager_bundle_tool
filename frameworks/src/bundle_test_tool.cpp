@@ -81,7 +81,7 @@ constexpr int32_t SLEEP_SECONDS = 20;
 const int32_t INDEX_OFFSET = 2;
 // quick fix error code
 const int32_t ERR_BUNDLEMANAGER_FEATURE_IS_NOT_SUPPORTED = 801;
-const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
+const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
 const int32_t CODE_PROTECT_UID = 7666;
 const int32_t MAX_WAITING_TIME = 600;
 const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
