@@ -73,7 +73,8 @@ public:
 
     ErrCode UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId) override;
 
-    ErrCode CreateCliSandboxApp(const std::string &callerPackageName, const std::string &bundleName,
+    ErrCode CreateCliSandboxApp(const std::string &creatorBundleName,
+        const std::string &envCreatorBundleName, const std::string &bundleName,
         int32_t userId, int32_t &appIndex) override;
 
     ErrCode DestroyCliSandboxApp(const std::string &creatorBundleName, const std::string &envCallerPackageName,

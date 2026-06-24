@@ -102,7 +102,7 @@ const std::string CREATE_CLI_SANDBOX_APP_OPTIONS = "hn:c:";
 const struct option CREATE_CLI_SANDBOX_APP_LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundleName", required_argument, nullptr, 'n'},
-    {"callerBundleName", required_argument, nullptr, 'c'},
+    {"creatorBundleName", required_argument, nullptr, 'c'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1854,11 +1854,13 @@ int32_t BundleManagerShellCommand::RecoverOperation(const std::string &bundleNam
     return statusReceiver->GetResultCode();
 }
 
-ErrCode BundleManagerShellCommand::CreateCliSandboxAppOperation(const std::string &callerBundleName,
-    const std::string &bundleName, int32_t userId, int32_t &appIndex) const
+ErrCode BundleManagerShellCommand::CreateCliSandboxAppOperation(const std::string &creatorBundleName,
+    const std::string &envCreatorBundleName, const std::string &bundleName, int32_t userId,
+    int32_t &appIndex) const
 {
     APP_LOGD("CreateCliSandboxAppOperation bundleName %{public}s", bundleName.c_str());
-    return bundleInstallerProxy_->CreateCliSandboxApp(callerBundleName, bundleName, userId, appIndex);
+    return bundleInstallerProxy_->CreateCliSandboxApp(creatorBundleName, envCreatorBundleName,
+        bundleName, userId, appIndex);
 }
 
 ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
@@ -1879,7 +1881,7 @@ ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
     }
 
     std::string bundleName;
-    std::string callerBundleName;
+    std::string creatorBundleName;
 
     while (true) {
         int32_t option = getopt_long(argc_, argv_, CREATE_CLI_SANDBOX_APP_OPTIONS.c_str(),
@@ -1926,7 +1928,7 @@ ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
                 break;
             }
             case 'c': {
-                callerBundleName = optarg;
+                creatorBundleName = optarg;
                 break;
             }
             default: {
@@ -1945,7 +1947,7 @@ ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
     }
 
     if (result == OHOS::ERR_OK) {
-        if (resultReceiver_ == "" && callerBundleName.size() == 0) {
+        if (resultReceiver_ == "" && creatorBundleName.size() == 0) {
             APP_LOGD("'ohos-bm create-cli-sandbox-app' with no caller bundle name option.");
             resultReceiver_ = CreateErrorResult(ERR_CREATE_CLI_SANDBOX_APP_PARAM_ERROR,
                 HELP_MSG_NO_CALLER_BUNDLE_NAME_OPTION);
@@ -1961,9 +1963,13 @@ ErrCode BundleManagerShellCommand::RunAsCreateCliSandboxAppCommand()
         return result;
     }
 
+    const char *envCallerBundleName = std::getenv("ohos_cli_callerBundleName");
+    std::string envCreatorBundleName =
+        (envCallerBundleName != nullptr && strlen(envCallerBundleName) > 0) ? std::string(envCallerBundleName) : "";
+
     int32_t appIndex = 0;
     int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
-    ErrCode ret = CreateCliSandboxAppOperation(callerBundleName, bundleName, userId, appIndex);
+    ErrCode ret = CreateCliSandboxAppOperation(creatorBundleName, envCreatorBundleName, bundleName, userId, appIndex);
     if (ret == OHOS::ERR_OK) {
         cJSON *data = cJSON_CreateObject();
         cJSON_AddNumberToObject(data, "appIndex", appIndex);

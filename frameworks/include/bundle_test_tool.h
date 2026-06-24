@@ -185,6 +185,13 @@ private:
     ErrCode ParseDeleteResourceInfoOptions(std::string &key);
     ErrCode ExecuteDeleteResourceInfo(const std::string &key);
     ErrCode RunAsGetMainAndCloneBundleInfo();
+    ErrCode RunAsQuerySandboxCloneAbilityInfo();
+    ErrCode ParseQuerySandboxCloneAbilityInfoOptions(std::string &creatorBundleName,
+        std::string &bundleName, std::string &moduleName, std::string &abilityName,
+        int32_t &flags, int32_t &appIndex, int32_t &userId);
+    ErrCode ExecuteQuerySandboxCloneAbilityInfo(const std::string &creatorBundleName,
+        const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,
+        int32_t flags, int32_t appIndex, int32_t userId);
 
     std::condition_variable cv_;
     std::mutex mutex_;
