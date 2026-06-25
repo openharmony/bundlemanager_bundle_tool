@@ -576,7 +576,7 @@
         "create-cli-sandbox-app": {
             "description": "Create an cli sandbox app",
             "requirePermissions": [
-                "ohos.permission.MANAGER_SANDBOX_BUNDLE"
+                "ohos.permission.MANAGE_SANDBOX_BUNDLE"
             ],
             "inputSchema": {
                 "type": "object",
