@@ -53,16 +53,6 @@
       },
       {
         "reason": "$string:inject_input_reason",
-        "name": "ohos.permission.UNINSTALL_CLONE_BUNDLE",
-        "usedScene": {
-          "abilities": [
-            "MainAbility"
-          ],
-          "when": "always"
-        }
-      },
-      {
-        "reason": "$string:inject_input_reason",
         "name": "ohos.permission.GET_BUNDLE_INFO",
         "usedScene": {
           "abilities": [
