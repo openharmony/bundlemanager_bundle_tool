@@ -118,7 +118,7 @@ const std::string SHARED_BUNDLE_INFO = "sharedBundleInfo";
 const std::string DEPENDENCIES = "dependencies";
 
 const int32_t MAX_WAITING_TIME = 3000;
-const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
+const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
 
 const std::string HELP_MSG_SET_DISPOSED_RULE =
     "usage: ohos-bm set-disposed-rule <options> "

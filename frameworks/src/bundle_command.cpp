@@ -62,7 +62,7 @@ const int32_t MAX_ARGUEMENTS_NUMBER = 3;
 const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
-const int32_t INITIAL_SANDBOX_APP_INDEX = 1000;
+const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
 
 class DeathRecipientGuard {
 public:

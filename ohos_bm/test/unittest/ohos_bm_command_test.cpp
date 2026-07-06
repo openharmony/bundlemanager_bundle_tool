@@ -1335,7 +1335,7 @@ HWTEST_F(OhosBmCommandTest, CleanCommand_0800, TestSize.Level0)
 
 /**
  * @tc.name: CleanCommand_0900
- * @tc.desc: Test with invalid --appIndex (> 1000).
+ * @tc.desc: Test with invalid --appIndex (> 3000).
  * @tc.type: FUNC
  */
 HWTEST_F(OhosBmCommandTest, CleanCommand_0900, TestSize.Level0)
@@ -1347,7 +1347,7 @@ HWTEST_F(OhosBmCommandTest, CleanCommand_0900, TestSize.Level0)
         const_cast<char *>("com.test.bundle"),
         const_cast<char *>("-c"),
         const_cast<char *>("-i"),
-        const_cast<char *>("1001"),
+        const_cast<char *>("3001"),
     };
     int argc = sizeof(argv) / sizeof(argv[0]);
     BundleManagerShellCommand cmd(argc, argv);
