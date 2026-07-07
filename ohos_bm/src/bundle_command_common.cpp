@@ -227,6 +227,38 @@ std::map<int32_t, std::string> BundleCommandCommon::bundleMessageMap_ = {
     { IStatusReceiver::ERR_INSTALL_FAILED_DEVICE_UNAUTHORIZED,
         "error: Failed to install the HAP because the device is unauthorized, "
         "make sure the UDID of your device is configured in the signing profile." },
+    // CLI sandbox app uninstall error codes
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_INTERNAL_ERROR, "error: cli sandbox app uninstall internal error." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_INVALID_BUNDLE_NAME,
+        "error: cli sandbox app uninstall invalid bundle name." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_INVALID_APP_INDEX, "error: cli sandbox app uninstall invalid app index." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_USER_NOT_EXIST, "error: cli sandbox app uninstall user not exist." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_APP_NOT_EXISTED, "error: cli sandbox app to uninstall not existed." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_NOT_INSTALLED_AT_SPECIFIED_USERID,
+        "error: cli sandbox app not installed at specified userId." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_APP_INDEX_NOT_FOUND, "error: cli sandbox app index not found." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_UNINSTALL_INVALID_CREATOR_BUNDLE_NAME,
+        "error: cli sandbox app uninstall invalid creator bundle name." },
+    // CLI sandbox app install/query error codes
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_PARAM_ERROR, "error: cli sandbox app install param error." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_INTERNAL_ERROR, "error: cli sandbox app install internal error." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_INVALID_ENV_CREATOR_BUNDLE_NAME,
+        "error: cli sandbox app install invalid env creator bundle name." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_INVALID_CREATOR_BUNDLE_NAME,
+        "error: cli sandbox app install invalid creator bundle name." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_INVALID_BUNDLE_NAME, "error: cli sandbox app install invalid bundle name." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_USER_NOT_EXIST, "error: cli sandbox app install user not exist." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_APP_NOT_EXISTED, "error: cli sandbox app to install not existed." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_NOT_INSTALLED_AT_SPECIFIED_USERID,
+        "error: cli sandbox app not installed at specified userId." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_OUT_OF_LIMIT_PER_CREATOR,
+        "error: cli sandbox app install out of limit per creator." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_OUT_OF_LIMIT, "error: cli sandbox app install out of limit." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_INVALID_APP_INDEX, "error: cli sandbox app install invalid app index." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_GRANT_PERMISSION_FAILED,
+        "error: cli sandbox app install failed due to grant permission failed." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_CREATOR_NOT_INSTALLED, "error: cli sandbox app creator not installed." },
+    { ERR_APPEXECFWK_CLI_SANDBOX_INSTALL_APP_INDEX_EXISTED, "error: cli sandbox app index already existed." },
 };
 
 int32_t BundleCommandCommon::GetOsAccountLocalIdFromUid(const int32_t callingUid)
