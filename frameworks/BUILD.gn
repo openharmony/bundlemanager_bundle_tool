@@ -100,6 +100,17 @@ ohos_source_set("tools_bm_source_set") {
 }
 
 ohos_executable("bm") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [ ":tools_bm_source_set" ]
 
   ldflags = [
@@ -201,6 +212,17 @@ ohos_source_set("tools_test_bm_source_set") {
 }
 
 ohos_executable("bundle_test_tool") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [ ":tools_test_bm_source_set" ]
 
   install_enable = false
