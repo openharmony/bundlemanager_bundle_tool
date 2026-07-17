@@ -1403,6 +1403,14 @@ HWTEST_F(BmCommandTest, GetBundlePath_0001, Function | MediumTest | TestSize.Lev
     param = "-x";
     res = cmd.GetBundlePath(param, bundlePaths);
     EXPECT_EQ(res, ERR_OK);
+
+    param = "--variant-bundle";
+    res = cmd.GetBundlePath(param, bundlePaths);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+
+    param = "-v";
+    res = cmd.GetBundlePath(param, bundlePaths);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
 /**

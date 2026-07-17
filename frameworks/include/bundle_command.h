@@ -80,7 +80,8 @@ const std::string HELP_MSG_INSTALL =
     "                                                                    the minimum waitting time is 180s,\n"
     "                                                                    the maximum waitting time is 600s\n"
     "  -d, --downgrade                                                install allow downgrade\n"
-    "  -g, --grant-permission                                         grant permissions for installation\n";
+    "  -g, --grant-permission                                         grant permissions for installation\n"
+    "  -v, --variant-bundle                                     specify the bundle is same name with variant bundle\n";
 
 const std::string HELP_MSG_UNINSTALL =
     "usage: bm uninstall <options>\n"
