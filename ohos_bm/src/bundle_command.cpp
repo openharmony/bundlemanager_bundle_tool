@@ -713,6 +713,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
                 APP_LOGE("cJSON_PrintBuffered failed");
                 resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                     "error: failed to format JSON result.");
+                cJSON_Delete(jsonResult);
                 return OHOS::ERR_INVALID_VALUE;
             }
             cJSON_Delete(jsonResult);
@@ -828,6 +829,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
                 APP_LOGE("cJSON_PrintBuffered failed");
                 resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                     "error: failed to format JSON result.");
+                cJSON_Delete(jsonResult);
                 return OHOS::ERR_INVALID_VALUE;
             }
             cJSON_Delete(jsonResult);
@@ -855,6 +857,7 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
                 APP_LOGE("cJSON_PrintBuffered failed");
                 resultReceiver_ = CreateErrorResult(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR,
                     "error: failed to format JSON result.");
+                cJSON_Delete(jsonResult);
                 return OHOS::ERR_INVALID_VALUE;
             }
             cJSON_Delete(jsonResult);
