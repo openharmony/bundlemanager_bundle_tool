@@ -1155,7 +1155,6 @@ bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string
     int32_t appIndex) const
 {
     userId = BundleCommandCommon::GetCurrentUserId(userId);
-    APP_LOGD("bundleName: %{public}s, userId:%{public}d, appIndex:%{public}d", bundleName.c_str(), userId, appIndex);
     sptr<CleanCacheCallbackImpl> cleanCacheCallBack(new (std::nothrow) CleanCacheCallbackImpl());
     if (cleanCacheCallBack == nullptr) {
         APP_LOGE("cleanCacheCallBack is null");
@@ -1173,7 +1172,6 @@ bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string 
     int32_t appIndex) const
 {
     userId = BundleCommandCommon::GetCurrentUserId(userId);
-    APP_LOGD("bundleName: %{public}s, userId:%{public}d, appIndex:%{public}d", bundleName.c_str(), userId, appIndex);
     auto appMgrClient = std::make_unique<AppMgrClient>();
     ErrCode cleanRetAms = appMgrClient->ClearUpApplicationData(bundleName, appIndex, userId);
     return cleanRetAms == ERR_OK;
@@ -1189,8 +1187,6 @@ int32_t BundleManagerShellCommand::UninstallOperation(
         APP_LOGE("statusReceiver is null");
         return OHOS::ERR_INVALID_VALUE;
     }
-
-    APP_LOGD("bundleName: %{public}s", bundleName.c_str());
 
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
@@ -1840,8 +1836,6 @@ int32_t BundleManagerShellCommand::RecoverOperation(const std::string &bundleNam
         APP_LOGE("statusReceiver is null");
         return OHOS::ERR_INVALID_VALUE;
     }
-
-    APP_LOGD("bundleName: %{public}s", bundleName.c_str());
 
     sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
     if (recipient == nullptr) {
