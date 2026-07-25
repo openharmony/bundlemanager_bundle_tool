@@ -360,24 +360,17 @@ ErrCode BundleManagerShellCommand::RunAsUninstallCommand()
     }
 
     int result = OHOS::ERR_OK;
-    int counter = 0;
     std::string bundleName = "";
     int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     bool isKeepData = false;
     bool isShared = false;
     int32_t versionCode = Constants::ALL_VERSIONCODE;
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, UNINSTALL_OPTIONS.c_str(), UNINSTALL_LONG_OPTIONS, nullptr);
         APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
         if (option == -1) {
             break;
         }
-
-        if (option == '?') {
-                resultReceiver_ = CreateErrorResult(IStatusReceiver::ERR_UNINSTALL_PARAM_ERROR, HELP_MSG_NO_OPTION);
-                result = OHOS::ERR_INVALID_VALUE;
-            }
 
         if (option == '?') {
             switch (optopt) {
@@ -514,7 +507,6 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
         return OHOS::ERR_INVALID_VALUE;
     }
 
-    int counter = 0;
     std::string bundleName = "";
     bool bundleDumpAll = false;
     bool bundleDumpDebug = false;
@@ -525,7 +517,6 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
     std::string deviceId = "";
     int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_DUMP.c_str(), LONG_OPTIONS_DUMP, nullptr);
         APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
         if (option == -1) {
@@ -661,11 +652,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedDependenciesCommand()
         return OHOS::ERR_INVALID_VALUE;
     }
 
-    int32_t counter = 0;
     std::string bundleName;
     std::string moduleName;
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_DUMP_SHARED_DEPENDENCIES.c_str(),
             LONG_OPTIONS_DUMP_SHARED_DEPENDENCIES, nullptr);
         if (option == -1) {
@@ -784,11 +773,9 @@ ErrCode BundleManagerShellCommand::RunAsDumpSharedCommand()
         return OHOS::ERR_INVALID_VALUE;
     }
 
-    int32_t counter = 0;
     std::string bundleName;
     bool dumpSharedAll = false;
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_DUMP_SHARED.c_str(),
             LONG_OPTIONS_DUMP_SHARED, nullptr);
         if (option == -1) {
@@ -922,14 +909,12 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
         return OHOS::ERR_INVALID_VALUE;
     }
 
-    int32_t counter = 0;
     int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
     int32_t appIndex = 0;
     bool cleanCache = false;
     bool cleanData = false;
     std::string bundleName = "";
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, CLEAN_SHORT_OPTIONS.c_str(), CLEAN_LONG_OPTIONS, nullptr);
         APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
         if (option == -1) {
@@ -1327,7 +1312,6 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     }
 
     int32_t result = OHOS::ERR_OK;
-    int32_t counter = 0;
     std::string appId;
     int32_t appIndex = 0;
     bool hasAppId = false;
@@ -1368,7 +1352,6 @@ ErrCode BundleManagerShellCommand::RunAsSetDisposedRuleCommand()
     };
 
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, setDisposedRuleOptions.c_str(),
             setDisposedRuleLongOptions, nullptr);
         APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
@@ -1596,7 +1579,6 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
     }
 
     int32_t result = OHOS::ERR_OK;
-    int32_t counter = 0;
     std::string appId;
     int32_t appIndex = 0;
     bool hasAppId = false;
@@ -1610,7 +1592,6 @@ ErrCode BundleManagerShellCommand::RunAsDeleteDisposedRuleCommand()
     };
 
     while (true) {
-        counter++;
         int32_t option = getopt_long(argc_, argv_, deleteDisposedRuleOptions.c_str(),
             deleteDisposedRuleLongOptions, nullptr);
         APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
