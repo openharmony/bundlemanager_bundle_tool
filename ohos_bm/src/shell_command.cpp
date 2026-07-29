@@ -32,6 +32,8 @@ const std::map<std::string, std::string> SUBCOMMAND_PERMISSION_MAP = {
     {"clean", "ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES"},
     {"set-disposed-rule", "ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"},
     {"delete-disposed-rule", "ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"},
+    {"get-recoverable-apps", "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"},
+    {"recover", "ohos.permission.cli.INSTALL_BUNDLE"},
 };
 } // namespace
 
