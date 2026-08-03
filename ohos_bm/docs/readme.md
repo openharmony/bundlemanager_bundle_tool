@@ -37,7 +37,7 @@ ohos_bm/
 |-------|------|---------|---------|
 | `--help` | 查看ohos-bm帮助信息 | 无 | 无 |
 | `uninstall` | 卸载应用包 | `--bundleName <bundle-name>`：指定要卸载的包名<br>`--keepData`：卸载后保留用户数据<br>`--shared`：卸载应用间共享库<br>`--version <version-code>`：指定共享库版本号卸载 | `ohos.permission.cli.UNINSTALL_BUNDLE` |
-| `dump` | 查看应用包信息 | `--all`：列出系统中所有应用包<br>`--bundleName <bundle-name>`：查看指定包的信息<br>`--shortcutInfo`：查看快捷方式信息<br>`--deviceId <device-id>`：指定设备ID查看分布式应用信息<br>`--debugBundle`：列出调试应用包<br>`--label`：查看标签信息 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
+| `dump` | 查看应用包信息 | `--all`：列出系统中所有应用包<br>`--bundleName <bundle-name>`：查看指定包的信息<br>`--shortcutInfo`：查看快捷方式信息<br>`--deviceId <device-id>`：指定设备ID查看分布式应用信息<br>`--debugBundle`：列出调试应用包<br>`--label`：查看标签信息 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED`、`ohos.permission.GET_ALL_BUNDLE_INFO` |
 | `dump-dependencies` | 查看指定应用和模块的依赖关系 | `--bundleName <bundle-name>`：指定包名<br>`--moduleName <module-name>`：指定模块名 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
 | `dump-shared` | 查看应用间共享库信息 | `--all`：列出所有共享库名称<br>`--bundleName <bundle-name>`：查看指定共享库信息 | `ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED` |
 | `clean` | 清理应用缓存或数据文件 | `--bundleName <bundle-name>`：指定包名<br>`--cache`：清理缓存文件<br>`--data`：清理数据文件<br>`--appIndex <app-index>`：指定应用索引 | `ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES` |
