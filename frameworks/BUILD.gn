@@ -56,7 +56,7 @@ ohos_source_set("tools_bm_source_set") {
     "-fdata-sections",
     "-flto",
   ]
-  cflags_cc = cflags + [ "-Os" ]
+  cflags_cc = cflags + [ "-Oz" ]
 
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -115,6 +115,8 @@ ohos_executable("bm") {
 
   ldflags = [
     "-Wl,--gc-sections",
+    "-Wl,--as-needed",
+    "-s",
     "-flto",
   ]
 
