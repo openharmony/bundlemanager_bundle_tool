@@ -43,6 +43,8 @@ public:
         int32_t userId = Constants::UNSPECIFIED_USERID) override;
     bool GetBundleStats(const std::string &bundleName, int32_t userId, std::vector<int64_t> &bundleStats,
         int32_t appIndex = 0, uint32_t statFlag = 0) override;
+    ErrCode GetBundleStatsAsync(const std::string &bundleName, int32_t userId, int32_t appIndex,
+        uint32_t statFlag, const sptr<IBundleStatsCallback> &callback) override;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

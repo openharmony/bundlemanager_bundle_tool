@@ -128,5 +128,28 @@ bool MockBundleMgrHost::GetBundleStats(const std::string &bundleName, int32_t us
     }
     return true;
 }
+
+ErrCode MockBundleMgrHost::GetBundleStatsAsync(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    uint32_t statFlag, const sptr<IBundleStatsCallback> &callback)
+{
+    APP_LOGD("enter");
+    APP_LOGD("bundleName: %{public}s", bundleName.c_str());
+    if (callback == nullptr) {
+        return ERR_BUNDLE_MANAGER_PARAM_ERROR;
+    }
+    if (g_getBundleStatsFailSecondBundle && bundleName == SECOND_BUNDLE_NAME) {
+        callback->OnGetBundleStatsFinished(ERR_BUNDLE_MANAGER_INTERNAL_ERROR, {});
+        return ERR_OK;
+    }
+
+    std::vector<int64_t> bundleStats = { 0, 0, 0, 0, 0 };
+    if (bundleName == FIRST_BUNDLE_NAME) {
+        bundleStats[CACHE_STATS_INDEX] = CACHE_SIZE_ONE;
+    } else {
+        bundleStats[CACHE_STATS_INDEX] = CACHE_SIZE_TWO;
+    }
+    callback->OnGetBundleStatsFinished(ERR_OK, bundleStats);
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

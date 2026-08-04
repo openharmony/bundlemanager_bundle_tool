@@ -54,6 +54,7 @@
 #include "token_setproc.h"
 #include "spm_module_parser.h"
 #include "system_ability_definition.h"
+#include "bundle_stats_callback_host.h"
 #ifdef BUNDLE_FRAMEWORK_QUICK_FIX
 #include "quick_fix_status_callback_host_impl.h"
 #endif
@@ -192,6 +193,7 @@ static const std::string HELP_MSG =
     "  deleteQuickFix                   delete a quick fix patch of an already installed bundle\n"
     "  setDebugMode                     enable signature debug mode\n"
     "  getBundleStats                   get bundle stats\n"
+    "  getBundleStatsAsync              get bundle stats async\n"
     "  getBundleInodeCount              get bundle inode count\n"
     "  batchGetBundleStats              batch get bundle stats\n"
     "  getAllBundleStats                get all bundle stats\n"
@@ -641,6 +643,16 @@ const std::string HELP_MSG_GET_BUNDLE_STATS =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n"
     "  -a, --app-index <app-index>            specify a app index\n";
+
+const std::string HELP_MSG_GET_BUNDLE_STATS_ASYNC =
+    "usage: bundle_test_tool getBundleStatsAsync <options>\n"
+    "eg:bundle_test_tool getBundleStatsAsync -n <bundle-name> -u <user-id> -a <app-index> -s <stat-flag>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -a, --app-index <app-index>            specify a app index\n"
+    "  -s, --stat-flag <stat-flag>            specify a stat flag\n";
 
 const std::string HELP_MSG_GET_BUNDLE_INODE_COUNT =
     "usage: bundle_test_tool getBundleInodeCount <options>\n"
@@ -1095,6 +1107,9 @@ const std::string STRING_SET_BUNDLE_FIRST_LAUNCH_NG = "set bundle first launch f
 const std::string STRING_GET_BUNDLE_STATS_OK = "get bundle stats successfully\n";
 const std::string STRING_GET_BUNDLE_STATS_NG = "get bundle stats failed\n";
 
+const std::string STRING_GET_BUNDLE_STATS_ASYNC_OK = "get bundle stats async successfully\n";
+const std::string STRING_GET_BUNDLE_STATS_ASYNC_NG = "get bundle stats async failed\n";
+
 const std::string STRING_GET_BUNDLE_INODE_COUNT_OK = "get bundle inode count successfully\n";
 const std::string STRING_GET_BUNDLE_INODE_COUNT_NG = "get bundle inode count failed\n";
 
@@ -1396,6 +1411,16 @@ const struct option LONG_OPTIONS_GET_BUNDLE_STATS[] = {
     {"bundle-name", required_argument, nullptr, 'n'},
     {"user-id", required_argument, nullptr, 'u'},
     {"app-index", required_argument, nullptr, 'a'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_BUNDLE_STATS_ASYNC = "hn:u:a:s:";
+const struct option LONG_OPTIONS_GET_BUNDLE_STATS_ASYNC[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"app-index", required_argument, nullptr, 'a'},
+    {"stat-flag", required_argument, nullptr, 's'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -1897,6 +1922,57 @@ bool GetLargestItemsCallbackImpl::WaitForGetCompletion()
     return false;
 }
 
+class BundleStatsCallbackImpl : public BundleStatsCallbackHost {
+public:
+    BundleStatsCallbackImpl() {}
+    ~BundleStatsCallbackImpl() {}
+    void OnGetBundleStatsFinished(ErrCode errCode, const std::vector<int64_t> &bundleStats) override;
+    ErrCode GetResultCode();
+    std::vector<int64_t> GetBundleStats();
+    bool WaitForGetCompletion();
+
+private:
+    std::mutex mutex_;
+    bool complete_ = false;
+    ErrCode errCode_ = 0;
+    std::vector<int64_t> bundleStats_;
+    std::promise<void> get_;
+    std::future<void> getFuture_ = get_.get_future();
+    DISALLOW_COPY_AND_MOVE(BundleStatsCallbackImpl);
+};
+
+void BundleStatsCallbackImpl::OnGetBundleStatsFinished(
+    ErrCode errCode, const std::vector<int64_t> &bundleStats)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!complete_) {
+        complete_ = true;
+        errCode_ = errCode;
+        bundleStats_ = bundleStats;
+        get_.set_value();
+    }
+}
+
+ErrCode BundleStatsCallbackImpl::GetResultCode()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return errCode_;
+}
+
+std::vector<int64_t> BundleStatsCallbackImpl::GetBundleStats()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return bundleStats_;
+}
+
+bool BundleStatsCallbackImpl::WaitForGetCompletion()
+{
+    if (getFuture_.wait_for(std::chrono::seconds(MAX_WAITING_TIME)) == std::future_status::ready) {
+        return true;
+    }
+    return false;
+}
+
 BundleEventCallbackImpl::BundleEventCallbackImpl()
 {
     APP_LOGI("create BundleEventCallbackImpl");
@@ -1950,6 +2026,7 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"deleteQuickFix", std::bind(&BundleTestTool::RunAsDeleteQuickFix, this)},
         {"setDebugMode", std::bind(&BundleTestTool::RunAsSetDebugMode, this)},
         {"getBundleStats", std::bind(&BundleTestTool::RunAsGetBundleStats, this)},
+        {"getBundleStatsAsync", std::bind(&BundleTestTool::RunAsGetBundleStatsAsync, this)},
         {"getBundleInodeCount", std::bind(&BundleTestTool::RunAsGetBundleInodeCount, this)},
         {"batchGetBundleStats", std::bind(&BundleTestTool::RunAsBatchGetBundleStats, this)},
         {"getAllBundleStats", std::bind(&BundleTestTool::RunAsGetAllBundleStats, this)},
@@ -5207,6 +5284,157 @@ bool BundleTestTool::GetBundleStats(const std::string &bundleName, int32_t userI
         }
     }
     return ret;
+}
+
+ErrCode BundleTestTool::RunAsGetBundleStatsAsync()
+{
+    std::string bundleName;
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t appIndex = 0;
+    uint32_t statFlag = 0;
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_BUNDLE_STATS_ASYNC.c_str(),
+            LONG_OPTIONS_GET_BUNDLE_STATS_ASYNC, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'n': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'u': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'a': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 's': {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                bundleName = optarg;
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'a': {
+                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 's': {
+                if (!StrToUint32(optarg, statFlag)) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && bundleName.size() == 0) {
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_BUNDLE_STATS_ASYNC);
+    } else {
+        std::string msg;
+        bool ret = GetBundleStatsAsync(bundleName, userId, appIndex, statFlag, msg);
+        if (ret) {
+            resultReceiver_ = STRING_GET_BUNDLE_STATS_ASYNC_OK + msg;
+        } else {
+            resultReceiver_ = STRING_GET_BUNDLE_STATS_ASYNC_NG + "\n";
+        }
+    }
+
+    return result;
+}
+
+bool BundleTestTool::GetBundleStatsAsync(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    uint32_t statFlag, std::string &msg)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return false;
+    }
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+    sptr<BundleStatsCallbackImpl> callback(new (std::nothrow) BundleStatsCallbackImpl());
+    if (callback == nullptr) {
+        APP_LOGE("callback is null");
+        return false;
+    }
+    ErrCode ret = bundleMgrProxy_->GetBundleStatsAsync(bundleName, userId, appIndex, statFlag, callback);
+    if (ret != ERR_OK) {
+        APP_LOGE("GetBundleStatsAsync failed, errCode: %{public}d", ret);
+        return false;
+    }
+    if (!callback->WaitForGetCompletion()) {
+        APP_LOGE("GetBundleStatsAsync timeout");
+        return false;
+    }
+    ErrCode code = callback->GetResultCode();
+    if (code != ERR_OK) {
+        APP_LOGE("GetBundleStatsAsync callback failed, errCode: %{public}d", code);
+        return false;
+    }
+    std::vector<int64_t> bundleStats = callback->GetBundleStats();
+    for (size_t index = 0; index < bundleStats.size() && index < BUNDLE_STATS_MIN_SIZE; ++index) {
+        msg += GET_BUNDLE_STATS_ARRAY[index] + std::to_string(bundleStats[index]) + "\n";
+    }
+    return true;
 }
 
 ErrCode BundleTestTool::RunAsGetBundleInodeCount()
