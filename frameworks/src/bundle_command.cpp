@@ -626,7 +626,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     std::string warning;
     bool isDowngrade = false;
     bool grantPermission = false;
-    AppCategory appCategory = AppCategory::APP_CATEGORY_UNSPECIFIED;
+    DeviceModeDistributionPolicy deviceModeDistributionPolicy = DeviceModeDistributionPolicy::UNSPECIFIED;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -763,8 +763,8 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 // 'bm install -v'
                 // 'bm install --variant-bundle'
                 APP_LOGD("'bm install %{public}s'", argv_[optind - 1]);
-                appCategory = AppCategory::APP_CATEGORY_DIFF_PACKAGE;
-                APP_LOGI("appCategory set to APP_CATEGORY_DIFF_PACKAGE");
+                deviceModeDistributionPolicy = DeviceModeDistributionPolicy::FULL_COMPATIBLE_DIFFERENT_PACKAGE;
+                APP_LOGI("deviceModeDistributionPolicy set to FULL_COMPATIBLE_DIFFERENT_PACKAGE");
                 break;
             }
             default: {
@@ -823,7 +823,7 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         installParam.installFlag = installFlag;
         installParam.userId = userId;
         installParam.sharedBundleDirPaths = sharedBundleDirPaths;
-        installParam.appCategory = appCategory;
+        installParam.deviceModeDistributionPolicy = deviceModeDistributionPolicy;
         if (isDowngrade) {
             APP_LOGI("install allow downgrade");
             installParam.parameters[BMS_PARA_INSTALL_ALLOW_DOWNGRADE] = "true";
