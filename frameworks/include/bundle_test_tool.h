@@ -276,7 +276,7 @@ private:
     ErrCode CheckCleanBundleCacheFilesAutomaticOption(int option, const std::string &commandName,
         uint64_t &cacheSize, int32_t &cleanType);
     ErrCode CheckCleanBundlePartialCacheAutomaticOption(
-        int32_t option, const std::string &commandName, CleanCacheInfo &cleanCacheInfo);
+        int32_t option, const std::string &commandName, CleanCacheInfo &cleanCacheInfo, bool &withPermission);
     ErrCode GetContinueBundleName(const std::string &bundleName, int32_t userId, std::string& msg);
     bool CheckGetAssetAccessGroupsOption(int32_t option, const std::string &commandName,
         std::string &bundleName);

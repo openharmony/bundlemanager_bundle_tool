@@ -1344,13 +1344,14 @@ const struct option LONG_OPTIONS_AUTO_CLEAN_CACHE[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE = "hn:u:a:s:";
+const std::string SHORT_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE = "hn:u:a:s:p";
 const struct option LONG_OPTIONS_AUTO_CLEAN_PARTIAL_CACHE[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-name", required_argument, nullptr, 'n'},
     {"user-id", required_argument, nullptr, 'u'},
     {"app-index", required_argument, nullptr, 'a'},
     {"cache-size", required_argument, nullptr, 's'},
+    {"with-permission", no_argument, nullptr, 'p'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -4387,7 +4388,7 @@ ErrCode BundleTestTool::RunAsCleanBundleCacheFilesAutomaticCommand()
 }
 
 ErrCode BundleTestTool::CheckCleanBundlePartialCacheAutomaticOption(
-    int32_t option, const std::string &commandName, CleanCacheInfo &cleanCacheInfo)
+    int32_t option, const std::string &commandName, CleanCacheInfo &cleanCacheInfo, bool &withPermission)
 {
     switch (option) {
         case 'h': {
@@ -4420,6 +4421,10 @@ ErrCode BundleTestTool::CheckCleanBundlePartialCacheAutomaticOption(
             }
             break;
         }
+        case 'p': {
+            withPermission = true;
+            break;
+        }
         default: {
             std::string unknownOption = "";
             std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
@@ -4437,6 +4442,7 @@ ErrCode BundleTestTool::RunAsCleanBundlePartialCacheAutomaticCommand()
     int counter = 0;
     std::string commandName = "cleanBundlePartialCacheAutomatic";
     CleanCacheInfo cleanCacheInfo;
+    bool withPermission = false;
     APP_LOGI("RunAsCleanBundlePartialCacheAutomaticCommand is start");
 
     while (true) {
@@ -4455,13 +4461,16 @@ ErrCode BundleTestTool::RunAsCleanBundlePartialCacheAutomaticCommand()
             }
             break;
         }
-        result = CheckCleanBundlePartialCacheAutomaticOption(option, commandName, cleanCacheInfo);
+        result = CheckCleanBundlePartialCacheAutomaticOption(option, commandName, cleanCacheInfo, withPermission);
         if (result != OHOS::ERR_OK) {
             resultReceiver_.append(HELP_MSG_AUTO_CLEAN_PARTIAL_CACHE_RULE);
             return OHOS::ERR_INVALID_VALUE;
         }
     }
 
+    if (withPermission) {
+        ReloadNativeTokenInfo();
+    }
     uint64_t beforeCleanedSize = 0;
     uint64_t afterCleanedSize = 0;
     result = bundleMgrProxy_->CleanBundlePartialCacheAutomatic(cleanCacheInfo, beforeCleanedSize, afterCleanedSize);
@@ -6182,7 +6191,7 @@ bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> ap
 
 void BundleTestTool::ReloadNativeTokenInfo()
 {
-    const int32_t permsNum = 6;
+    const int32_t permsNum = 7;
     uint64_t tokenId;
     const char *perms[permsNum];
     perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
@@ -6191,6 +6200,7 @@ void BundleTestTool::ReloadNativeTokenInfo()
     perms[3] = "ohos.permission.GET_INSTALLED_BUNDLE_LIST";
     perms[4] = "ohos.permission.SET_DEFAULT_APPLICATION";
     perms[5] = "ohos.permission.GET_BUNDLE_RESOURCES";
+    perms[6] = "ohos.permission.PERMISSION_REMOVECACHEFILE";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
