@@ -102,7 +102,8 @@
         "dump": {
             "description": "View application package information",
             "requirePermissions": [
-                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED",
+                "ohos.permission.GET_ALL_BUNDLE_INFO"
             ],
             "inputSchema": {
                 "type": "object",
