@@ -6200,7 +6200,7 @@ void BundleTestTool::ReloadNativeTokenInfo()
     perms[3] = "ohos.permission.GET_INSTALLED_BUNDLE_LIST";
     perms[4] = "ohos.permission.SET_DEFAULT_APPLICATION";
     perms[5] = "ohos.permission.GET_BUNDLE_RESOURCES";
-    perms[6] = "ohos.permission.PERMISSION_REMOVECACHEFILE";
+    perms[6] = "ohos.permission.REMOVE_CACHE_FILES";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
