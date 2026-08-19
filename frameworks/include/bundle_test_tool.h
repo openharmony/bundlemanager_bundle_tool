@@ -58,6 +58,7 @@ private:
     ErrCode RunAsUninstallSandboxCommand();
     ErrCode RunAsUninstallPreInstallBundleCommand();
     ErrCode RunAsDumpSandboxCommand();
+    ErrCode RunAsInstallCommand();
     ErrCode RunAsUninstallEnterpriseReSignCert();
     ErrCode RunAsGetEnterpriseReSignCert();
     ErrCode RunAsGetStringCommand();
@@ -294,6 +295,12 @@ private:
     ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
     ErrCode UninstallPreInstallBundleOperation(
         const std::string &bundleName, InstallParam &installParam) const;
+    ErrCode InstallOperation(const std::vector<std::string> &bundlePaths, InstallParam &installParam,
+        int32_t waittingTime, std::string &resultMsg) const;
+    ErrCode GetBundlePath(const std::string &param, std::vector<std::string> &bundlePaths) const;
+    void GetAbsPaths(const std::vector<std::string> &paths, std::vector<std::string> &absPaths) const;
+    bool IsInstallOption(int index) const;
+    std::string GetWaringString(int32_t currentUserId, int32_t specifedUserId) const;
     bool CheckUnisntallCorrectOption(int option, const std::string &commandName,
         int &temp, std::string &Name);
     bool CheckGetAppIdentifierAndAppIndexOption(int32_t option, const std::string &commandName,
