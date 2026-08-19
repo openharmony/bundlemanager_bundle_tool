@@ -249,7 +249,9 @@ static const std::string HELP_MSG =
     "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n"
     "  parseSpmModule                   parse spm module\n"
     "  getMainAndCloneBundleInfo        get main and clone bundle info\n"
-    "  querySandboxCloneAbilityInfo     query sandbox clone ability info\n";
+    "  querySandboxCloneAbilityInfo     query sandbox clone ability info\n"
+    "  filterBundleListByDeviceModeDistributionPolicies  filter bundle list by device mode "
+    "distribution policies\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -682,6 +684,14 @@ const std::string HELP_MSG_GET_TOP_N_LARGEST_ITEMS =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n"
     "  -a, --app-index <app-index>            specify a app index\n";
+
+const std::string HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES =
+    "usage: bundle_test_tool filterBundleListByDeviceModeDistributionPolicies <options>\n"
+    "eg:bundle_test_tool filterBundleListByDeviceModeDistributionPolicies -p <policies>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -p, --policies <policies>              specify device mode distribution policy list (0~8),\n"
+    "                                         multiple values separated by commas, e.g. 1,2,4\n";
 
 const std::string HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME =
     "usage: bundle_test_tool getDistributedBundleName <options>\n"
@@ -1217,6 +1227,11 @@ const std::string STRING_GET_APPIDENTIFIER_AND_APPINDEX_NG = "getAppIdentifierAn
 
 const std::string STRING_SET_APP_DISTRIBUTION_TYPES_OK = "setAppDistributionTypes successfully\n";
 const std::string STRING_SET_APP_DISTRIBUTION_TYPES_NG = "setAppDistributionTypes failed\n";
+
+const std::string STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_OK =
+    "filterBundleListByDeviceModeDistributionPolicies successfully\n";
+const std::string STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_NG =
+    "filterBundleListByDeviceModeDistributionPolicies failed\n";
 
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
@@ -1755,6 +1770,13 @@ const struct option LONG_OPTIONS_SET_APP_DISTRIBUTION_TYPES[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_FILTER_BUNDLE_LIST = "hp:";
+const struct option LONG_OPTIONS_FILTER_BUNDLE_LIST[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"policies", required_argument, nullptr, 'p'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX = "ha:";
 const struct option LONG_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -2039,7 +2061,9 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"deleteResourceInfo", std::bind(&BundleTestTool::RunAsDeleteResourceInfo, this)},
         {"getMainAndCloneBundleInfo", std::bind(&BundleTestTool::RunAsGetMainAndCloneBundleInfo, this)},
         {"querySandboxCloneAbilityInfo",
-            std::bind(&BundleTestTool::RunAsQuerySandboxCloneAbilityInfo, this)}
+            std::bind(&BundleTestTool::RunAsQuerySandboxCloneAbilityInfo, this)},
+        {"filterBundleListByDeviceModeDistributionPolicies",
+            std::bind(&BundleTestTool::RunAsFilterBundleListByDeviceModeDistributionPolicies, this)}
     };
 
     return OHOS::ERR_OK;
@@ -9305,6 +9329,112 @@ ErrCode BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir()
                                    std::to_string(ret) + "\n");
         }
     }
+    return result;
+}
+
+bool BundleTestTool::CheckFilterBundleListOption(int32_t option, const std::string &commandName,
+    std::string &policies)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'p': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            policies = optarg;
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+bool BundleTestTool::ProcessDeviceModeDistributionPolicyEnums(std::vector<std::string> policyStrings,
+    std::set<DeviceModeDistributionPolicy> &policyEnums)
+{
+    int32_t minValue = static_cast<int32_t>(DeviceModeDistributionPolicy::UNSPECIFIED);
+    int32_t maxValue = static_cast<int32_t>(DeviceModeDistributionPolicy::FULL_COMPATIBLE_DIFFERENT_PACKAGE);
+    for (const std::string &item : policyStrings) {
+        int32_t value = 0;
+        bool result = true;
+        StringToInt(item, "filterBundleListByDeviceModeDistributionPolicies", value, result);
+        if (!result || value < minValue || value > maxValue) {
+            APP_LOGE("invalid device mode distribution policy: %{public}s", item.c_str());
+            return false;
+        }
+        policyEnums.insert(static_cast<DeviceModeDistributionPolicy>(value));
+    }
+    return !policyEnums.empty();
+}
+
+ErrCode BundleTestTool::RunAsFilterBundleListByDeviceModeDistributionPolicies()
+{
+    APP_LOGI("RunAsFilterBundleListByDeviceModeDistributionPolicies start");
+    ReloadNativeTokenInfo();
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "filterBundleListByDeviceModeDistributionPolicies";
+    std::string policies = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_FILTER_BUNDLE_LIST.c_str(),
+            LONG_OPTIONS_FILTER_BUNDLE_LIST, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = !CheckFilterBundleListOption(option, commandName, policies)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        APP_LOGD("policies = %{public}s", policies.c_str());
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES);
+    } else {
+        if (policies.empty()) {
+            APP_LOGE("policies is empty");
+            resultReceiver_.append(HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (bundleMgrProxy_ == nullptr) {
+            APP_LOGE("bundleMgrProxy_ is nullptr");
+            resultReceiver_.append("error: bundleMgrProxy_ is nullptr\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        std::vector<std::string> policyStrings;
+        OHOS::SplitStr(policies, ",", policyStrings);
+        std::set<DeviceModeDistributionPolicy> policyEnums;
+        if (!ProcessDeviceModeDistributionPolicyEnums(policyStrings, policyEnums)) {
+            APP_LOGE("policies param %{public}s failed", policies.c_str());
+            resultReceiver_.append(STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_NG);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        ErrCode ret = bundleMgrProxy_->FilterBundleListByDeviceModeDistributionPolicies(policyEnums);
+        if (ret != ERR_OK) {
+            APP_LOGE("FilterBundleListByDeviceModeDistributionPolicies failed, errCode is %{public}d", ret);
+            resultReceiver_.append(STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_NG);
+            resultReceiver_.append("errCode is " + std::to_string(ret) + "\n");
+            return ret;
+        }
+        resultReceiver_.append(STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_OK);
+    }
+    APP_LOGI("RunAsFilterBundleListByDeviceModeDistributionPolicies end");
     return result;
 }
 

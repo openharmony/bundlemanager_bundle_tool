@@ -150,6 +150,8 @@ private:
     ErrCode RunAsGetOdidResetCount();
     ErrCode RunAsSetBundleFirstLaunch();
     ErrCode RunAsGetTopNLargestItemsInAppDataDir();
+    // eg: bundle_test_tool filterBundleListByDeviceModeDistributionPolicies -p <policies>
+    ErrCode RunAsFilterBundleListByDeviceModeDistributionPolicies();
     // eg: bundle_test_tool batchGetBundleInfo -n <bundle-name>,<bundle-name> -f <flags> -u <user-id>
     ErrCode RunAsBatchGetBundleInfo();
     ErrCode RunAsParseSpmModule();
@@ -284,6 +286,10 @@ private:
         std::string &appDistributionTypes);
     bool ProcessAppDistributionTypeEnums(std::vector<std::string> appDistributionTypeStrings,
         std::set<AppDistributionTypeEnum> &appDistributionTypeEnums);
+    bool CheckFilterBundleListOption(int32_t option, const std::string &commandName,
+        std::string &policies);
+    bool ProcessDeviceModeDistributionPolicyEnums(std::vector<std::string> policyStrings,
+        std::set<DeviceModeDistributionPolicy> &policyEnums);
     void ReloadNativeTokenInfo();
     ErrCode InnerGetSimpleAppInfoForUid(const int32_t &option, std::vector<std::int32_t> &uids);
     ErrCode UninstallPreInstallBundleOperation(
