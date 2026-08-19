@@ -322,7 +322,7 @@ private:
 
     ErrCode GetBundlePath(const std::string& param, std::vector<std::string>& bundlePaths) const;
 
-    bool CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
+    int32_t CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
     bool CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId, int32_t appIndex = 0) const;
     void GetUdidOperation();
 

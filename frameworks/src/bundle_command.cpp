@@ -225,35 +225,35 @@ const struct option LONG_OPTIONS_DUMP_SHARED[] = {
 
 class CleanCacheCallbackImpl : public CleanCacheCallbackHost {
 public:
-    CleanCacheCallbackImpl() : signal_(std::make_shared<std::promise<bool>>())
+    CleanCacheCallbackImpl() : signal_(std::make_shared<std::promise<int32_t>>())
     {}
     ~CleanCacheCallbackImpl() override
     {}
-    void OnCleanCacheFinished(bool error) override;
-    bool GetResultCode();
+    void OnCleanCacheFinished(bool succeeded) override;
+    int32_t GetResultCode();
 private:
-    std::shared_ptr<std::promise<bool>> signal_;
+    std::shared_ptr<std::promise<int32_t>> signal_;
     DISALLOW_COPY_AND_MOVE(CleanCacheCallbackImpl);
 };
 
-void CleanCacheCallbackImpl::OnCleanCacheFinished(bool error)
+void CleanCacheCallbackImpl::OnCleanCacheFinished(bool succeeded)
 {
     if (signal_ != nullptr) {
-        signal_->set_value(error);
+        signal_->set_value(succeeded ? ERR_OK : IStatusReceiver::ERR_UNKNOWN);
     }
 }
 
-bool CleanCacheCallbackImpl::GetResultCode()
+int32_t CleanCacheCallbackImpl::GetResultCode()
 {
     if (signal_ != nullptr) {
         auto future = signal_->get_future();
         std::chrono::milliseconds span(MAX_WAITING_TIME);
         if (future.wait_for(span) == std::future_status::timeout) {
-            return false;
+            return IStatusReceiver::ERR_OPERATION_TIME_OUT;
         }
         return future.get();
     }
-    return false;
+    return IStatusReceiver::ERR_UNKNOWN;
 }
 
 std::map<int32_t, int32_t> BundleManagerShellCommand::errCodeMap_ = {
@@ -1439,10 +1439,12 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
     } else {
         // bm clean -c
         if (cleanCache) {
-            if (CleanBundleCacheFilesOperation(bundleName, userId, appIndex)) {
+            int32_t cleanResult = CleanBundleCacheFilesOperation(bundleName, userId, appIndex);
+            if (cleanResult == ERR_OK) {
                 resultReceiver_ = STRING_CLEAN_CACHE_BUNDLE_OK + "\n";
             } else {
                 resultReceiver_ = STRING_CLEAN_CACHE_BUNDLE_NG + "\n";
+                resultReceiver_.append(GetMessageFromCode(cleanResult));
             }
         }
         // bm clean -d
@@ -2518,7 +2520,7 @@ int32_t BundleManagerShellCommand::UninstallSharedOperation(const UninstallParam
     return statusReceiver->GetResultCode();
 }
 
-bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId,
+int32_t BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string &bundleName, int32_t userId,
     int32_t appIndex) const
 {
     userId = BundleCommandCommon::GetCurrentUserId(userId);
@@ -2526,14 +2528,14 @@ bool BundleManagerShellCommand::CleanBundleCacheFilesOperation(const std::string
     sptr<CleanCacheCallbackImpl> cleanCacheCallBack(new (std::nothrow) CleanCacheCallbackImpl());
     if (cleanCacheCallBack == nullptr) {
         APP_LOGE("cleanCacheCallBack is null");
-        return false;
+        return IStatusReceiver::ERR_UNKNOWN;
     }
     ErrCode cleanRet = bundleMgrProxy_->CleanBundleCacheFiles(bundleName, cleanCacheCallBack, userId, appIndex);
     if (cleanRet == ERR_OK) {
         return cleanCacheCallBack->GetResultCode();
     }
     APP_LOGE("clean bundle cache files operation failed, cleanRet = %{public}d", cleanRet);
-    return false;
+    return cleanRet;
 }
 
 bool BundleManagerShellCommand::CleanBundleDataFilesOperation(const std::string &bundleName, int32_t userId,
