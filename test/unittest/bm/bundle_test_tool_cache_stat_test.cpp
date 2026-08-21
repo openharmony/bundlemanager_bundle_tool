@@ -154,4 +154,130 @@ HWTEST_F(BundleTestToolCacheStatTest, Bundle_Test_Tool_Get_Each_Bundle_Cache_Sta
     EXPECT_NE(msg.find("fail count: 1"), std::string::npos);
     EXPECT_NE(msg.find("total cache size: 100"), std::string::npos);
 }
+
+/**
+ * @tc.number: Bundle_Test_Tool_Get_Bundle_Stats_Async_0100
+ * @tc.name: GetBundleStatsAsync
+ * @tc.desc: Verify GetBundleStatsAsync returns stats successfully for the first bundle.
+ */
+HWTEST_F(BundleTestToolCacheStatTest, Bundle_Test_Tool_Get_Bundle_Stats_Async_0100,
+    Function | MediumTest | TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>("bundle_test_tool"),
+        const_cast<char*>("getBundleStatsAsync"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    BundleTestTool cmd(argc, argv);
+    SetMockObjects(cmd);
+
+    std::string msg;
+    bool ret = cmd.GetBundleStatsAsync("com.example.bundle.one", 100, 0, 0, msg);
+
+    EXPECT_TRUE(ret);
+    EXPECT_NE(msg.find("cache size: 100"), std::string::npos);
+}
+
+/**
+ * @tc.number: Bundle_Test_Tool_Get_Bundle_Stats_Async_0200
+ * @tc.name: GetBundleStatsAsync
+ * @tc.desc: Verify GetBundleStatsAsync returns stats successfully for the second bundle.
+ */
+HWTEST_F(BundleTestToolCacheStatTest, Bundle_Test_Tool_Get_Bundle_Stats_Async_0200,
+    Function | MediumTest | TestSize.Level1)
+{
+    char *argv[] = {
+        const_cast<char*>("bundle_test_tool"),
+        const_cast<char*>("getBundleStatsAsync"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    BundleTestTool cmd(argc, argv);
+    SetMockObjects(cmd);
+
+    std::string msg;
+    bool ret = cmd.GetBundleStatsAsync("com.example.bundle.two", 100, 0, 0, msg);
+
+    EXPECT_TRUE(ret);
+    EXPECT_NE(msg.find("cache size: 200"), std::string::npos);
+}
+
+/**
+ * @tc.number: Bundle_Test_Tool_Get_Bundle_Stats_Async_0300
+ * @tc.name: GetBundleStatsAsync
+ * @tc.desc: Verify GetBundleStatsAsync reports failure when the bundle stats query fails.
+ */
+HWTEST_F(BundleTestToolCacheStatTest, Bundle_Test_Tool_Get_Bundle_Stats_Async_0300,
+    Function | MediumTest | TestSize.Level1)
+{
+    MockBundleMgrHost::SetGetBundleStatsFailSecondBundle(true);
+
+    char *argv[] = {
+        const_cast<char*>("bundle_test_tool"),
+        const_cast<char*>("getBundleStatsAsync"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    BundleTestTool cmd(argc, argv);
+    SetMockObjects(cmd);
+
+    std::string msg;
+    bool ret = cmd.GetBundleStatsAsync("com.example.bundle.two", 100, 0, 0, msg);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: Bundle_Test_Tool_Get_Bundle_Stats_Async_0400
+ * @tc.name: RunAsGetBundleStatsAsync
+ * @tc.desc: Verify RunAsGetBundleStatsAsync parses options and returns successfully.
+ */
+HWTEST_F(BundleTestToolCacheStatTest, Bundle_Test_Tool_Get_Bundle_Stats_Async_0400,
+    Function | MediumTest | TestSize.Level1)
+{
+    optind = 0;
+    char *argv[] = {
+        const_cast<char*>("bundle_test_tool"),
+        const_cast<char*>("getBundleStatsAsync"),
+        const_cast<char*>("-n"),
+        const_cast<char*>("com.example.bundle.one"),
+        const_cast<char*>("-u"),
+        const_cast<char*>("100"),
+        const_cast<char*>("-a"),
+        const_cast<char*>("0"),
+        const_cast<char*>("-s"),
+        const_cast<char*>("0"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    BundleTestTool cmd(argc, argv);
+    SetMockObjects(cmd);
+
+    ErrCode result = cmd.RunAsGetBundleStatsAsync();
+
+    EXPECT_EQ(result, OHOS::ERR_OK);
+}
+
+/**
+ * @tc.number: Bundle_Test_Tool_Get_Bundle_Stats_Async_0500
+ * @tc.name: RunAsGetBundleStatsAsync
+ * @tc.desc: Verify RunAsGetBundleStatsAsync fails when no bundle name is specified.
+ */
+HWTEST_F(BundleTestToolCacheStatTest, Bundle_Test_Tool_Get_Bundle_Stats_Async_0500,
+    Function | MediumTest | TestSize.Level1)
+{
+    optind = 0;
+    char *argv[] = {
+        const_cast<char*>("bundle_test_tool"),
+        const_cast<char*>("getBundleStatsAsync"),
+        const_cast<char*>(""),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    BundleTestTool cmd(argc, argv);
+    SetMockObjects(cmd);
+
+    ErrCode result = cmd.RunAsGetBundleStatsAsync();
+
+    EXPECT_NE(result, OHOS::ERR_OK);
+}
 }  // namespace OHOS
