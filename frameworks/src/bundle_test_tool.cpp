@@ -82,6 +82,7 @@ const int32_t INDEX_OFFSET = 2;
 // quick fix error code
 const int32_t ERR_BUNDLEMANAGER_FEATURE_IS_NOT_SUPPORTED = 801;
 const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
+const int32_t DUAL_MODE_CLONE_APP_INDEX = 10000;
 const int32_t CODE_PROTECT_UID = 7666;
 const int32_t MAX_WAITING_TIME = 600;
 const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
@@ -4408,7 +4409,9 @@ ErrCode BundleTestTool::CheckCleanBundlePartialCacheAutomaticOption(
         }
         case 'a': {
             if (!OHOS::StrToInt(optarg, cleanCacheInfo.appIndex) ||
-                (cleanCacheInfo.appIndex < 0 || cleanCacheInfo.appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                (cleanCacheInfo.appIndex < 0 ||
+                (cleanCacheInfo.appIndex > INITIAL_SANDBOX_APP_INDEX &&
+                cleanCacheInfo.appIndex != DUAL_MODE_CLONE_APP_INDEX))) {
                 resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                 return OHOS::ERR_INVALID_VALUE;
             }
@@ -5003,7 +5006,9 @@ ErrCode BundleTestTool::BundleNameAndUserIdCommonFunc(std::string &bundleName, i
                 break;
             }
             case 'a': {
-                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                if (!OHOS::StrToInt(optarg, appIndex) ||
+                    (appIndex < 0 ||
+                    (appIndex > INITIAL_SANDBOX_APP_INDEX && appIndex != DUAL_MODE_CLONE_APP_INDEX))) {
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }

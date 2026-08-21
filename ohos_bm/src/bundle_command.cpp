@@ -972,7 +972,9 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 break;
             }
             case 'i': {
-                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                if (!OHOS::StrToInt(optarg, appIndex) ||
+                    (appIndex < 0 ||
+                    (appIndex > INITIAL_SANDBOX_APP_INDEX && appIndex != DUAL_MODE_CLONE_APP_INDEX))) {
                     APP_LOGE("ohos-bm clean with error appIndex %{private}s", optarg);
                     resultReceiver_ = CreateErrorResult(
                         ERR_CLEAN_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);

@@ -119,6 +119,7 @@ const std::string DEPENDENCIES = "dependencies";
 
 const int32_t MAX_WAITING_TIME = 3000;
 const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
+const int32_t DUAL_MODE_CLONE_APP_INDEX = 10000;
 
 const std::string HELP_MSG_SET_DISPOSED_RULE =
     "usage: ohos-bm set-disposed-rule <options> "
