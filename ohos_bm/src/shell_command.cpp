@@ -19,37 +19,51 @@
 #include "app_log_wrapper.h"
 #include "ipc_skeleton.h"
 #include "privacy_kit.h"
+#include "accesstoken_kit.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 
 namespace {
-const std::map<std::string, std::string> SUBCOMMAND_PERMISSION_MAP = {
-    {"uninstall", "ohos.permission.cli.UNINSTALL_BUNDLE"},
-    {"dump", "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"},
-    {"dump-dependencies", "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"},
-    {"dump-shared", "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"},
-    {"clean", "ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES"},
-    {"set-disposed-rule", "ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"},
-    {"delete-disposed-rule", "ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"},
-    {"get-recoverable-apps", "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"},
-    {"recover", "ohos.permission.cli.INSTALL_BUNDLE"},
+const std::map<std::string, std::vector<std::string>> SUBCOMMAND_PERMISSION_MAP = {
+    {"uninstall", {"ohos.permission.cli.UNINSTALL_BUNDLE"}},
+    {"dump", {
+        "ohos.permission.GET_ALL_BUNDLE_INFO",
+        "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+    }},
+    {"dump-dependencies", {"ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"}},
+    {"dump-shared", {"ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"}},
+    {"clean", {"ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES"}},
+    {"set-disposed-rule", {"ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"}},
+    {"delete-disposed-rule", {"ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"}},
+    {"get-recoverable-apps", {"ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"}},
+    {"recover", {"ohos.permission.cli.INSTALL_BUNDLE"}},
 };
+
 } // namespace
 
 void ShellCommand::ReportPermissionUsedRecord(bool success)
 {
-    auto it = SUBCOMMAND_PERMISSION_MAP.find(cmd_);
-    if (it == SUBCOMMAND_PERMISSION_MAP.end()) {
+    auto permissionIt = SUBCOMMAND_PERMISSION_MAP.find(cmd_);
+    if (permissionIt == SUBCOMMAND_PERMISSION_MAP.end() || permissionIt->second.empty()) {
         return;
     }
-    auto callerToken = IPCSkeleton::GetSelfTokenID();
+    auto selfTokenId = IPCSkeleton::GetSelfTokenID();
     int32_t successCount = success ? 1 : 0;
     int32_t failCount = success ? 0 : 1;
-    int32_t ret = Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(
-        callerToken, it->second, successCount, failCount);
-    if (ret != 0) {
-        APP_LOGE("AddPermissionUsedRecord failed, ret = %{public}d", ret);
+
+    for (const auto& permission : permissionIt->second) {
+        auto verifyResult = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfTokenId, permission);
+        if (verifyResult != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+            continue;
+        }
+        int32_t ret = Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(
+            selfTokenId, permission, successCount, failCount);
+        if (ret != 0) {
+            APP_LOGE("AddPermissionUsedRecord failed, permission = %{public}s, ret = %{public}d",
+                permission.c_str(), ret);
+        }
+        return;
     }
 }
 
