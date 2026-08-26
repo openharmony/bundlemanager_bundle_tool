@@ -121,7 +121,7 @@ const struct option LONG_OPTIONS_UNINSTALL_PLUGIN[] = {
     {nullptr, 0, nullptr, 0},
 };
 
-const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:i:gv";
+const std::string SHORT_OPTIONS = "hp:rn:m:a:cdu:w:s:i:g";
 const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"bundle-path", required_argument, nullptr, 'p'},
@@ -139,7 +139,6 @@ const struct option LONG_OPTIONS[] = {
     {"shared-bundle-dir-path", required_argument, nullptr, 's'},
     {"app-index", required_argument, nullptr, 'i'},
     {"grant-permission", no_argument, nullptr, 'g'},
-    {"variant-bundle", no_argument, nullptr, 'v'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -376,8 +375,7 @@ bool BundleManagerShellCommand::IsInstallOption(int index) const
         argList_[index - INDEX_OFFSET] == "-w" || argList_[index - INDEX_OFFSET] == "--waitting-time" ||
         argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path" ||
         argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--downgrade" ||
-        argList_[index - INDEX_OFFSET] == "-g" || argList_[index - INDEX_OFFSET] == "--add-permission" ||
-        argList_[index - INDEX_OFFSET] == "-v" || argList_[index - INDEX_OFFSET] == "--variant-bundle") {
+        argList_[index - INDEX_OFFSET] == "-g" || argList_[index - INDEX_OFFSET] == "--add-permission") {
         return true;
     }
     return false;
@@ -626,7 +624,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
     std::string warning;
     bool isDowngrade = false;
     bool grantPermission = false;
-    DeviceModeDistributionPolicy deviceModeDistributionPolicy = DeviceModeDistributionPolicy::UNSPECIFIED;
     while (true) {
         counter++;
         int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
@@ -759,14 +756,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
                 grantPermission = true;
                 break;
             }
-            case 'v': {
-                // 'bm install -v'
-                // 'bm install --variant-bundle'
-                APP_LOGD("'bm install %{public}s'", argv_[optind - 1]);
-                deviceModeDistributionPolicy = DeviceModeDistributionPolicy::FULL_COMPATIBLE_DIFFERENT_PACKAGE;
-                APP_LOGI("deviceModeDistributionPolicy set to FULL_COMPATIBLE_DIFFERENT_PACKAGE");
-                break;
-            }
             default: {
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -823,7 +812,6 @@ ErrCode BundleManagerShellCommand::RunAsInstallCommand()
         installParam.installFlag = installFlag;
         installParam.userId = userId;
         installParam.sharedBundleDirPaths = sharedBundleDirPaths;
-        installParam.deviceModeDistributionPolicy = deviceModeDistributionPolicy;
         if (isDowngrade) {
             APP_LOGI("install allow downgrade");
             installParam.parameters[BMS_PARA_INSTALL_ALLOW_DOWNGRADE] = "true";
@@ -862,8 +850,7 @@ ErrCode BundleManagerShellCommand::GetBundlePath(const std::string& param,
     }
     if (param == "-r" || param == "--replace" || param == "-p" ||
         param == "--bundle-path" || param == "-u" || param == "--user-id" ||
-        param == "-w" || param == "--waitting-time" || param == "-v" ||
-        param == "--variant-bundle") {
+        param == "-w" || param == "--waitting-time") {
         return OHOS::ERR_INVALID_VALUE;
     }
     bundlePaths.emplace_back(param);

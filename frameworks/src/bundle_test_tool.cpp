@@ -14,6 +14,7 @@
  */
 #include "bundle_test_tool.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -85,6 +86,29 @@ const int32_t ERR_BUNDLEMANAGER_FEATURE_IS_NOT_SUPPORTED = 801;
 const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
 const int32_t CODE_PROTECT_UID = 7666;
 const int32_t MAX_WAITING_TIME = 600;
+const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
+const char* BMS_PARA_INSTALL_ALLOW_DOWNGRADE = "ohos.bms.param.installAllowDowngrade";
+const char* BMS_PARA_INSTALL_GRANT_PERMISSION = "ohos.bms.param.installAddPermission";
+const char* BMS_PARA_INSTALL_DEVICE_MODE_DISTRIBUTION_POLICY = "ohos.bms.param.deviceModeDistributionPolicy";
+
+// mirror InstallParam::RefreshDeviceModeDistributionPolicy parsing rules:
+// non-empty, digits only, decimal value within enum range (0~8)
+bool IsValidDeviceModeDistributionPolicy(const std::string &value)
+{
+    if (value.empty()) {
+        return false;
+    }
+    const int32_t maxValue =
+        static_cast<int32_t>(DeviceModeDistributionPolicy::FULL_COMPATIBLE_DIFFERENT_PACKAGE);
+    int32_t parsed = 0;
+    for (char c : value) {
+        if (c < '0' || c > '9' || parsed > maxValue) {
+            return false;
+        }
+        parsed = parsed * 10 + (c - '0');
+    }
+    return parsed <= maxValue;
+}
 const int32_t MAX_PARAMS_FOR_UNINSTALL = 4;
 constexpr size_t BUNDLE_STATS_CACHE_INDEX = 4;
 constexpr size_t BUNDLE_STATS_MIN_SIZE = 5;
@@ -251,7 +275,10 @@ static const std::string HELP_MSG =
     "  getTopNLargestItemsInAppDataDir  get top N largest items in app data dir\n"
     "  parseSpmModule                   parse spm module\n"
     "  getMainAndCloneBundleInfo        get main and clone bundle info\n"
-    "  querySandboxCloneAbilityInfo     query sandbox clone ability info\n";
+    "  querySandboxCloneAbilityInfo     query sandbox clone ability info\n"
+    "  filterBundleListByDeviceModeDistributionPolicies  filter bundle list by device mode "
+    "distribution policies\n"
+    "  install                          install bundles with specified paths\n";
 
 
 const std::string HELP_MSG_GET_REMOVABLE =
@@ -694,6 +721,41 @@ const std::string HELP_MSG_GET_TOP_N_LARGEST_ITEMS =
     "  -n, --bundle-name  <bundle-name>       specify bundle name of the application\n"
     "  -u, --user-id <user-id>                specify a user id\n"
     "  -a, --app-index <app-index>            specify a app index\n";
+
+const std::string HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES =
+    "usage: bundle_test_tool filterBundleListByDeviceModeDistributionPolicies <options>\n"
+    "eg:bundle_test_tool filterBundleListByDeviceModeDistributionPolicies -p <policies>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -p, --policies <policies>              specify device mode distribution policy list (0~8),\n"
+    "                                         multiple values separated by commas, e.g. 1,2,4\n";
+
+const std::string HELP_MSG_INSTALL =
+    "usage: bundle_test_tool install <options>\n"
+    "options list:\n"
+    "  -h, --help                                                     list available commands\n"
+    "  -p, --bundle-path <file-path>                                  install a hap or hsp or app by a specified path\n"
+    "  -p, --bundle-path <file-path> <file-path> ...                  install one bundle by some hap or hsp paths\n"
+    "  -p, --bundle-path <bundle-direction>                           install one bundle by a direction,\n"
+    "                                                                    under which are some hap or hsp\n"
+    "                                                                    or one app files\n"
+    "  -r -p <bundle-file-path>                                       replace an existing bundle\n"
+    "  -r --bundle-path <bundle-file-path>                            replace an existing bundle\n"
+    "  -s, --shared-bundle-dir-path <shared-bundle-dir-path>          install inter-application hsp files\n"
+    "  -u, --user-id <user-id>                                        specify a user id,\n"
+    "                                                                   only supports current user or userId is 0\n"
+    "  -w, --waitting-time <waitting-time>                            specify waitting time for installation,\n"
+    "                                                                    the minimum waitting time is 180s,\n"
+    "                                                                    the maximum waitting time is 600s\n"
+    "  -d, --downgrade                                                install allow downgrade\n"
+    "  -g, --grant-permission                                         grant permissions for installation\n"
+    "  -v, --variant-bundle <policy>                                  specify device mode distribution policy\n"
+    "                                                                    of the variant bundle, a decimal string\n"
+    "                                                                    in range 0~8, e.g. 4 for universal\n"
+    "                                                                    different-package\n";
+
+const std::string HELP_MSG_NO_BUNDLE_PATH_OPTION =
+    "error: you must specify a bundle path with '-p' or '--bundle-path'.";
 
 const std::string HELP_MSG_GET_DISTRIBUTED_BUNDLE_NAME =
     "usage: bundle_test_tool getDistributedBundleName <options>\n"
@@ -1232,6 +1294,17 @@ const std::string STRING_GET_APPIDENTIFIER_AND_APPINDEX_NG = "getAppIdentifierAn
 
 const std::string STRING_SET_APP_DISTRIBUTION_TYPES_OK = "setAppDistributionTypes successfully\n";
 const std::string STRING_SET_APP_DISTRIBUTION_TYPES_NG = "setAppDistributionTypes failed\n";
+
+const std::string STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_OK =
+    "filterBundleListByDeviceModeDistributionPolicies successfully\n";
+const std::string STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_NG =
+    "filterBundleListByDeviceModeDistributionPolicies failed\n";
+
+const std::string STRING_INSTALL_BUNDLE_OK = "install bundle successfully.";
+const std::string STRING_INSTALL_BUNDLE_NG = "error: failed to install bundle.";
+
+const std::string WARNING_USER =
+    "Warning: The current user is %. If you want to set the userId as $, please switch to $.\n";
 
 const std::string GET_BUNDLE_STATS_ARRAY[] = {
     "app data size: ",
@@ -1780,6 +1853,27 @@ const struct option LONG_OPTIONS_SET_APP_DISTRIBUTION_TYPES[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_FILTER_BUNDLE_LIST = "hp:";
+const struct option LONG_OPTIONS_FILTER_BUNDLE_LIST[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"policies", required_argument, nullptr, 'p'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_INSTALL = "hp:ru:w:sdgv:";
+const struct option LONG_OPTIONS_INSTALL[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-path", required_argument, nullptr, 'p'},
+    {"replace", no_argument, nullptr, 'r'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"waitting-time", required_argument, nullptr, 'w'},
+    {"shared-bundle-dir-path", required_argument, nullptr, 's'},
+    {"downgrade", no_argument, nullptr, 'd'},
+    {"grant-permission", no_argument, nullptr, 'g'},
+    {"variant-bundle", required_argument, nullptr, 'v'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX = "ha:";
 const struct option LONG_OPTIONS_GET_APPIDENTIFIER_AND_APPINDEX[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -2116,7 +2210,10 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"deleteResourceInfo", std::bind(&BundleTestTool::RunAsDeleteResourceInfo, this)},
         {"getMainAndCloneBundleInfo", std::bind(&BundleTestTool::RunAsGetMainAndCloneBundleInfo, this)},
         {"querySandboxCloneAbilityInfo",
-            std::bind(&BundleTestTool::RunAsQuerySandboxCloneAbilityInfo, this)}
+            std::bind(&BundleTestTool::RunAsQuerySandboxCloneAbilityInfo, this)},
+        {"filterBundleListByDeviceModeDistributionPolicies",
+            std::bind(&BundleTestTool::RunAsFilterBundleListByDeviceModeDistributionPolicies, this)},
+        {"install", std::bind(&BundleTestTool::RunAsInstallCommand, this)}
     };
 
     return OHOS::ERR_OK;
@@ -8752,6 +8849,397 @@ ErrCode BundleTestTool::UninstallPreInstallBundleOperation(
     return statusReceiver->GetResultCode();
 }
 
+ErrCode BundleTestTool::InstallOperation(const std::vector<std::string> &bundlePaths,
+    InstallParam &installParam, int32_t waittingTime, std::string &resultMsg) const
+{
+    if (bundleInstallerProxy_ == nullptr) {
+        APP_LOGE("bundleInstallerProxy_ is nullptr");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    std::vector<std::string> pathVec;
+    GetAbsPaths(bundlePaths, pathVec);
+
+    std::vector<std::string> hspPathVec;
+    GetAbsPaths(installParam.sharedBundleDirPaths, hspPathVec);
+    installParam.sharedBundleDirPaths = hspPathVec;
+
+    sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl(waittingTime));
+    if (statusReceiver == nullptr) {
+        APP_LOGE("statusReceiver is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    sptr<BundleDeathRecipient> recipient(new (std::nothrow) BundleDeathRecipient(statusReceiver));
+    if (recipient == nullptr) {
+        APP_LOGE("recipient is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    auto bundleInstallerObject = bundleInstallerProxy_->AsObject();
+    if (bundleInstallerObject == nullptr) {
+        APP_LOGE("bundleInstallerObject is null");
+        return IStatusReceiver::ERR_UNKNOWN;
+    }
+    bundleInstallerObject->AddDeathRecipient(recipient);
+    ErrCode res = bundleInstallerProxy_->StreamInstall(pathVec, installParam, statusReceiver);
+    APP_LOGD("StreamInstall result is %{public}d", res);
+    if (res == ERR_OK) {
+        resultMsg = statusReceiver->GetResultMsg();
+        return statusReceiver->GetResultCode();
+    }
+    if (res == ERR_APPEXECFWK_INSTALL_PARAM_ERROR) {
+        APP_LOGE("install param error");
+        return IStatusReceiver::ERR_INSTALL_PARAM_ERROR;
+    }
+    if (res == ERR_APPEXECFWK_INSTALL_INTERNAL_ERROR) {
+        APP_LOGE("install internal error");
+        return IStatusReceiver::ERR_INSTALL_INTERNAL_ERROR;
+    }
+    if (res == ERR_APPEXECFWK_INSTALL_FILE_PATH_INVALID) {
+        APP_LOGE("install invalid path");
+        return IStatusReceiver::ERR_INSTALL_FILE_PATH_INVALID;
+    }
+    if (res == ERR_APPEXECFWK_INSTALL_DISK_MEM_INSUFFICIENT) {
+        APP_LOGE("install failed due to no space left");
+        return IStatusReceiver::ERR_INSTALL_DISK_MEM_INSUFFICIENT;
+    }
+    return res;
+}
+
+ErrCode BundleTestTool::GetBundlePath(const std::string &param,
+    std::vector<std::string> &bundlePaths) const
+{
+    if (param.empty()) {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    if (param == "-r" || param == "--replace" || param == "-p" ||
+        param == "--bundle-path" || param == "-u" || param == "--user-id" ||
+        param == "-w" || param == "--waitting-time" || param == "-v" ||
+        param == "--variant-bundle") {
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    bundlePaths.emplace_back(param);
+    return OHOS::ERR_OK;
+}
+
+void BundleTestTool::GetAbsPaths(
+    const std::vector<std::string> &paths, std::vector<std::string> &absPaths) const
+{
+    std::vector<std::string> realPathVec;
+    for (auto &bundlePath : paths) {
+        std::string absoluteBundlePath = "";
+        if (bundlePath.empty()) {
+            continue;
+        }
+        if (bundlePath.at(0) == '/') {
+            // absolute path
+            absoluteBundlePath.append(bundlePath);
+        } else {
+            // relative path
+            char *currentPathPtr = getcwd(nullptr, 0);
+
+            if (currentPathPtr != nullptr) {
+                absoluteBundlePath.append(currentPathPtr);
+                absoluteBundlePath.append('/' + bundlePath);
+
+                free(currentPathPtr);
+                currentPathPtr = nullptr;
+            }
+        }
+        realPathVec.emplace_back(absoluteBundlePath);
+    }
+
+    for (const auto &path : realPathVec) {
+        if (std::find(absPaths.begin(), absPaths.end(), path) == absPaths.end()) {
+            absPaths.emplace_back(path);
+        }
+    }
+}
+
+bool BundleTestTool::IsInstallOption(int index) const
+{
+    if (index >= argc_ || index < INDEX_OFFSET) {
+        return false;
+    }
+    if (argList_[index - INDEX_OFFSET] == "-r" || argList_[index - INDEX_OFFSET] == "--replace" ||
+        argList_[index - INDEX_OFFSET] == "-p" || argList_[index - INDEX_OFFSET] == "--bundle-path" ||
+        argList_[index - INDEX_OFFSET] == "-u" || argList_[index - INDEX_OFFSET] == "--user-id" ||
+        argList_[index - INDEX_OFFSET] == "-w" || argList_[index - INDEX_OFFSET] == "--waitting-time" ||
+        argList_[index - INDEX_OFFSET] == "-s" || argList_[index - INDEX_OFFSET] == "--shared-bundle-dir-path" ||
+        argList_[index - INDEX_OFFSET] == "-d" || argList_[index - INDEX_OFFSET] == "--downgrade" ||
+        argList_[index - INDEX_OFFSET] == "-g" || argList_[index - INDEX_OFFSET] == "--add-permission" ||
+        argList_[index - INDEX_OFFSET] == "-v" || argList_[index - INDEX_OFFSET] == "--variant-bundle") {
+        return true;
+    }
+    return false;
+}
+
+std::string BundleTestTool::GetWaringString(int32_t currentUserId, int32_t specifedUserId) const
+{
+    std::string res = WARNING_USER;
+    size_t pos = res.find('%');
+    while (pos != std::string::npos) {
+        res.replace(pos, 1, std::to_string(currentUserId));
+        pos = res.find('%');
+    }
+    pos = res.find('$');
+    while (pos != std::string::npos) {
+        res.replace(pos, 1, std::to_string(specifedUserId));
+        pos = res.find('$');
+    }
+    return res;
+}
+
+ErrCode BundleTestTool::RunAsInstallCommand()
+{
+    APP_LOGI("begin to RunAsInstallCommand");
+    int result = OHOS::ERR_OK;
+    InstallFlag installFlag = InstallFlag::REPLACE_EXISTING;
+    int counter = 0;
+    std::vector<std::string> bundlePath;
+    std::vector<std::string> sharedBundleDirPaths;
+    int index = 0;
+    int hspIndex = 0;
+    const int32_t currentUser = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+    int32_t userId = currentUser;
+    int32_t waittingTime = MINIMUM_WAITTING_TIME;
+    std::string warning;
+    bool isDowngrade = false;
+    bool grantPermission = false;
+    std::string deviceModeDistributionPolicy = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_INSTALL.c_str(),
+            LONG_OPTIONS_INSTALL, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if (counter == 1) {
+                // When scanning the first argument
+                if (strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                    // 'bundle_test_tool install' with no option: bundle_test_tool install
+                    // 'bundle_test_tool install' with a wrong argument: bundle_test_tool install xxx
+                    APP_LOGD("'bundle_test_tool install' with no option.");
+                    resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                    result = OHOS::ERR_INVALID_VALUE;
+                }
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'p': {
+                    // 'bundle_test_tool install -p' with no argument
+                    APP_LOGD("'bundle_test_tool install' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'u': {
+                    // 'bundle_test_tool install -u' with no argument
+                    APP_LOGD("'bundle_test_tool install' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'w': {
+                    // 'bundle_test_tool install -w' with no argument
+                    APP_LOGD("'bundle_test_tool install' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'v': {
+                    // 'bundle_test_tool install -v' with no argument
+                    APP_LOGD("'bundle_test_tool install' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    // 'bundle_test_tool install' with an unknown option
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    APP_LOGD("'bundle_test_tool install' with an unknown option.");
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'bundle_test_tool install %{public}s'", argv_[optind - 1]);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'p': {
+                APP_LOGD("'bundle_test_tool install %{public}s'", argv_[optind - 1]);
+                if (GetBundlePath(optarg, bundlePath) != OHOS::ERR_OK) {
+                    APP_LOGD("'bundle_test_tool install' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                index = optind;
+                break;
+            }
+            case 'r': {
+                installFlag = InstallFlag::REPLACE_EXISTING;
+                break;
+            }
+            case 'u': {
+                APP_LOGW("'bundle_test_tool install -u only support current user or user 0'");
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    APP_LOGE("bundle_test_tool install with error userId %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                if (userId != Constants::DEFAULT_USERID && !BundleCommandCommon::IsUserForeground(userId)) {
+                    warning = GetWaringString(currentUser, userId);
+                    userId = BundleCommandCommon::GetCurrentUserId(Constants::UNSPECIFIED_USERID);
+                }
+                break;
+            }
+            case 'w': {
+                APP_LOGD("'bundle_test_tool install %{public}s %{public}s'",
+                    argv_[optind - INDEX_OFFSET], optarg);
+                if (!OHOS::StrToInt(optarg, waittingTime) || waittingTime < MINIMUM_WAITTING_TIME ||
+                    waittingTime > MAX_WAITING_TIME) {
+                    APP_LOGE("bundle_test_tool install with error waittingTime %{private}s", optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 's': {
+                APP_LOGD("'bundle_test_tool install %{public}s %{public}s'",
+                    argv_[optind - INDEX_OFFSET], optarg);
+                if (GetBundlePath(optarg, sharedBundleDirPaths) != OHOS::ERR_OK) {
+                    APP_LOGD("'bundle_test_tool install -s' with no argument.");
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                hspIndex = optind;
+                break;
+            }
+            case 'd': {
+                isDowngrade = true;
+                break;
+            }
+            case 'g': {
+                grantPermission = true;
+                break;
+            }
+            case 'v': {
+                // 'bundle_test_tool install -v <device-mode-distribution-policy>'
+                // 'bundle_test_tool install --variant-bundle <device-mode-distribution-policy>'
+                APP_LOGD("'bundle_test_tool install %{public}s %{public}s'", argv_[optind - 1], optarg);
+                if (!IsValidDeviceModeDistributionPolicy(optarg)) {
+                    APP_LOGE("bundle_test_tool install with error deviceModeDistributionPolicy %{private}s",
+                        optarg);
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                deviceModeDistributionPolicy = optarg;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+
+    for (; index < argc_ && index >= INDEX_OFFSET; ++index) {
+        if (IsInstallOption(index)) {
+            break;
+        }
+        if (GetBundlePath(argList_[index - INDEX_OFFSET], bundlePath) != OHOS::ERR_OK) {
+            bundlePath.clear();
+            APP_LOGD("'bundle_test_tool install' with error arguments.");
+            resultReceiver_.append("error value for the chosen option");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    // hsp list
+    for (; hspIndex < argc_ && hspIndex >= INDEX_OFFSET; ++hspIndex) {
+        if (IsInstallOption(hspIndex)) {
+            break;
+        }
+        if (GetBundlePath(argList_[hspIndex - INDEX_OFFSET], sharedBundleDirPaths) != OHOS::ERR_OK) {
+            sharedBundleDirPaths.clear();
+            APP_LOGD("'bundle_test_tool install -s' with error arguments.");
+            resultReceiver_.append("error value for the chosen option");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    for (auto &path : bundlePath) {
+        APP_LOGD("install hap path %{private}s", path.c_str());
+    }
+
+    for (auto &path : sharedBundleDirPaths) {
+        APP_LOGD("install hsp path %{private}s", path.c_str());
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (resultReceiver_ == "" && bundlePath.empty() && sharedBundleDirPaths.empty()) {
+            // 'bundle_test_tool install ...' with no bundle path option
+            APP_LOGD("'bundle_test_tool install' with no bundle path option.");
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_PATH_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_INSTALL);
+    } else {
+        InstallParam installParam;
+        installParam.installFlag = installFlag;
+        installParam.userId = userId;
+        installParam.sharedBundleDirPaths = sharedBundleDirPaths;
+        if (isDowngrade) {
+            APP_LOGI("install allow downgrade");
+            installParam.parameters[BMS_PARA_INSTALL_ALLOW_DOWNGRADE] = "true";
+        }
+        if (grantPermission) {
+            APP_LOGI("install allow grantPermission");
+            installParam.parameters[BMS_PARA_INSTALL_GRANT_PERMISSION] = "true";
+        }
+        if (!deviceModeDistributionPolicy.empty()) {
+            APP_LOGI("install with deviceModeDistributionPolicy %{public}s",
+                deviceModeDistributionPolicy.c_str());
+            installParam.parameters[BMS_PARA_INSTALL_DEVICE_MODE_DISTRIBUTION_POLICY] =
+                deviceModeDistributionPolicy;
+            installParam.RefreshDeviceModeDistributionPolicy();
+        }
+        std::string resultMsg;
+        int32_t installResult = InstallOperation(bundlePath, installParam, waittingTime, resultMsg);
+        if (installResult == OHOS::ERR_OK) {
+            resultReceiver_ = STRING_INSTALL_BUNDLE_OK + "\n";
+            if (!resultMsg.empty() && resultMsg[0] != '[') {
+                resultReceiver_.append(resultMsg + "\n");
+            }
+        } else {
+            resultReceiver_ = STRING_INSTALL_BUNDLE_NG + "\n";
+            resultReceiver_.append(GetMessageFromCode(installResult));
+            if (!resultMsg.empty() && resultMsg[0] != '[') {
+                resultReceiver_.append(resultMsg + "\n");
+            }
+            result = installResult;
+        }
+        if (!warning.empty()) {
+            resultReceiver_ = warning + resultReceiver_;
+        }
+    }
+    APP_LOGI("RunAsInstallCommand end");
+    return result;
+}
+
 bool BundleTestTool::CheckUnisntallCorrectOption(
     int option, const std::string &commandName, int &temp, std::string &name)
 {
@@ -9533,6 +10021,112 @@ ErrCode BundleTestTool::RunAsGetTopNLargestItemsInAppDataDir()
                                    std::to_string(ret) + "\n");
         }
     }
+    return result;
+}
+
+bool BundleTestTool::CheckFilterBundleListOption(int32_t option, const std::string &commandName,
+    std::string &policies)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            ret = false;
+            break;
+        }
+        case 'p': {
+            APP_LOGD("'bundle_test_tool %{public}s %{public}s'", commandName.c_str(), argv_[optind - 1]);
+            policies = optarg;
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
+bool BundleTestTool::ProcessDeviceModeDistributionPolicyEnums(std::vector<std::string> policyStrings,
+    std::set<DeviceModeDistributionPolicy> &policyEnums)
+{
+    int32_t minValue = static_cast<int32_t>(DeviceModeDistributionPolicy::UNSPECIFIED);
+    int32_t maxValue = static_cast<int32_t>(DeviceModeDistributionPolicy::FULL_COMPATIBLE_DIFFERENT_PACKAGE);
+    for (const std::string &item : policyStrings) {
+        int32_t value = 0;
+        bool result = true;
+        StringToInt(item, "filterBundleListByDeviceModeDistributionPolicies", value, result);
+        if (!result || value < minValue || value > maxValue) {
+            APP_LOGE("invalid device mode distribution policy: %{public}s", item.c_str());
+            return false;
+        }
+        policyEnums.insert(static_cast<DeviceModeDistributionPolicy>(value));
+    }
+    return !policyEnums.empty();
+}
+
+ErrCode BundleTestTool::RunAsFilterBundleListByDeviceModeDistributionPolicies()
+{
+    APP_LOGI("RunAsFilterBundleListByDeviceModeDistributionPolicies start");
+    ReloadNativeTokenInfo();
+    int result = OHOS::ERR_OK;
+    int counter = 0;
+    std::string commandName = "filterBundleListByDeviceModeDistributionPolicies";
+    std::string policies = "";
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_FILTER_BUNDLE_LIST.c_str(),
+            LONG_OPTIONS_FILTER_BUNDLE_LIST, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                resultReceiver_.append(HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES);
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        result = !CheckFilterBundleListOption(option, commandName, policies)
+            ? OHOS::ERR_INVALID_VALUE : result;
+        APP_LOGD("policies = %{public}s", policies.c_str());
+    }
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES);
+    } else {
+        if (policies.empty()) {
+            APP_LOGE("policies is empty");
+            resultReceiver_.append(HELP_MSG_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (bundleMgrProxy_ == nullptr) {
+            APP_LOGE("bundleMgrProxy_ is nullptr");
+            resultReceiver_.append("error: bundleMgrProxy_ is nullptr\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        std::vector<std::string> policyStrings;
+        OHOS::SplitStr(policies, ",", policyStrings);
+        std::set<DeviceModeDistributionPolicy> policyEnums;
+        if (!ProcessDeviceModeDistributionPolicyEnums(policyStrings, policyEnums)) {
+            APP_LOGE("policies param %{public}s failed", policies.c_str());
+            resultReceiver_.append(STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_NG);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        ErrCode ret = bundleMgrProxy_->FilterBundleListByDeviceModeDistributionPolicies(policyEnums);
+        if (ret != ERR_OK) {
+            APP_LOGE("FilterBundleListByDeviceModeDistributionPolicies failed, errCode is %{public}d", ret);
+            resultReceiver_.append(STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_NG);
+            resultReceiver_.append("errCode is " + std::to_string(ret) + "\n");
+            return ret;
+        }
+        resultReceiver_.append(STRING_FILTER_BUNDLE_LIST_BY_DEVICE_MODE_DISTRIBUTION_POLICIES_OK);
+    }
+    APP_LOGI("RunAsFilterBundleListByDeviceModeDistributionPolicies end");
     return result;
 }
 
