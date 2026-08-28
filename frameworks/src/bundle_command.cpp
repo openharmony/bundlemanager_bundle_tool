@@ -63,6 +63,7 @@ const int32_t MAX_OVERLAY_ARGUEMENTS_NUMBER = 8;
 const int32_t MINIMUM_WAITTING_TIME = 180; // 3 mins
 const int32_t MAXIMUM_WAITTING_TIME = 600; // 10 mins
 const int32_t INITIAL_SANDBOX_APP_INDEX = 3000;
+const int32_t DUAL_MODE_CLONE_APP_INDEX = 10000;
 
 class DeathRecipientGuard {
 public:
@@ -1393,7 +1394,9 @@ ErrCode BundleManagerShellCommand::RunAsCleanCommand()
                 break;
             }
             case 'i': {
-                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                if (!OHOS::StrToInt(optarg, appIndex) ||
+                    (appIndex < 0 ||
+                    (appIndex > INITIAL_SANDBOX_APP_INDEX && appIndex != DUAL_MODE_CLONE_APP_INDEX))) {
                     APP_LOGE("bm clean with error appIndex %{private}s", optarg);
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
