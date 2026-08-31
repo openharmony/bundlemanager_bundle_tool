@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bundle_test_tool.h"
+#include "parse_bundle_tool_int.h"
 
 #include <algorithm>
 #include <chrono>
@@ -3008,15 +3009,17 @@ ErrCode BundleTestTool::RunAsGetEnterpriseReSignCert()
 ErrCode BundleTestTool::StringToInt(
     std::string optarg, const std::string &commandName, int &temp, bool &result)
 {
-    try {
-        temp = std::stoi(optarg);
-        if (optind > 0 && optind <= argc_) {
-            APP_LOGD("bundle_test_tool %{public}s -u user-id:%{public}d, %{public}s",
-                commandName.c_str(), temp, argv_[optind - 1]);
-        }
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+    int32_t value = 0;
+    if (!ParseBundleToolInt32(optarg, value)) {
+        APP_LOGE("bundle_test_tool %{public}s invalid integer %{public}s",
+            commandName.c_str(), optarg.c_str());
         result = false;
+        return OHOS::ERR_OK;
+    }
+    temp = value;
+    if (optind > 0 && optind <= argc_) {
+        APP_LOGD("bundle_test_tool %{public}s -u user-id:%{public}d, %{public}s",
+            commandName.c_str(), temp, argv_[optind - 1]);
     }
     return OHOS::ERR_OK;
 }
@@ -3024,34 +3027,37 @@ ErrCode BundleTestTool::StringToInt(
 ErrCode BundleTestTool::StringToUnsignedLongLong(
     std::string optarg, const std::string &commandName, uint64_t &temp, bool &result)
 {
-    try {
-        APP_LOGI("StringToUnsignedLongLong start, optarg : %{public}s", optarg.c_str());
-        if ((optarg == "") || (optarg[0] == '0') || (!isdigit(optarg[0]))) {
-            resultReceiver_.append("error: parameter error, cache size must be greater than 0\n");
-            return OHOS::ERR_INVALID_VALUE;
-        }
-        temp = std::stoull(optarg);
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        result = false;
+    APP_LOGI("StringToUnsignedLongLong start, optarg : %{public}s", optarg.c_str());
+    if ((optarg == "") || (optarg[0] == '0') || (!isdigit(optarg[0]))) {
+        resultReceiver_.append("error: parameter error, cache size must be greater than 0\n");
+        return OHOS::ERR_INVALID_VALUE;
     }
+    uint64_t value = 0;
+    if (!ParseBundleToolUint64(optarg, value)) {
+        APP_LOGE("bundle_test_tool %{public}s invalid cache size %{public}s",
+            commandName.c_str(), optarg.c_str());
+        result = false;
+        return OHOS::ERR_OK;
+    }
+    temp = value;
     return OHOS::ERR_OK;
 }
 
 bool BundleTestTool::StringToUnsignedLongLong(
     std::string optarg, const std::string &commandName, uint64_t &temp)
 {
-    try {
-        APP_LOGI("StringToUnsignedLongLong start, optarg : %{public}s", optarg.c_str());
-        if ((optarg == "") || (!isdigit(optarg[0]))) {
-            resultReceiver_.append("error: parameter error, cache size must be greater than or equal to 0\n");
-            return false;
-        }
-        temp = std::stoull(optarg);
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+    APP_LOGI("StringToUnsignedLongLong start, optarg : %{public}s", optarg.c_str());
+    if ((optarg == "") || (!isdigit(optarg[0]))) {
+        resultReceiver_.append("error: parameter error, cache size must be greater than or equal to 0\n");
         return false;
     }
+    uint64_t value = 0;
+    if (!ParseBundleToolUint64(optarg, value)) {
+        APP_LOGE("bundle_test_tool %{public}s invalid cache size %{public}s",
+            commandName.c_str(), optarg.c_str());
+        return false;
+    }
+    temp = value;
     return true;
 }
 
