@@ -5473,7 +5473,8 @@ ErrCode BundleTestTool::RunAsGetBundleStatsAsync()
                 break;
             }
             case 'a': {
-                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 || appIndex > INITIAL_SANDBOX_APP_INDEX)) {
+                if (!OHOS::StrToInt(optarg, appIndex) || (appIndex < 0 ||
+                    (appIndex > INITIAL_SANDBOX_APP_INDEX && appIndex != DUAL_MODE_CLONE_APP_INDEX))) {
                     resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
                     return OHOS::ERR_INVALID_VALUE;
                 }
