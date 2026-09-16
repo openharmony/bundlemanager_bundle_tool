@@ -228,6 +228,7 @@ static const std::string HELP_MSG =
     "  pluginCallback                   register then unregister plugin event callback\n"
     "  resetAOTCompileStatus            reset AOTCompileStatus\n"
     "  sendCommonEvent                  send common event\n"
+    "  batchSetApplicationEnabled       batch set application enabled status for clone apps\n"
     "  queryDataGroupInfos              obtain the data group infos of the application\n"
     "  getGroupDir                      obtain the data group dir path by data group id\n"
     "  getJsonProfile                   obtain the json string of the specified module\n"
@@ -890,6 +891,22 @@ const std::string HELP_MSG_SET_APPLICATION_DISABLE_FORBIDDEN =
     "  -f, --forbidden <forbidden>            specify whether the app is forbidden to be disabled\n"
     "  -c, --caller-uid <caller-uid>          specify a caller uid\n";
 
+const std::string HELP_MSG_BATCH_SET_APPLICATION_ENABLED =
+    "usage: bundle_test_tool batchSetApplicationEnabled <options>\n"
+    "eg:bundle_test_tool batchSetApplicationEnabled -u 100 -e 1 -d 2 -k -s\n"
+    "    bundle_test_tool batchSetApplicationEnabled -u 100 -e 1 -d -1 -k -s\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -u, --user-id <user-id>                specify a user id\n"
+    "  -e, --enable-index <enable-app-index>  specify the app index to enable\n"
+    "  -d, --disable-index <disable-app-index> specify the app index to disable,\n"
+    "                                         -1 (ALL_CLONE_APP_INDEX) to disable all\n"
+    "                                         clone apps except enable-app-index\n"
+    "  -k, --kill-process                     kill the process when disabling\n"
+    "  -s, --send-event                       send broadcast events\n"
+    "  -i, --uid <uid>                        set caller uid via setuid before calling\n"
+    "                                         (optional; if omitted, uid is not reset)\n";
+
 const std::string HELP_MSG_SET_DEFAULT_APPLICATION_FOR_CUSTOM =
     "usage: bundle_test_tool setDefaultApplicationForCustom <options>\n"
     "eg:bundle_test_tool setDefaultApplicationForCustom\n"
@@ -1227,6 +1244,9 @@ const std::string STRING_GET_ALL_JSON_PROFILE_NG = "getAllJsonProfile failed\n";
 
 const std::string STRING_SET_APPLICATION_DISABLE_FORBIDDEN_OK = "setApplicationDisableForbidden successfully\n";
 const std::string STRING_SET_APPLICATION_DISABLE_FORBIDDEN_NG = "setApplicationDisableForbidden failed\n";
+
+const std::string STRING_BATCH_SET_APPLICATION_ENABLED_OK = "batchSetApplicationEnabled successfully\n";
+const std::string STRING_BATCH_SET_APPLICATION_ENABLED_NG = "batchSetApplicationEnabled failed\n";
 
 const std::string STRING_SET_DEFAULT_APPLICATION_FOR_CUSTOM_OK = "setDefaultApplicationForCustom successfully\n";
 const std::string STRING_SET_DEFAULT_APPLICATION_FOR_CUSTOM_NG = "setDefaultApplicationForCustom failed\n";
@@ -1743,6 +1763,18 @@ const struct option LONG_OPTIONS_SET_APPLICATION_DISABLE_FORBIDDEN[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_BATCH_SET_APPLICATION_ENABLED = "hu:e:d:ksi:";
+const struct option LONG_OPTIONS_BATCH_SET_APPLICATION_ENABLED[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {"enable-index", required_argument, nullptr, 'e'},
+    {"disable-index", required_argument, nullptr, 'd'},
+    {"kill-process", no_argument, nullptr, 'k'},
+    {"send-event", no_argument, nullptr, 's'},
+    {"uid", required_argument, nullptr, 'i'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_SET_DEFAULT_APPLICATION_FOR_CUSTOM = "hu:t:n:m:a:c:";
 const struct option LONG_OPTIONS_SET_DEFAULT_APPLICATION_FOR_CUSTOM[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -2143,6 +2175,8 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"getOdid", std::bind(&BundleTestTool::RunAsGetOdid, this)},
         {"getUidByBundleName", std::bind(&BundleTestTool::RunGetUidByBundleName, this)},
         {"getApiTargetVersionByUid", std::bind(&BundleTestTool::RunGetApiTargetVersionByUid, this)},
+        {"batchSetApplicationEnabled",
+            std::bind(&BundleTestTool::RunAsBatchSetApplicationEnabled, this)},
         {"implicitQuerySkillUriInfo",
             std::bind(&BundleTestTool::RunAsImplicitQuerySkillUriInfo, this)},
         {"queryAbilityInfoByContinueType",
@@ -6522,7 +6556,7 @@ bool BundleTestTool::ProcessAppDistributionTypeEnums(std::vector<std::string> ap
 
 void BundleTestTool::ReloadNativeTokenInfo()
 {
-    const int32_t permsNum = 7;
+    const int32_t permsNum = 8;
     uint64_t tokenId;
     const char *perms[permsNum];
     perms[0] = "ohos.permission.MANAGE_EDM_POLICY";
@@ -6532,6 +6566,7 @@ void BundleTestTool::ReloadNativeTokenInfo()
     perms[4] = "ohos.permission.SET_DEFAULT_APPLICATION";
     perms[5] = "ohos.permission.GET_BUNDLE_RESOURCES";
     perms[6] = "ohos.permission.REMOVE_CACHE_FILES";
+    perms[7] = "ohos.permission.CHANGE_ABILITY_ENABLED_STATE";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = permsNum,
@@ -8301,6 +8336,147 @@ ErrCode BundleTestTool::SetDefaultApplicationForCustom(int32_t userId,
     AAFwk::Want want;
     want.SetElement(elementName);
     return defaultAppProxy->SetDefaultApplicationForCustom(userId, type, want);
+}
+
+bool BundleTestTool::CheckBatchSetApplicationEnabledCorrectOption(int32_t option,
+    const std::string &commandName, int32_t &userId, int32_t &enableAppIndex,
+    int32_t &disableAppIndex, bool &killProcess, bool &needSendEvent, int32_t &uid)
+{
+    bool ret = true;
+    switch (option) {
+        case 'h': {
+            APP_LOGD("bundle_test_tool %{public}s %{public}s", commandName.c_str(), argv_[optind - 1]);
+            return false;
+        }
+        case 'u': {
+            StringToInt(optarg, commandName, userId, ret);
+            break;
+        }
+        case 'e': {
+            StringToInt(optarg, commandName, enableAppIndex, ret);
+            break;
+        }
+        case 'd': {
+            StringToInt(optarg, commandName, disableAppIndex, ret);
+            break;
+        }
+        case 'k': {
+            killProcess = true;
+            break;
+        }
+        case 's': {
+            needSendEvent = true;
+            break;
+        }
+        case 'i': {
+            StringToInt(optarg, commandName, uid, ret);
+            break;
+        }
+        default: {
+            std::string unknownOption = "";
+            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+            APP_LOGD("bundle_test_tool %{public}s with an unknown option.", commandName.c_str());
+            resultReceiver_.append(unknownOptionMsg);
+            return false;
+        }
+    }
+    return ret;
+}
+
+int32_t BundleTestTool::ValidateBatchSetApplicationEnabledParams(int32_t enableAppIndex, int32_t disableAppIndex)
+{
+    if (enableAppIndex <= 0) {
+        APP_LOGD("bundle_test_tool batchSetApplicationEnabled with invalid enable app index.");
+        resultReceiver_.append("error: enable-index must be greater than 0.\n");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    if (disableAppIndex != Constants::ALL_CLONE_APP_INDEX && disableAppIndex <= 0) {
+        APP_LOGD("bundle_test_tool batchSetApplicationEnabled with invalid disable app index.");
+        resultReceiver_.append("error: disable-index must be greater than 0 or -1 (ALL_CLONE_APP_INDEX).\n");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    if (disableAppIndex != Constants::ALL_CLONE_APP_INDEX && enableAppIndex == disableAppIndex) {
+        APP_LOGD("bundle_test_tool batchSetApplicationEnabled with same app index.");
+        resultReceiver_.append("error: enable-index and disable-index cannot be the same.\n");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsBatchSetApplicationEnabled()
+{
+    std::string commandName = "batchSetApplicationEnabled";
+    int32_t result = OHOS::ERR_OK;
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    int32_t enableAppIndex = 0;
+    int32_t disableAppIndex = 0;
+    bool killProcess = false;
+    bool needSendEvent = false;
+    int32_t uid = Constants::INVALID_UID;
+    int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_BATCH_SET_APPLICATION_ENABLED.c_str(),
+        LONG_OPTIONS_BATCH_SET_APPLICATION_ENABLED, nullptr);
+    if (option == -1) {
+        APP_LOGD("bundle_test_tool batchSetApplicationEnabled with no option.");
+        resultReceiver_.append(HELP_MSG_BATCH_SET_APPLICATION_ENABLED);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+    while (option != -1) {
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        bool ret = CheckBatchSetApplicationEnabledCorrectOption(
+            option, commandName, userId, enableAppIndex, disableAppIndex, killProcess, needSendEvent, uid);
+        if (!ret) {
+            resultReceiver_.append(HELP_MSG_BATCH_SET_APPLICATION_ENABLED);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        option = getopt_long(argc_, argv_, SHORT_OPTIONS_BATCH_SET_APPLICATION_ENABLED.c_str(),
+            LONG_OPTIONS_BATCH_SET_APPLICATION_ENABLED, nullptr);
+    }
+    APP_LOGI("userId: %{public}d, enableAppIndex: %{public}d, disableAppIndex: %{public}d, "
+        "killProcess: %{public}d, needSendEvent: %{public}d, uid: %{public}d",
+        userId, enableAppIndex, disableAppIndex, killProcess, needSendEvent, uid);
+    result = ValidateBatchSetApplicationEnabledParams(enableAppIndex, disableAppIndex);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_BATCH_SET_APPLICATION_ENABLED);
+    } else {
+        result = ExecuteBatchSetApplicationEnabled(userId, enableAppIndex, disableAppIndex,
+            killProcess, needSendEvent, uid);
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::ExecuteBatchSetApplicationEnabled(int32_t userId, int32_t enableAppIndex,
+    int32_t disableAppIndex, bool killProcess, bool needSendEvent, int32_t uid)
+{
+    ReloadNativeTokenInfo();
+    if (uid != Constants::INVALID_UID) {
+        APP_LOGI("batchSetApplicationEnabled setuid to %{public}d", uid);
+        setuid(uid);
+    }
+    int32_t result = BatchSetApplicationEnabled(userId, enableAppIndex, disableAppIndex, killProcess, needSendEvent);
+    if (uid != Constants::INVALID_UID) {
+        setuid(Constants::ROOT_UID);
+    }
+    if (result == ERR_OK) {
+        resultReceiver_.append(STRING_BATCH_SET_APPLICATION_ENABLED_OK);
+    } else {
+        resultReceiver_.append(STRING_BATCH_SET_APPLICATION_ENABLED_NG +
+            "errCode is " + std::to_string(result) + "\n");
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::BatchSetApplicationEnabled(int32_t userId, int32_t enableAppIndex,
+    int32_t disableAppIndex, bool killProcess, bool needSendEvent)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        return ERR_APPEXECFWK_NULL_PTR;
+    }
+    return bundleMgrProxy_->BatchSetApplicationEnabled(userId, enableAppIndex, disableAppIndex, killProcess,
+        needSendEvent);
 }
 
 ErrCode BundleTestTool::RunAsGetDisposedRules()
