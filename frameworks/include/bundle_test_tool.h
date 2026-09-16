@@ -128,6 +128,15 @@ private:
     ErrCode SetDefaultApplicationForCustom(int32_t userId,
         const std::string& type, const std::string &bundleName, const std::string &moduleName,
         const std::string &abilityName);
+    ErrCode RunAsBatchSetApplicationEnabled();
+    ErrCode BatchSetApplicationEnabled(int32_t userId, int32_t enableAppIndex,
+        int32_t disableAppIndex, bool killProcess, bool needSendEvent);
+    bool CheckBatchSetApplicationEnabledCorrectOption(int32_t option, const std::string &commandName,
+        int32_t &userId, int32_t &enableAppIndex, int32_t &disableAppIndex, bool &killProcess, bool &needSendEvent,
+        int32_t &uid);
+    int32_t ValidateBatchSetApplicationEnabledParams(int32_t enableAppIndex, int32_t disableAppIndex);
+    ErrCode ExecuteBatchSetApplicationEnabled(int32_t userId, int32_t enableAppIndex, int32_t disableAppIndex,
+        bool killProcess, bool needSendEvent, int32_t uid);
     ErrCode RunAsGetDisposedRules();
     ErrCode GetDisposedRules(int32_t userId, std::string &msg);
     ErrCode CheckGetDisposedRulesCorrectOption(
