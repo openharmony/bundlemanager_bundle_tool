@@ -27,16 +27,13 @@ namespace AppExecFwk {
 namespace {
 const std::map<std::string, std::vector<std::string>> SUBCOMMAND_PERMISSION_MAP = {
     {"uninstall", {"ohos.permission.cli.UNINSTALL_BUNDLE"}},
-    {"dump", {
-        "ohos.permission.GET_ALL_BUNDLE_INFO",
-        "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
-    }},
-    {"dump-dependencies", {"ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"}},
-    {"dump-shared", {"ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"}},
+    {"dump", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
+    {"dump-dependencies", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
+    {"dump-shared", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
     {"clean", {"ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES"}},
     {"set-disposed-rule", {"ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"}},
     {"delete-disposed-rule", {"ohos.permission.cli.MANAGE_DISPOSED_APP_STATUS"}},
-    {"get-recoverable-apps", {"ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"}},
+    {"get-recoverable-apps", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
     {"recover", {"ohos.permission.cli.INSTALL_BUNDLE"}},
 };
 
