@@ -102,8 +102,7 @@
         "dump": {
             "description": "View application package information",
             "requirePermissions": [
-                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED",
-                "ohos.permission.GET_ALL_BUNDLE_INFO"
+                "ohos.permission.GET_INSTALLED_BUNDLE_LIST"
             ],
             "inputSchema": {
                 "type": "object",
@@ -169,7 +168,7 @@
         "dump-dependencies": {
             "description": "View dependency information of specified application and module",
             "requirePermissions": [
-                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+                "ohos.permission.GET_INSTALLED_BUNDLE_LIST"
             ],
             "inputSchema": {
                 "type": "object",
@@ -219,7 +218,7 @@
         "dump-shared": {
             "description": "View inter-application shared library information",
             "requirePermissions": [
-                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+                "ohos.permission.GET_INSTALLED_BUNDLE_LIST"
             ],
             "inputSchema": {
                 "type": "object",
@@ -481,7 +480,7 @@
         "get-recoverable-apps": {
             "description": "Get recoverable (uninstalled pre-installed) applications info",
             "requirePermissions": [
-                "ohos.permission.cli.GET_BUNDLE_INFO_PRIVILEGED"
+                "ohos.permission.GET_INSTALLED_BUNDLE_LIST"
             ],
             "inputSchema": {
                 "type": "object",
