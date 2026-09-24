@@ -63,6 +63,16 @@ const std::string HELP_MSG_DUMP =
     "  --deviceId <device-id>          specify a device id\n"
     "  --label                          list the label info\n";
 
+const std::string HELP_MSG_PUBLIC_DUMP =
+    "usage: ohos-bm public-dump <options>\n"
+    "options list:\n"
+    "  --help                           list available commands\n"
+    "  --all                            list all bundles in system\n"
+    "  --debugBundle                   list debug bundles in system\n"
+    "  --bundleName <bundle-name>      list the bundle info by a bundle name\n"
+    "  --shortcutInfo                  list the shortcut info\n"
+    "  --label                          list the label info\n";
+
 const std::string HELP_MSG_CLEAN =
     "usage: ohos-bm clean <options>\n"
     "options list:\n"
@@ -231,6 +241,7 @@ private:
     ErrCode RunAsHelpCommand();
     ErrCode RunAsUninstallCommand();
     ErrCode RunAsDumpCommand();
+    ErrCode RunAsPublicDumpCommand();
     ErrCode RunAsDumpSharedDependenciesCommand();
     ErrCode RunAsDumpSharedCommand();
     ErrCode RunAsCleanCommand();

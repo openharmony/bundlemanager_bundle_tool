@@ -28,6 +28,7 @@ namespace {
 const std::map<std::string, std::vector<std::string>> SUBCOMMAND_PERMISSION_MAP = {
     {"uninstall", {"ohos.permission.cli.UNINSTALL_BUNDLE"}},
     {"dump", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
+    {"public-dump", {"ohos.permission.GET_ALL_BUNDLE_INFO"}},
     {"dump-dependencies", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
     {"dump-shared", {"ohos.permission.GET_INSTALLED_BUNDLE_LIST"}},
     {"clean", {"ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES"}},

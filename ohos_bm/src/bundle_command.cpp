@@ -65,6 +65,18 @@ const struct option LONG_OPTIONS_DUMP[] = {
     {nullptr, 0, nullptr, 0},
 };
 
+const std::string SHORT_OPTIONS_PUBLIC_DUMP = "hn:aisgl";
+const struct option LONG_OPTIONS_PUBLIC_DUMP[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundleName", required_argument, nullptr, 'n'},
+    {"all", no_argument, nullptr, 'a'},
+    {"bundleInfo", no_argument, nullptr, 'i'},
+    {"shortcutInfo", no_argument, nullptr, 's'},
+    {"debugBundle", no_argument, nullptr, 'g'},
+    {"label", no_argument, nullptr, 'l'},
+    {nullptr, 0, nullptr, 0},
+};
+
 const std::string SHORT_OPTIONS_DUMP_SHARED_DEPENDENCIES = "hn:m:";
 const struct option LONG_OPTIONS_DUMP_SHARED_DEPENDENCIES[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -274,6 +286,7 @@ ErrCode BundleManagerShellCommand::CreateCommandMap()
         {"--help", [this] { return this->RunAsHelpCommand(); } },
         {"uninstall", [this] { return this->RunAsUninstallCommand(); } },
         {"dump", [this] { return this->RunAsDumpCommand(); } },
+        {"public-dump", [this] { return this->RunAsPublicDumpCommand(); } },
         {"dump-dependencies", [this] { return this->RunAsDumpSharedDependenciesCommand(); } },
         {"dump-shared", [this] { return this->RunAsDumpSharedCommand(); } },
         {"clean", [this] { return this->RunAsCleanCommand(); } },
@@ -618,6 +631,130 @@ ErrCode BundleManagerShellCommand::RunAsDumpCommand()
             dumpResults = DumpShortcutInfos(bundleName, userId);
         } else if (bundleDumpDistributedBundleInfo) {
             dumpResults = DumpDistributedBundleInfo(deviceId, bundleName);
+        } else if (bundleDumpAll && !bundleDumpLabel) {
+            dumpResults = DumpBundleList(userId);
+        } else if (bundleDumpDebug) {
+            dumpResults = DumpDebugBundleList(userId);
+        } else if (bundleDumpInfo && !bundleDumpLabel) {
+            dumpResults = DumpBundleInfo(bundleName, userId);
+        } else if (bundleDumpAll && bundleDumpLabel) {
+            dumpResults = DumpAllLabel(userId);
+        } else if (bundleDumpInfo && bundleDumpLabel) {
+            dumpResults = DumpBundleLabel(bundleName, userId);
+        }
+        if (dumpResults.empty()) {
+            resultReceiver_ = CreateErrorResult(
+                ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR, HELP_MSG_DUMP_FAILED);
+            return OHOS::ERR_INVALID_VALUE;
+        } else {
+            resultReceiver_ = CreateSuccessResult(dumpResults);
+        }
+    }
+    APP_LOGI("end");
+    return result;
+}
+
+ErrCode BundleManagerShellCommand::RunAsPublicDumpCommand()
+{
+    APP_LOGI("begin to RunAsPublicDumpCommand");
+    int result = OHOS::ERR_OK;
+
+    // Return error when no arguments provided
+    if (argc_ <= 2) {
+        APP_LOGD("'ohos-bm public-dump' with no option.");
+        resultReceiver_ = CreateErrorResult(ERR_DUMP_PARAM_ERROR, HELP_MSG_NO_OPTION);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    std::string bundleName = "";
+    bool bundleDumpAll = false;
+    bool bundleDumpDebug = false;
+    bool bundleDumpInfo = false;
+    bool bundleDumpShortcut = false;
+    bool bundleDumpLabel = false;
+    int32_t userId = BundleCommandCommon::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid());
+    while (true) {
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_PUBLIC_DUMP.c_str(),
+            LONG_OPTIONS_PUBLIC_DUMP, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (option == -1) {
+            break;
+        }
+        if (option == '?') {
+            switch (optopt) {
+                case 'n': {
+                    APP_LOGD("'ohos-bm public-dump -n' with no argument.");
+                    resultReceiver_ = CreateErrorResult(
+                        ERR_DUMP_PARAM_ERROR, STRING_REQUIRE_CORRECT_VALUE);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                    APP_LOGD("'ohos-bm public-dump' with an unknown option.");
+                    resultReceiver_ = CreateErrorResult(ERR_DUMP_PARAM_ERROR, unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+        switch (option) {
+            case 'h': {
+                APP_LOGD("'ohos-bm public-dump %{public}s'", argv_[optind - 1]);
+                resultReceiver_ = HELP_MSG_PUBLIC_DUMP;
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'a': {
+                APP_LOGD("'ohos-bm public-dump %{public}s'", argv_[optind - 1]);
+                bundleDumpAll = true;
+                break;
+            }
+            case 'l': {
+                APP_LOGD("'ohos-bm public-dump %{public}s'", argv_[optind - 1]);
+                bundleDumpLabel = true;
+                break;
+            }
+            case 'g': {
+                APP_LOGD("'ohos-bm public-dump %{public}s'", argv_[optind - 1]);
+                bundleDumpDebug = true;
+                break;
+            }
+            case 'n': {
+                APP_LOGD("'ohos-bm public-dump %{public}s %{public}s'", argv_[optind - INDEX_OFFSET], optarg);
+                bundleName = optarg;
+                bundleDumpInfo = true;
+                break;
+            }
+            case 's': {
+                APP_LOGD("'ohos-bm public-dump %{public}s %{public}s'", argv_[optind - INDEX_OFFSET], optarg);
+                bundleDumpShortcut = true;
+                break;
+            }
+            default: {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    if (result == OHOS::ERR_OK) {
+        if ((resultReceiver_ == "") && bundleDumpShortcut && (bundleName.size() == 0)) {
+            APP_LOGD("'ohos-bm public-dump -s' with no bundle name option.");
+            resultReceiver_ = CreateErrorResult(
+                ERR_DUMP_PARAM_ERROR, HELP_MSG_NO_BUNDLE_NAME_OPTION);
+            result = OHOS::ERR_INVALID_VALUE;
+        }
+    }
+    if (result != OHOS::ERR_OK) {
+        if (resultReceiver_ == "") {
+            resultReceiver_ = CreateErrorResult(ERR_DUMP_PARAM_ERROR, HELP_MSG_PUBLIC_DUMP);
+        }
+    } else {
+        std::string dumpResults = "";
+        if (bundleDumpShortcut) {
+            dumpResults = DumpShortcutInfos(bundleName, userId);
         } else if (bundleDumpAll && !bundleDumpLabel) {
             dumpResults = DumpBundleList(userId);
         } else if (bundleDumpDebug) {
