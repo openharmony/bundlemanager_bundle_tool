@@ -38,6 +38,7 @@ ohos_bm/
 | `--help` | 查看ohos-bm帮助信息 | 无 | 无 |
 | `uninstall` | 卸载应用包 | `--bundleName <bundle-name>`：指定要卸载的包名<br>`--keepData`：卸载后保留用户数据<br>`--shared`：卸载应用间共享库<br>`--version <version-code>`：指定共享库版本号卸载 | `ohos.permission.cli.UNINSTALL_BUNDLE` |
 | `dump` | 查看应用包信息 | `--all`：列出系统中所有应用包<br>`--bundleName <bundle-name>`：查看指定包的信息<br>`--shortcutInfo`：查看快捷方式信息<br>`--deviceId <device-id>`：指定设备ID查看分布式应用信息<br>`--debugBundle`：列出调试应用包<br>`--label`：查看标签信息 | `ohos.permission.GET_INSTALLED_BUNDLE_LIST` |
+| `public-dump` | 查看应用包信息（功能与`dump`一致，但不支持`--deviceId`，不支持查询分布式应用信息） | `--all`：列出系统中所有应用包<br>`--bundleName <bundle-name>`：查看指定包的信息<br>`--shortcutInfo`：查看快捷方式信息<br>`--debugBundle`：列出调试应用包<br>`--label`：查看标签信息 | `ohos.permission.GET_ALL_BUNDLE_INFO` |
 | `dump-dependencies` | 查看指定应用和模块的依赖关系 | `--bundleName <bundle-name>`：指定包名<br>`--moduleName <module-name>`：指定模块名 | `ohos.permission.GET_INSTALLED_BUNDLE_LIST` |
 | `dump-shared` | 查看应用间共享库信息 | `--all`：列出所有共享库名称<br>`--bundleName <bundle-name>`：查看指定共享库信息 | `ohos.permission.GET_INSTALLED_BUNDLE_LIST` |
 | `clean` | 清理应用缓存或数据文件 | `--bundleName <bundle-name>`：指定包名<br>`--cache`：清理缓存文件<br>`--data`：清理数据文件<br>`--appIndex <app-index>`：指定应用索引 | `ohos.permission.cli.REMOVE_BUNDLE_DATA_AND_CACHE_FILES` |
@@ -151,6 +152,25 @@ ohos-bm dump --all --label
 
 # 查看指定应用的标签信息
 ohos-bm dump --bundleName com.example.test --label
+```
+
+`public-dump` 子命令功能与 `dump` 基本一致，仅所需权限不同（`ohos.permission.GET_ALL_BUNDLE_INFO`），且不支持 `--deviceId` 参数（不支持查询分布式应用信息）：
+
+```bash
+# 列出系统中所有应用包
+ohos-bm public-dump --all
+
+# 查看指定应用包的详细信息
+ohos-bm public-dump --bundleName com.example.test
+
+# 查看应用的快捷方式信息
+ohos-bm public-dump --bundleName com.example.test --shortcutInfo
+
+# 列出调试应用包
+ohos-bm public-dump --debugBundle
+
+# 查看标签信息
+ohos-bm public-dump --all --label
 ```
 
 ### 4.4 查看依赖关系

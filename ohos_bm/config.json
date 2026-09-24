@@ -165,6 +165,67 @@
                 }
             }
         },
+        "public-dump": {
+            "description": "View application package information",
+            "requirePermissions": [
+                "ohos.permission.GET_ALL_BUNDLE_INFO"
+            ],
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "help": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "all": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "debugBundle": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "bundleName": {
+                        "type": "string",
+                        "description": "Specify bundle name",
+                        "default": ""
+                    },
+                    "shortcutInfo": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "label": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
+            "outputSchema": {
+                "type": "object",
+                "description": "Execution result",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "errCode": {
+                        "type": "string"
+                    },
+                    "errMsg": {
+                        "type": "string"
+                    },
+                    "suggestion": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "dump-dependencies": {
             "description": "View dependency information of specified application and module",
             "requirePermissions": [
