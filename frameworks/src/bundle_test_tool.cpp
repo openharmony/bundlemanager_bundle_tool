@@ -245,6 +245,8 @@ static const std::string HELP_MSG =
     "  queryAbilityInfo                 get ability info by bundle, module and ability name\n"
     "  batchQueryAbilityInfos           batch get ability infos by repeated want specs\n"
     "  queryAbilityInfoByContinueType   get ability info by continue type\n"
+    "  queryExtensionAbilityInfoOptimal get the optimal extension ability info by implicit want\n"
+    "  getSandboxExtAbilityInfoOptimal  get the optimal ext ability info of a sandbox app\n"
     "  cleanBundleCacheFilesAutomatic   clear cache data of a specified size\n"
     "  cleanBundlePartialCacheAutomatic clear partial or all cache data of a specified bundle\n"
     "  getContinueBundleName            get continue bundle name list\n"
@@ -604,6 +606,37 @@ const std::string HELP_MSG_IMPLICIT_QUERY_INFOS =
     "  -f, --flags <flags>                    specify query flags (default: 0)\n"
     "  -u, --user-id <user-id>                specify a user id\n"
     "  -d, --with-default <0|1>               specify whether to query with default app (default: 0)\n";
+
+const std::string HELP_MSG_QUERY_EXT_ABILITY_INFO_OPTIMAL =
+    "usage: bundle_test_tool queryExtensionAbilityInfoOptimal <options>\n"
+    "eg:bundle_test_tool queryExtensionAbilityInfoOptimal -a <action> -e <entity> "
+    "-f <flags> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name\n"
+    "  -b, --ability-name <ability-name>      specify ability name\n"
+    "  -a, --action <action>                  specify action\n"
+    "  -e, --entity <entity>                  specify entity\n"
+    "  -r, --uri <uri>                        specify uri\n"
+    "  -t, --type <type>                      specify type\n"
+    "  -f, --flags <flags>                    specify extension info flags (default: 0)\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
+
+const std::string HELP_MSG_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL =
+    "usage: bundle_test_tool getSandboxExtAbilityInfoOptimal <options>\n"
+    "eg:bundle_test_tool getSandboxExtAbilityInfoOptimal -i <app-index> -a <action> "
+    "-e <entity> -f <flags> -u <user-id>\n"
+    "options list:\n"
+    "  -h, --help                             list available commands\n"
+    "  -n, --bundle-name <bundle-name>        specify bundle name\n"
+    "  -b, --ability-name <ability-name>      specify ability name\n"
+    "  -a, --action <action>                  specify action\n"
+    "  -e, --entity <entity>                  specify entity\n"
+    "  -r, --uri <uri>                        specify uri\n"
+    "  -t, --type <type>                      specify type\n"
+    "  -f, --flags <flags>                    specify extension info flags (default: 0)\n"
+    "  -i, --app-index <app-index>            specify sandbox app index\n"
+    "  -u, --user-id <user-id>                specify a user id\n";
 
 const std::string HELP_MSG_GET_CLONE_BUNDLE_INFO_EXT =
     "usage: bundle_test_tool getCloneBundleInfoExt <options>\n"
@@ -1031,6 +1064,23 @@ const std::string HELP_MSG_NO_IMPLICIT_QUERY_INFOS =
     "and an action with '-a' or '--action' \n"
     "and an entity with '-e' or '--entity' \n";
 
+const std::string HELP_MSG_NO_QUERY_EXT_ABILITY_INFO_OPTIMAL =
+    "error: you must specify at least one of a bundle name with '-n' or '--bundle-name' \n"
+    "an ability name with '-b' or '--ability-name' \n"
+    "an action with '-a' or '--action' \n"
+    "an entity with '-e' or '--entity' \n"
+    "a uri with '-r' or '--uri' \n"
+    "or a type with '-t' or '--type' \n";
+
+const std::string HELP_MSG_NO_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL =
+    "error: you must specify at least one of a bundle name with '-n' or '--bundle-name' \n"
+    "an ability name with '-b' or '--ability-name' \n"
+    "an action with '-a' or '--action' \n"
+    "an entity with '-e' or '--entity' \n"
+    "a uri with '-r' or '--uri' \n"
+    "or a type with '-t' or '--type' \n"
+    "and a sandbox app index with '-i' or '--app-index' \n";
+
 const std::string HELP_MSG_IS_BUNDLE_INSTALLED =
     "usage: bundle_test_tool getrm <options>\n"
     "eg:bundle_test_tool getrm -m <module-name> -n <bundle-name> \n"
@@ -1289,6 +1339,16 @@ const std::string STRING_QUERY_ABILITY_INFO_NG = "queryAbilityInfo failed\n";
 
 const std::string STRING_BATCH_QUERY_ABILITY_INFOS_OK = "batchQueryAbilityInfos successfully\n";
 const std::string STRING_BATCH_QUERY_ABILITY_INFOS_NG = "batchQueryAbilityInfos failed\n";
+
+const std::string STRING_QUERY_EXT_ABILITY_INFO_OPTIMAL_OK =
+    "queryExtensionAbilityInfoOptimal successfully\n";
+const std::string STRING_QUERY_EXT_ABILITY_INFO_OPTIMAL_NG =
+    "queryExtensionAbilityInfoOptimal failed\n";
+
+const std::string STRING_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL_OK =
+    "getSandboxExtAbilityInfoOptimal successfully\n";
+const std::string STRING_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL_NG =
+    "getSandboxExtAbilityInfoOptimal failed\n";
 
 const std::string STRING_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE_NG =
     "queryAbilityInfoByContinueType failed\n";
@@ -1727,6 +1787,35 @@ const struct option LONG_OPTIONS_QUERY_ABILITY_INFO_BY_CONTINUE_TYPE[] = {
     {"bundle-name", required_argument, nullptr, 'n'},
     {"continueType", required_argument, nullptr, 'c'},
     {"userId", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_QUERY_EXT_ABILITY_INFO_OPTIMAL = "hn:b:a:e:r:t:f:u:";
+const struct option LONG_OPTIONS_QUERY_EXT_ABILITY_INFO_OPTIMAL[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"ability-name", required_argument, nullptr, 'b'},
+    {"action", required_argument, nullptr, 'a'},
+    {"entity", required_argument, nullptr, 'e'},
+    {"uri", required_argument, nullptr, 'r'},
+    {"type", required_argument, nullptr, 't'},
+    {"flags", required_argument, nullptr, 'f'},
+    {"user-id", required_argument, nullptr, 'u'},
+    {nullptr, 0, nullptr, 0},
+};
+
+const std::string SHORT_OPTIONS_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL = "hn:b:a:e:r:t:f:i:u:";
+const struct option LONG_OPTIONS_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"bundle-name", required_argument, nullptr, 'n'},
+    {"ability-name", required_argument, nullptr, 'b'},
+    {"action", required_argument, nullptr, 'a'},
+    {"entity", required_argument, nullptr, 'e'},
+    {"uri", required_argument, nullptr, 'r'},
+    {"type", required_argument, nullptr, 't'},
+    {"flags", required_argument, nullptr, 'f'},
+    {"app-index", required_argument, nullptr, 'i'},
+    {"user-id", required_argument, nullptr, 'u'},
     {nullptr, 0, nullptr, 0},
 };
 
@@ -2239,6 +2328,10 @@ ErrCode BundleTestTool::CreateCommandMap()
         {"implicitQueryInfos", std::bind(&BundleTestTool::RunAsImplicitQueryInfos, this)},
         {"queryAbilityInfo", std::bind(&BundleTestTool::RunAsQueryAbilityInfo, this)},
         {"batchQueryAbilityInfos", std::bind(&BundleTestTool::RunAsBatchQueryAbilityInfos, this)},
+        {"queryExtensionAbilityInfoOptimal",
+            std::bind(&BundleTestTool::RunAsQueryExtensionAbilityInfoOptimal, this)},
+        {"getSandboxExtAbilityInfoOptimal",
+            std::bind(&BundleTestTool::RunAsGetSandboxExtAbilityInfoOptimal, this)},
         {"getCloneBundleInfoExt", std::bind(&BundleTestTool::RunAsGetCloneBundleInfoExt, this)},
         {"addResourceInfoByBundleName", std::bind(&BundleTestTool::RunAsAddResourceInfoByBundleName, this)},
         {"addResourceInfoByAbility", std::bind(&BundleTestTool::RunAsAddResourceInfoByAbility, this)},
@@ -10571,6 +10664,311 @@ ErrCode BundleTestTool::ExecuteQuerySandboxCloneAbilityInfo(const std::string &c
 
     nlohmann::json jsonObject = abilityInfo;
     resultReceiver_.append(STRING_QUERY_SANDBOX_CLONE_ABILITY_INFO_OK);
+    resultReceiver_.append(jsonObject.dump(Constants::DUMP_INDENT));
+    resultReceiver_.append("\n");
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsQueryExtensionAbilityInfoOptimal()
+{
+    APP_LOGI("RunAsQueryExtensionAbilityInfoOptimal start");
+    std::string bundleName;
+    std::string abilityName;
+    std::string action;
+    std::string entity;
+    std::string uri;
+    std::string type;
+    int32_t flags = static_cast<int32_t>(GetExtensionAbilityInfoFlag::GET_EXTENSION_ABILITY_INFO_DEFAULT);
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    ErrCode result = ParseQueryExtensionAbilityInfoOptimalOptions(bundleName, abilityName, action, entity, uri,
+        type, flags, userId);
+    APP_LOGI("bundleName: %{public}s, abilityName: %{public}s, action: %{public}s, entity: %{public}s, "
+        "uri: %{public}s, type: %{public}s, flags: %{public}d, userId: %{public}d", bundleName.c_str(),
+        abilityName.c_str(), action.c_str(), entity.c_str(), uri.c_str(), type.c_str(), flags, userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_QUERY_EXT_ABILITY_INFO_OPTIMAL);
+        return result;
+    }
+    return ExecuteQueryExtensionAbilityInfoOptimal(bundleName, abilityName, action, entity, uri, type, flags,
+        userId);
+}
+
+ErrCode BundleTestTool::ParseQueryExtensionAbilityInfoOptimalOptions(std::string &bundleName,
+    std::string &abilityName, std::string &action, std::string &entity, std::string &uri, std::string &type,
+    int32_t &flags, int32_t &userId)
+{
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_QUERY_EXT_ABILITY_INFO_OPTIMAL.c_str(),
+            LONG_OPTIONS_QUERY_EXT_ABILITY_INFO_OPTIMAL, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        if (option == '?') {
+            resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                bundleName = optarg;
+                break;
+            }
+            case 'b': {
+                abilityName = optarg;
+                break;
+            }
+            case 'a': {
+                action = optarg;
+                break;
+            }
+            case 'e': {
+                entity = optarg;
+                break;
+            }
+            case 'r': {
+                uri = optarg;
+                break;
+            }
+            case 't': {
+                type = optarg;
+                break;
+            }
+            case 'f': {
+                if (!OHOS::StrToInt(optarg, flags) || flags < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                std::string unknownOption;
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    if (result == OHOS::ERR_OK && bundleName.empty() && abilityName.empty() && action.empty() && entity.empty() &&
+        uri.empty() && type.empty()) {
+        resultReceiver_.append(HELP_MSG_NO_QUERY_EXT_ABILITY_INFO_OPTIMAL);
+        result = OHOS::ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::ExecuteQueryExtensionAbilityInfoOptimal(const std::string &bundleName,
+    const std::string &abilityName, const std::string &action, const std::string &entity,
+    const std::string &uri, const std::string &type, int32_t flags, int32_t userId)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        resultReceiver_.append(STRING_QUERY_EXT_ABILITY_INFO_OPTIMAL_NG);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    AAFwk::Want want;
+    want.SetAction(action);
+    if (!entity.empty()) {
+        want.AddEntity(entity);
+    }
+    ElementName elementName("", bundleName, abilityName, "");
+    want.SetElement(elementName);
+    want.SetUri(uri);
+    want.SetType(type);
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+
+    ExtensionAbilityInfo extensionInfo;
+    setuid(5523);
+    ErrCode ret = bundleMgrProxy_->QueryExtensionAbilityInfoOptimal(want, flags, userId, extensionInfo);
+    setuid(0);
+    if (ret != ERR_OK) {
+        resultReceiver_.append(STRING_QUERY_EXT_ABILITY_INFO_OPTIMAL_NG);
+        resultReceiver_.append("errCode is " + std::to_string(ret) + "\n");
+        return ret;
+    }
+
+    nlohmann::json jsonObject = extensionInfo;
+    resultReceiver_.append(STRING_QUERY_EXT_ABILITY_INFO_OPTIMAL_OK);
+    resultReceiver_.append(jsonObject.dump(Constants::DUMP_INDENT));
+    resultReceiver_.append("\n");
+    return OHOS::ERR_OK;
+}
+
+ErrCode BundleTestTool::RunAsGetSandboxExtAbilityInfoOptimal()
+{
+    APP_LOGI("RunAsGetSandboxExtAbilityInfoOptimal start");
+    std::string bundleName;
+    std::string abilityName;
+    std::string action;
+    std::string entity;
+    std::string uri;
+    std::string type;
+    int32_t flags = static_cast<int32_t>(GetExtensionAbilityInfoFlag::GET_EXTENSION_ABILITY_INFO_DEFAULT);
+    int32_t appIndex = 0;
+    int32_t userId = Constants::UNSPECIFIED_USERID;
+    ErrCode result = ParseGetSandboxExtAbilityInfoOptimalOptions(bundleName, abilityName, action, entity, uri,
+        type, flags, appIndex, userId);
+    APP_LOGI("bundleName: %{public}s, abilityName: %{public}s, action: %{public}s, entity: %{public}s, "
+        "uri: %{public}s, type: %{public}s, flags: %{public}d, appIndex: %{public}d, userId: %{public}d",
+        bundleName.c_str(), abilityName.c_str(), action.c_str(), entity.c_str(), uri.c_str(), type.c_str(),
+        flags, appIndex, userId);
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL);
+        return result;
+    }
+    return ExecuteGetSandboxExtAbilityInfoOptimal(bundleName, abilityName, action, entity, uri, type, flags,
+        appIndex, userId);
+}
+
+ErrCode BundleTestTool::ParseGetSandboxExtAbilityInfoOptimalOptions(std::string &bundleName,
+    std::string &abilityName, std::string &action, std::string &entity, std::string &uri, std::string &type,
+    int32_t &flags, int32_t &appIndex, int32_t &userId)
+{
+    int32_t result = OHOS::ERR_OK;
+    int32_t counter = 0;
+    while (true) {
+        counter++;
+        int32_t option = getopt_long(argc_, argv_, SHORT_OPTIONS_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL.c_str(),
+            LONG_OPTIONS_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL, nullptr);
+        APP_LOGD("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        if (option == -1) {
+            if ((counter == 1) && (strcmp(argv_[optind], cmd_.c_str()) == 0)) {
+                return OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+        if (option == '?') {
+            resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        switch (option) {
+            case 'h': {
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'n': {
+                bundleName = optarg;
+                break;
+            }
+            case 'b': {
+                abilityName = optarg;
+                break;
+            }
+            case 'a': {
+                action = optarg;
+                break;
+            }
+            case 'e': {
+                entity = optarg;
+                break;
+            }
+            case 'r': {
+                uri = optarg;
+                break;
+            }
+            case 't': {
+                type = optarg;
+                break;
+            }
+            case 'f': {
+                if (!OHOS::StrToInt(optarg, flags) || flags < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'i': {
+                if (!OHOS::StrToInt(optarg, appIndex) || appIndex < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            case 'u': {
+                if (!OHOS::StrToInt(optarg, userId) || userId < 0) {
+                    resultReceiver_.append(STRING_REQUIRE_CORRECT_VALUE);
+                    return OHOS::ERR_INVALID_VALUE;
+                }
+                break;
+            }
+            default: {
+                std::string unknownOption;
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+        }
+    }
+    if (result == OHOS::ERR_OK && appIndex <= 0) {
+        resultReceiver_.append(HELP_MSG_NO_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL);
+        result = OHOS::ERR_INVALID_VALUE;
+    }
+    if (result == OHOS::ERR_OK && bundleName.empty() && abilityName.empty() && action.empty() && entity.empty() &&
+        uri.empty() && type.empty()) {
+        resultReceiver_.append(HELP_MSG_NO_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL);
+        result = OHOS::ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+ErrCode BundleTestTool::ExecuteGetSandboxExtAbilityInfoOptimal(const std::string &bundleName,
+    const std::string &abilityName, const std::string &action, const std::string &entity,
+    const std::string &uri, const std::string &type, int32_t flags, int32_t appIndex, int32_t userId)
+{
+    if (bundleMgrProxy_ == nullptr) {
+        APP_LOGE("bundleMgrProxy_ is nullptr");
+        resultReceiver_.append(STRING_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL_NG);
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    AAFwk::Want want;
+    want.SetAction(action);
+    if (!entity.empty()) {
+        want.AddEntity(entity);
+    }
+    ElementName elementName("", bundleName, abilityName, "");
+    want.SetElement(elementName);
+    want.SetUri(uri);
+    want.SetType(type);
+    userId = BundleCommandCommon::GetCurrentUserId(userId);
+
+    ExtensionAbilityInfo extensionInfo;
+    setuid(5523);
+    ErrCode ret = bundleMgrProxy_->GetSandboxExtAbilityInfoOptimal(want, appIndex, flags, userId, extensionInfo);
+    setuid(0);
+    if (ret != ERR_OK) {
+        resultReceiver_.append(STRING_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL_NG);
+        resultReceiver_.append("errCode is " + std::to_string(ret) + "\n");
+        return ret;
+    }
+
+    nlohmann::json jsonObject = extensionInfo;
+    resultReceiver_.append(STRING_GET_SANDBOX_EXT_ABILITY_INFO_OPTIMAL_OK);
     resultReceiver_.append(jsonObject.dump(Constants::DUMP_INDENT));
     resultReceiver_.append("\n");
     return OHOS::ERR_OK;

@@ -181,6 +181,20 @@ private:
     ErrCode ExecuteImplicitQueryInfos(const std::string &bundleName, const std::string &action,
         const std::string &entity, const std::string &uri, const std::string &type,
         int32_t flags, int32_t userId, bool withDefault);
+    ErrCode RunAsQueryExtensionAbilityInfoOptimal();
+    ErrCode ParseQueryExtensionAbilityInfoOptimalOptions(std::string &bundleName, std::string &abilityName,
+        std::string &action, std::string &entity, std::string &uri, std::string &type, int32_t &flags,
+        int32_t &userId);
+    ErrCode ExecuteQueryExtensionAbilityInfoOptimal(const std::string &bundleName,
+        const std::string &abilityName, const std::string &action, const std::string &entity,
+        const std::string &uri, const std::string &type, int32_t flags, int32_t userId);
+    ErrCode RunAsGetSandboxExtAbilityInfoOptimal();
+    ErrCode ParseGetSandboxExtAbilityInfoOptimalOptions(std::string &bundleName, std::string &abilityName,
+        std::string &action, std::string &entity, std::string &uri, std::string &type, int32_t &flags,
+        int32_t &appIndex, int32_t &userId);
+    ErrCode ExecuteGetSandboxExtAbilityInfoOptimal(const std::string &bundleName,
+        const std::string &abilityName, const std::string &action, const std::string &entity,
+        const std::string &uri, const std::string &type, int32_t flags, int32_t appIndex, int32_t userId);
     ErrCode RunAsGetCloneBundleInfoExt();
     ErrCode ParseGetCloneBundleInfoExtOptions(std::string &bundleName, uint32_t &flags,
         int32_t &appIndex, int32_t &userId);
