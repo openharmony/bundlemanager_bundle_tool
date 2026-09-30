@@ -23,6 +23,10 @@
 #include "bundle_mgr_interface.h"
 #include "bundle_installer_interface.h"
 
+#ifndef BMS_FDSAN_BUNDLE_TEST_TOOL_TAG
+#define BMS_FDSAN_BUNDLE_TEST_TOOL_TAG (((uint64_t)LOG_DOMAIN << 32) | 0x1)
+#endif
+
 namespace OHOS {
 namespace AppExecFwk {
 class BundleEventCallbackImpl : public BundleEventCallbackHost {

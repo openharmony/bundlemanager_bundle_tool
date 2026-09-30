@@ -9706,8 +9706,9 @@ ErrCode BundleTestTool::RunAsSetEnpDeviceCommand()
         resultReceiver_.append("failed to open file\n");
         return -1;
     }
+    fdsan_exchange_owner_tag(fd, 0, BMS_FDSAN_BUNDLE_TEST_TOOL_TAG);
     int ret = ioctl(fd, CODESIGN_SET_ENP_DEVICE_FLAG, 1);
-    close(fd);
+    fdsan_close_with_tag(fd, BMS_FDSAN_BUNDLE_TEST_TOOL_TAG);
     if (ret != 0) {
         APP_LOGE("set enp flag failed");
         resultReceiver_.append("set enp flag failed " + std::to_string(errno) + "\n");
@@ -9800,8 +9801,14 @@ ErrCode BundleTestTool::RunAsInstallEnterpriseResignCertCommand()
             ReloadNativeTokenInfo();
         }
         int32_t fd = open(certPath.c_str(), O_RDONLY);
+        if (fd < 0) {
+            APP_LOGE("failed to open file");
+            resultReceiver_.append("failed to open file\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        fdsan_exchange_owner_tag(fd, 0, BMS_FDSAN_BUNDLE_TEST_TOOL_TAG);
         auto res = bundleInstallerProxy_->InstallEnterpriseReSignatureCert(certAlias, fd, userId);
-        close(fd);
+        fdsan_close_with_tag(fd, BMS_FDSAN_BUNDLE_TEST_TOOL_TAG);
         if (res != OHOS::ERR_OK) {
             resultReceiver_.append("ErrCode is " + std::to_string(res) + "\n");
         } else {
